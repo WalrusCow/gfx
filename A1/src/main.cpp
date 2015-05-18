@@ -2,23 +2,21 @@
 #include <QDesktopWidget>
 #include "AppWindow.hpp"
 
-int main(int argc, char** argv)
-{
-    QApplication app(argc, argv);
+int main(int argc, char** argv) {
+  QApplication app(argc, argv);
 
-    AppWindow window;
-    window.resize(window.sizeHint());
-    int desktopArea = QApplication::desktop()->width() * 
-                      QApplication::desktop()->height();
+  AppWindow window;
+  window.resize(window.sizeHint());
+  int desktopArea = QApplication::desktop()->width() *
+                    QApplication::desktop()->height();
 
-    int widgetArea = window.width() * window.height();
+  int widgetArea = window.width() * window.height();
 
-    if (((float)widgetArea / (float) desktopArea) < 0.75f) {
-        window.show();
-    } else {
-        window.showMaximized();
-    }
+  if (((float)widgetArea / (float) desktopArea) < 0.75f) {
+    window.show();
+  } else {
+    window.showMaximized();
+  }
 
-    return app.exec();
+  return app.exec();
 }
-
