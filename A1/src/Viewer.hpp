@@ -1,5 +1,4 @@
-#ifndef CS488_VIEWER_HPP
-#define CS488_VIEWER_HPP
+#pragma once
 
 #include <QGLWidget>
 #include <QGLShaderProgram>
@@ -9,25 +8,25 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
-#else 
+#else
 #include <QGLBuffer>
 #endif
 
 class Viewer : public QGLWidget {
-    
+
     Q_OBJECT
 
 public:
     Viewer(const QGLFormat& format, QWidget *parent = 0);
     virtual ~Viewer();
-    
+
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
     // If you want to render a new frame, call do not call paintGL(),
-    // instead, call update() to ensure that the view gets a paint 
+    // instead, call update() to ensure that the view gets a paint
     // event.
-  
+
 protected:
 
     // Events we implement
@@ -56,7 +55,7 @@ private:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
     QOpenGLBuffer mVertexBufferObject;
     QOpenGLVertexArrayObject mVertexArrayObject;
-#else 
+#else
     QGLBuffer mVertexBufferObject;
 #endif
 
@@ -66,9 +65,7 @@ private:
     QMatrix4x4 mPerspMatrix;
     QMatrix4x4 mModelMatrices[4];
     QMatrix4x4 mTransformMatrix;
-    
+
     QTimer* mTimer;
     QGLShaderProgram mProgram;
 };
-
-#endif
