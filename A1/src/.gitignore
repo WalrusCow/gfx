@@ -1,0 +1,6 @@
+1
+*.o
+*.d
+game488
+Makefile
+moc_*
