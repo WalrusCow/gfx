@@ -1,32 +1,30 @@
-#ifndef APPWINDOW_HPP
-#define APPWINDOW_HPP
+#pragma once
 
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <unordered_map>
 #include <vector>
+
 #include "Viewer.hpp"
 
-class AppWindow : public QMainWindow
-{
-    Q_OBJECT
+class AppWindow : public QMainWindow {
+  Q_OBJECT
 
-public:
-    AppWindow();
+ public:
+  AppWindow();
 
-protected:
-    void keyPressEvent(QKeyEvent *event);
+ protected:
+  void keyPressEvent(QKeyEvent *event);
 
-private:
-    void createActions();
-    void createMenu();
+ private:
+  void createActions();
+  void createMenu();
 
-    // Each menu itself
-    QMenu* m_menu_app;
+  // Each menu itself
+  QMenu* m_menu_app;
 
-    std::vector<QAction*> m_menu_actions;
-    Viewer* m_viewer;
+  std::unordered_map<int, QAction*> menuActions;
+  Viewer* m_viewer;
 };
-
-#endif
