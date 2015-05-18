@@ -26,11 +26,14 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000/30);
 
-  mModelMatrices[0].translate(-5,-10,0);
+  mModelMatrices[0].translate(-5,-10, 0);
+
   mModelMatrices[1].translate(5,-10,0);
   mModelMatrices[1].rotate(90, QVector3D(0,0,1));
+
   mModelMatrices[2].translate(-5,10,0);
   mModelMatrices[2].rotate(270, QVector3D(0,0,1));
+
   mModelMatrices[3].translate(5,10,0);
   mModelMatrices[3].rotate(180, QVector3D(0,0,1));
 }
@@ -71,14 +74,6 @@ void Viewer::initializeGL() {
     return;
   }
 
-  float triangleData[] = {
-    //  X   Y   Z
-     0.0f, 0.0f, 0.0f,
-     1.0f, 0.0f, 0.0f,
-     0.0f, 1.0f, 0.0f,
-  };
-
-
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   mVertexArrayObject.create();
   mVertexArrayObject.bind();
@@ -86,7 +81,6 @@ void Viewer::initializeGL() {
   mVertexBufferObject.create();
   mVertexBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
 #else
-
   /*
    * if qt version is less than 5.1, use the following commented code
    * instead of QOpenGLVertexVufferObject. Also use QGLBuffer instead of
@@ -115,7 +109,8 @@ void Viewer::initializeGL() {
     return;
   }
 
-  mVertexBufferObject.allocate(triangleData, 3 * 3 * sizeof(float));
+  //mVertexBufferObject.allocate(triangleData, 3 * 3 * sizeof(float));
+  mVertexBufferObject.allocate(cubeCoords, sizeof(cubeCoords));
 
   mProgram.bind();
 
@@ -136,12 +131,14 @@ void Viewer::paintGL() {
 #endif
 
 
-  for (int i = 0; i < 4; i++) {
+  mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[0]);
+  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+  //for (int i = 0; i < 4; i++) {
 
-    mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[i]);
+  //  mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[i]);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-  }
+  //  glDrawArrays(GL_TRIANGLES, 0, 12*3);
+  //}
 }
 
 void Viewer::resizeGL(int width, int height) {

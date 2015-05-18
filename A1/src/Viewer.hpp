@@ -28,7 +28,6 @@ class Viewer : public QGLWidget {
   // event.
 
  protected:
-
   // Events we implement
 
   // Called when GL is first initialized
@@ -45,7 +44,6 @@ class Viewer : public QGLWidget {
   virtual void mouseMoveEvent ( QMouseEvent * event );
 
  private:
-
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
@@ -68,4 +66,54 @@ class Viewer : public QGLWidget {
 
   QTimer* mTimer;
   QGLShaderProgram mProgram;
+
+  const float cubeCoords[12 * 3 * 3] = {
+    // Bottom (into screen)
+    0.0f, 0.0f, 0.0f, // 1
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, // end 1
+    1.0f, 1.0f, 0.0f, // 2
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, // end 1
+
+    // Top (out of screen)
+    0.0f, 0.0f, 1.0f, // 3
+    0.0f, 1.0f, 1.0f,
+    1.0f, 0.0f, 1.0f, // end 3
+    1.0f, 1.0f, 1.0f, // 4
+    0.0f, 1.0f, 1.0f,
+    1.0f, 0.0f, 1.0f, // end 4
+
+    // Top (y)
+    0.0f, 1.0f, 0.0f, // 5
+    0.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 0.0f, // end 5
+    1.0f, 1.0f, 1.0f, // 6
+    0.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 0.0f, // end 6
+
+    // Bottom (y)
+    0.0f, 0.0f, 0.0f, // 7
+    0.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 0.0f, // end 7
+    1.0f, 0.0f, 1.0f, // 8
+    0.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 0.0f, // end 8
+
+    // Left (x)
+    0.0f, 0.0f, 0.0f, // 9
+    0.0f, 0.0f, 1.0f,
+    0.0f, 1.0f, 0.0f, // end 9
+    0.0f, 1.0f, 1.0f, // 10
+    0.0f, 0.0f, 1.0f,
+    0.0f, 1.0f, 0.0f, // end 10
+
+    // Right (x)
+    1.0f, 0.0f, 0.0f, // 9
+    1.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 0.0f, // end 9
+    1.0f, 1.0f, 1.0f, // 10
+    1.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 0.0f, // end 10
+  };
 };
