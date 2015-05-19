@@ -77,8 +77,10 @@ class Viewer : public QGLWidget {
   bool scaling = false;
 
   int lastMouseX;
+  int lastDx;
 
   const float scaleFactor = 1.005;
+  const float rotateFactor = M_PI / 15;
 
   // Coordinates for a unit cube
   const float cubeCoords[12 * 3 * 3] = {

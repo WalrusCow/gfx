@@ -169,7 +169,6 @@ void Viewer::mousePressEvent (QMouseEvent* event) {
     scaling = true;
   }
   lastMouseX = event->x();
-  std::cerr << "Mouse down" << std::endl;
 }
 
 void Viewer::mouseReleaseEvent (QMouseEvent* event) {
@@ -181,29 +180,26 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
   int x = event->x();
   int dx = x - lastMouseX;
 
-  std::cerr << "Movement by " << dx << std::endl;
-
   if (scaling) {
-    std::cerr << "scaling" << std::endl;
     float scaleAmount = pow(scaleFactor, dx);
     scaleWorld(scaleAmount, scaleAmount, scaleAmount);
   }
   else {
-    std::cerr << "rotating" << std::endl;
     // Rotate by something
     auto buttons = event->buttons();
     if (buttons & Qt::LeftButton) {
-      // Something with left button (rotate X)
+      rotateWorld(rotateFactor * dx, 1.0f, 0.0f, 0.0f);
     }
     if (buttons & Qt::RightButton) {
-      // Something with right button (rotate Z)
+      rotateWorld(rotateFactor * dx, 0.0f, 0.0f, 1.0f);
     }
     if (buttons & Qt::MidButton) {
-      // Something with mid button (rotate Y)
+      rotateWorld(rotateFactor * dx, 0.0f, 1.0f, 0.0f);
     }
   }
 
   lastMouseX = x;
+  lastDx = dx;
 }
 
 QMatrix4x4 Viewer::getCameraMatrix() {
