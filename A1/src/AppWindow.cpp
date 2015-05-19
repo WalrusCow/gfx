@@ -10,7 +10,7 @@ AppWindow::AppWindow() : game(10, 20) {
   connect(gameTicker, &QTimer::timeout, this, [this] {
     game.tick();
   });
-  gameTicker->start(500);
+  gameTicker->start(SLOW_MS);
 
   QGLFormat glFormat;
   glFormat.setVersion(3, 3);
