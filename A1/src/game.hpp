@@ -15,10 +15,20 @@
 #ifndef CS488_GAME_HPP
 #define CS488_GAME_HPP
 
+struct Space {
+  char c;
+  int32_t id;
+  Space() : Space('.', 0) {}
+  Space(char c) : Space(c, 0) {}
+  Space(char c, int32_t id) : c(c), id(id) {}
+};
+
 class Piece {
 public:
   Piece();
   Piece(const char *desc, int cindex, 
+         int left, int top, int right, int bottom);
+  Piece(const Space *desc, int cindex, 
          int left, int top, int right, int bottom);
 
   Piece& operator =(const Piece& other);
@@ -32,15 +42,34 @@ public:
   Piece rotateCW() const;
   Piece rotateCCW() const;
 
-  bool isOn(int row, int col) const;
+  int32_t setId(int32_t id);
+
+  // Return id
+  int32_t isOn(int row, int col) const;
 
 private:
-  void getColumn(int col, char *buf) const;
-  void getColumnRev(int col, char *buf) const;
+  void getColumn(int col, Space *buf) const;
+  void getColumnRev(int col, Space *buf) const;
 
-  char desc_[16];
+  Space desc_[16];
   int cindex_;
   int margins_[4];
+
+  int32_t id;
+};
+
+struct BoardSpace {
+  int type;
+  int32_t id;
+
+  BoardSpace& operator =(const BoardSpace& other) {
+    type = other.type;
+    id = other.id;
+    return *this;
+  }
+  BoardSpace() : BoardSpace(-1, 0) {}
+  BoardSpace(int type) : BoardSpace(type, 0) {}
+  BoardSpace(int type, int32_t id) : type(type), id(id) {}
 };
 
 class Game
@@ -99,8 +128,8 @@ public:
   // for r in [0,board_height_+4), not [0,board_height_].  The top four
   // rows are added on to accommodate new pieces that are falling into
   // the well.
-  int get(int r, int c) const;
-  int& get(int r, int c);
+  BoardSpace get(int r, int c) const;
+  BoardSpace& get(int r, int c);
 
 private:
   bool doesPieceFit(const Piece& p, int x, int y) const;
@@ -123,7 +152,10 @@ private:
   int px_;
   int py_;
 
-  int* board_;
+  BoardSpace* board_;
+
+  // Each cube gets an id
+  static int32_t cubeId;
 };
 
 #endif // CS488_GAME_HPP

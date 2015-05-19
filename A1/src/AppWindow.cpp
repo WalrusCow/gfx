@@ -18,7 +18,6 @@ AppWindow::AppWindow() : game(10, 20) {
   setCentralWidget(new QWidget);
   centralWidget()->setLayout(layout);
 
-  newGame();
   m_viewer->show();
 
   createActions();

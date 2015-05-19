@@ -13,8 +13,11 @@
 //---------------------------------------------------------------------------
 
 #include <algorithm>
+#include <iostream>
 
 #include "game.hpp"
+
+int32_t Game::cubeId = 0;
 
 static const Piece PIECES[] = {
   Piece(
@@ -54,7 +57,20 @@ static const Piece PIECES[] = {
         "....", 6,			1,1,1,1)
 };
 
-Piece::Piece(const char *desc, int cindex, 
+Piece::Piece(const char* desc, int cindex,
+              int left, int top, int right, int bottom)
+{
+  for (int i = 0; i < 16; ++i) {
+    desc_[i] = Space(desc[i], 0);
+  }
+  cindex_ = cindex;
+  margins_[0] = left;
+  margins_[1] = top;
+  margins_[2] = right;
+  margins_[3] = bottom;
+}
+
+Piece::Piece(const Space *desc, int cindex, 
               int left, int top, int right, int bottom)
 {
   std::copy(desc, desc + 16, desc_);
@@ -103,34 +119,53 @@ int Piece::getColourIndex() const
 
 Piece Piece::rotateCW() const
 {
-  char ndesc[16];
-  getColumnRev(0, (char*)ndesc);
-  getColumnRev(1, (char*)(ndesc+4));
-  getColumnRev(2, (char*)(ndesc+8));
-  getColumnRev(3, (char*)(ndesc+12));
+  Space ndesc[16];
+  getColumnRev(0, (Space*)ndesc);
+  getColumnRev(1, (Space*)(ndesc+4));
+  getColumnRev(2, (Space*)(ndesc+8));
+  getColumnRev(3, (Space*)(ndesc+12));
 
-  return Piece(ndesc, cindex_,
+  Piece p = Piece(ndesc, cindex_,
 		margins_[3], margins_[0], margins_[1], margins_[2]);
+  p.setId(id);
+  return p;
 }
 
 Piece Piece::rotateCCW() const
 {
-  char ndesc[16];
-  getColumn(3, (char*)ndesc);
-  getColumn(2, (char*)(ndesc+4));
-  getColumn(1, (char*)(ndesc+8));
-  getColumn(0, (char*)(ndesc+12));
+  Space ndesc[16];
+  getColumn(3, (Space*)ndesc);
+  getColumn(2, (Space*)(ndesc+4));
+  getColumn(1, (Space*)(ndesc+8));
+  getColumn(0, (Space*)(ndesc+12));
 
-  return Piece(ndesc, cindex_,
+  Piece p = Piece(ndesc, cindex_,
 		margins_[1], margins_[2], margins_[3], margins_[0]);
+  p.setId(id);
+  return p;
 }
 
-bool Piece::isOn(int row, int col) const
+int32_t Piece::setId(int32_t id) {
+  this->id = id;
+  for (int i = 0; i < 16; ++i) {
+    if (desc_[i].c == 'x') {
+      std::cerr<<"adding to id "<<this->id<<std::endl;
+      desc_[i].id = id;
+      id += 1;
+    }
+  }
+  return id;
+}
+
+int32_t Piece::isOn(int row, int col) const
 {
-  return desc_[ row*4 + col ] == 'x';
+  if (desc_[ row*4 + col ].c == 'x') {
+    return desc_[row*4+col].id;
+  }
+  return -1;
 }
 
-void Piece::getColumn(int col, char *buf) const
+void Piece::getColumn(int col, Space *buf) const
 {
   buf[0] = desc_[col];
   buf[1] = desc_[col+4];
@@ -138,7 +173,7 @@ void Piece::getColumn(int col, char *buf) const
   buf[3] = desc_[col+12];
 }
 
-void Piece::getColumnRev(int col, char *buf) const
+void Piece::getColumnRev(int col, Space *buf) const
 {
   buf[0] = desc_[col+12];
   buf[1] = desc_[col+8];
@@ -153,15 +188,20 @@ Game::Game(int width, int height)
 {
   int sz = board_width_ * (board_height_+4);
 
-  board_ = new int[ sz ];
-  std::fill(board_, board_ + sz, -1);
+  board_ = new BoardSpace[ sz ];
+  //std::fill(board_, board_ + sz, -1);
   generateNewPiece();
 }
 
 void Game::reset()
 {
+  cubeId = 0;
   stopped_ = false;
-  std::fill(board_, board_ + (board_width_*(board_height_+4)), -1);
+  for (int i = 0; i < board_width_ * board_height_ + 4; ++i) {
+    board_[i].type = -1;
+    board_[i].id = -1;
+  }
+  //std::fill(board_, board_ + (board_width_*(board_height_+4)), -1);
   generateNewPiece();
 }
 
@@ -170,12 +210,12 @@ Game::~Game()
   delete [] board_;
 }
 
-int Game::get(int r, int c) const
+BoardSpace Game::get(int r, int c) const
 {
   return board_[ r*board_width_ + c ];
 }
 
-int& Game::get(int r, int c) 
+BoardSpace& Game::get(int r, int c) 
 {
   return board_[ r*board_width_ + c ];
 }
@@ -196,8 +236,8 @@ bool Game::doesPieceFit(const Piece& p, int x, int y) const
 
   for(int r = 0; r < 4; ++r) {
     for(int c = 0; c < 4; ++c) {
-      if(p.isOn(r, c)) {
-        if(get(y-r, x+c) != -1) {
+      if(p.isOn(r, c) >= 0) {
+        if(get(y-r, x+c).type != -1) {
           return false;
         }
       }
@@ -211,8 +251,9 @@ void Game::removePiece(const Piece& p, int x, int y)
 {
   for(int r = 0; r < 4; ++r) {
     for(int c = 0; c < 4; ++c) {
-      if(p.isOn(r, c)) {
-        get(y-r, x+c) = -1;
+      if(p.isOn(r, c) >= 0) {
+        get(y-r, x+c).type = -1;
+        get(y-r, x+c).id = -1;
       }
     }
   }
@@ -227,7 +268,8 @@ void Game::removeRow(int y)
   }
 
   for(int c = 0; c < board_width_; ++c) {
-    get(board_height_+3, c) = -1;
+    get(board_height_+3, c).type = -1;
+    get(board_height_+3, c).id = -1;
   }
 }
 
@@ -246,7 +288,7 @@ int Game::collapse()
       int holes = 0;
 
       for(int c = 0; c < board_width_; ++c) {
-        if(get(r, c) == -1) {
+        if(get(r, c).type == -1) {
           holes = 1;
           break;
         }
@@ -272,8 +314,8 @@ void Game::placePiece(const Piece& p, int x, int y)
 {
   for(int r = 0; r < 4; ++r) {
     for(int c = 0; c < 4; ++c) {
-      if(p.isOn(r, c)) {
-        get(y-r, x+c) = p.getColourIndex();
+      if(p.isOn(r, c) >= 0) {
+        get(y-r, x+c) = BoardSpace(p.getColourIndex(), p.isOn(r,c));
       }
     }
   }
@@ -282,6 +324,8 @@ void Game::placePiece(const Piece& p, int x, int y)
 void Game::generateNewPiece() 
 {
   piece_ = PIECES[ rand() % 7 ];
+  std::cerr<<"New piece"<<std::endl;
+  cubeId = piece_.setId(cubeId);
 
   int xleft = (board_width_-3) / 2;
 
