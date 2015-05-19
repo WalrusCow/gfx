@@ -1,12 +1,11 @@
-// #include <GL/glew.h>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <GL/glu.h>
 #include <QtWidgets>
 #include <QtOpenGL>
 #include <QVector3D>
 #include "Viewer.hpp"
-#include <iostream>
-#include <math.h>
-// #include <GL/gl.h>
-#include <GL/glu.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
@@ -19,7 +18,7 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
     vao(this) {
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
-  mTimer->start(1000/30);
+  mTimer->start(1000 / 30);
 }
 
 Viewer::~Viewer() {
@@ -128,18 +127,35 @@ void Viewer::paintGL() {
   for (int i = 0; i < 21; ++i) {
     wellTransform.translate(0, -1, 0);
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+    drawCube();
   }
   for (int i = 0; i < 11; ++i) {
     wellTransform.translate(1, 0, 0);
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+    drawCube();
   }
   for (int i = 0; i < 20; ++i) {
     wellTransform.translate(0, 1, 0);
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+    drawCube();
   }
+}
+
+void Viewer::drawCube() {
+  float rgb[3];
+  // 6 faces
+  for (int i = 0; i < 6; ++i) {
+    // rgb values
+    for (int j = 0; j < 3; ++j)
+      rgb[j] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+    int off = 3 * 6 * i;
+    for (int j = 0; j < 6; ++j, off += 3) {
+      colourBuffer.write(sizeof(float) * off, &rgb, 3 * sizeof(float));
+    }
+  }
+
+  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void Viewer::resizeGL(int width, int height) {

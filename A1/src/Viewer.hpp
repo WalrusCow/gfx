@@ -54,6 +54,9 @@ class Viewer : public QGLWidget {
   void rotateWorld(float angle, const QVector3D& vector);
   void scaleWorld(float x, float y, float z);
 
+  // Draw a cube according to current mode
+  void drawCube();
+
   void updateRotVector(Qt::MouseButton button, bool release);
 
 
@@ -139,59 +142,5 @@ class Viewer : public QGLWidget {
   };
 
   // Colors for a unit cube
-  const float cubeColours[12 * 3 * 3] = {
-    // Bottom (into screen)
-    // red
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-
-    // Top (out of screen)
-    // red
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-
-    // Top (y)
-    // green
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-
-    // Bottom (y)
-    // green
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-
-    // Left (x)
-    // blue
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-
-    // Right (x)
-    // blue
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-  };
+  const float cubeColours[12 * 3 * 3] = {0};
 };
