@@ -5,9 +5,15 @@
 
 class Cube {
  public:
-  Cube(const QMatrix4x4& xform) : transform(xform) {}
+  // Take a matrix to position this cube and an array of {r, g, b} floats
+  Cube(const QMatrix4x4& xform, float* colour);
   // Draw me onto OpenGL
   void draw(QOpenGLBuffer& colourBuffer) const;
+
+  // Set all faces to a single colour
+  void useColour(float r, float g, float b);
+  // Randomize each face colour, ensuring no duplicates
+  void randomizeColours();
 
   // We need the 6 face colours and a transform matrix
   QMatrix4x4 transform;

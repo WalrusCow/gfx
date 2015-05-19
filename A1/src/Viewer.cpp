@@ -108,17 +108,18 @@ void Viewer::initializeWell() {
 
   // Initialize well cubes
   // 20 deep and 10 across is 21 down, 11 right, 20 up
+  float wellColour[3] = {0.25, 0.25, 0.25};
   for (int i = 0; i < 21; ++i) {
     wellTransform.translate(0, -1, 0);
-    cubes.emplace_back(wellTransform);
+    cubes.emplace_back(wellTransform, wellColour);
   }
   for (int i = 0; i < 11; ++i) {
     wellTransform.translate(1, 0, 0);
-    cubes.emplace_back(wellTransform);
+    cubes.emplace_back(wellTransform, wellColour);
   }
   for (int i = 0; i < 20; ++i) {
     wellTransform.translate(0, 1, 0);
-    cubes.emplace_back(wellTransform);
+    cubes.emplace_back(wellTransform, wellColour);
   }
 }
 
