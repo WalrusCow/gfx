@@ -45,31 +45,20 @@ void AppWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void AppWindow::createActions() {
-  QAction* quitAct = newAction("&Quit", "Exits the program", Qt::Key_Q);
-  appMenuActions.push_back(quitAct);
+  newMenuAction("&Quit", "Exit the program", appMenuActions, Qt::Key_Q, [this] {
+    QMainWindow::close();
+  })->setShortcuts(QKeySequence::Quit);
 
-  // Alternatively, you could use: setShortcuts(Qt::CTRL + Qt::Key_P);
-  quitAct->setShortcuts(QKeySequence::Quit);
-  connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-  // TODO: status tips
-
-  QAction* resetAct = newAction("&Reset", "Reset the view", Qt::Key_R);
-  appMenuActions.push_back(resetAct);
-  connect(resetAct, &QAction::triggered, this, [this] {
+  newMenuAction("&Reset", "Reset the view", appMenuActions, Qt::Key_R, [this] {
     m_viewer->resetView();
   });
 
-  QAction* wireModeAct = newAction(
-      "&Wire-frame", "Draw wire frames", Qt::Key_W);
-  drawMenuActions.push_back(wireModeAct);
-  connect(wireModeAct, &QAction::triggered, this, [this] {
+  newMenuAction(
+      "&Wire-frame", "Draw wire frames", drawMenuActions, Qt::Key_W, [this] {
     m_viewer->setMode(Viewer::DrawMode::WIRE);
   });
 
-  QAction* faceModeAct = newAction("&Face", "Fill faces", Qt::Key_F);
-  drawMenuActions.push_back(faceModeAct);
-  connect(faceModeAct, &QAction::triggered, this, [this] {
+  newMenuAction("&Face", "Fill faces", drawMenuActions, Qt::Key_F, [this] {
     m_viewer->setMode(Viewer::DrawMode::FACE);
   });
 }
@@ -86,10 +75,17 @@ void AppWindow::createMenu() {
   }
 }
 
-QAction* AppWindow::newAction(
-    const std::string& title, const std::string& tip, int key) {
+QAction* AppWindow::newMenuAction(
+    const std::string& title,
+    const std::string& tip,
+    std::list<QAction*>& menuList,
+    int shortcut,
+    const std::function<void()>& onTrigger) {
+
   QAction* action = new QAction(tr(title.c_str()), this);
   action->setStatusTip(tr(tip.c_str()));
-  shortcutActions.insert({key, action});
+  shortcutActions.insert({shortcut, action});
+  menuList.push_back(action);
+  connect(action, &QAction::triggered, this, onTrigger);
   return action;
 }

@@ -4,6 +4,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <functional>
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -23,7 +24,12 @@ class AppWindow : public QMainWindow {
   void createActions();
   void createMenu();
 
-  QAction* newAction(const std::string& title, const std::string& tip, int key);
+  QAction* newMenuAction(
+      const std::string& title,
+      const std::string& tip,
+      std::list<QAction*>& menuList,
+      int shortcut,
+      const std::function<void()>& onTrigger);
 
 
   QMenu* appMenu;
