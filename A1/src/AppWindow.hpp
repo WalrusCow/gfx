@@ -34,14 +34,11 @@ class AppWindow : public QMainWindow {
       int shortcut,
       const std::function<void()>& onTrigger);
 
-  QAction* newMenuAction(
-      const std::string& title,
-      const std::string& tip,
-      std::list<QAction*>& menuList,
-      int shortcut,
-      const std::function<void()>& onTrigger);
-
   QTimer* gameTicker;
+
+  const int SLOW_MS = 800;
+  const int MEDIUM_MS = 500;
+  const int FAST_MS = 200;
 
   QMenu* appMenu;
   std::list<QAction*> appMenuActions;

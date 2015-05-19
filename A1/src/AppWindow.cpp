@@ -39,7 +39,24 @@ void AppWindow::keyPressEvent(QKeyEvent *event) {
     return;
   }
 
+  // Other handlers
   switch (key) {
+    case Qt::Key_Space:
+      game.drop();
+      break;
+    case Qt::Key_Left:
+      game.moveLeft();
+      break;
+    case Qt::Key_Right:
+      game.moveRight();
+      break;
+    case Qt::Key_Up:
+      game.rotateCCW();
+      break;
+    case Qt::Key_Down:
+      game.rotateCW();
+      break;
+
     case Qt::Key_Escape:
       QCoreApplication::instance()->quit();
       break;
@@ -72,9 +89,8 @@ void AppWindow::createActions() {
     QMainWindow::close();
   })->setShortcuts(QKeySequence::Quit);
 
-  QActionGroup* drawGroup = new QActionGroup(this);
-
   // Draw menu
+  QActionGroup* drawGroup = new QActionGroup(this);
   newMenuAction("&Face", drawGroup,
       "Fill faces", drawMenuActions, Qt::Key_F, [this] {
     m_viewer->setMode(Viewer::DrawMode::FACE);
@@ -92,22 +108,21 @@ void AppWindow::createActions() {
 
   drawGroup->actions().first()->setChecked(true);
 
-  QActionGroup* speedGroup = new QActionGroup(this);
-
   // Speed menu
+  QActionGroup* speedGroup = new QActionGroup(this);
   newMenuAction("Slow", speedGroup,
       "Slow speed", speedMenuActions, Qt::Key_1, [this] {
-    //m_viewer->setMode(Viewer::DrawMode::FACE);
+    gameTicker->setInterval(SLOW_MS);
   });
 
   newMenuAction("Medium", speedGroup,
       "Medium speed", speedMenuActions, Qt::Key_2, [this] {
-    //m_viewer->setMode(Viewer::DrawMode::FACE);
+    gameTicker->setInterval(MEDIUM_MS);
   });
 
   newMenuAction("Fast", speedGroup,
       "Fast speed", speedMenuActions, Qt::Key_3, [this] {
-    //m_viewer->setMode(Viewer::DrawMode::FACE);
+    gameTicker->setInterval(FAST_MS);
   });
 
   speedGroup->actions().first()->setChecked(true);
