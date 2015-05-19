@@ -133,8 +133,8 @@ void Viewer::paintGL() {
   if (qApp->mouseButtons() != Qt::NoButton) {
     pRotDx = 0;
   }
-  // Keep on rotating, man (but not if we are holding a button)
-  if (qApp->mouseButtons() == Qt::NoButton && pRotDx != 0) {
+  // Keep on rotating, man
+  if (pRotDx != 0) {
     rotateWorld(ROTATE_FACTOR * pRotDx, pRotVec);
   }
 
@@ -183,7 +183,6 @@ void Viewer::mousePressEvent (QMouseEvent* event) {
     scaling = true;
   }
   lastMouseX = event->x();
-  updateRotVector(event->button(), false);
 }
 
 void Viewer::mouseReleaseEvent (QMouseEvent* event) {
