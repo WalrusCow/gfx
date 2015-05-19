@@ -72,6 +72,12 @@ class Viewer : public QGLWidget {
   QTimer* mTimer;
   QGLShaderProgram mProgram;
 
+  bool scaling = false;
+
+  int lastMouseX;
+
+  const float scaleFactor = 1.005;
+
   // Coordinates for a unit cube
   const float cubeCoords[12 * 3 * 3] = {
     // Bottom (into screen)

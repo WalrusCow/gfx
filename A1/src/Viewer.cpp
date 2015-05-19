@@ -25,18 +25,6 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000/30);
-
-
-  //mModelMatrices[0].translate(-5,-10, 0);
-
-  //mModelMatrices[1].translate(5,-10,0);
-  //mModelMatrices[1].rotate(90, QVector3D(0,0,1));
-
-  //mModelMatrices[2].translate(-5,10,0);
-  //mModelMatrices[2].rotate(270, QVector3D(0,0,1));
-
-  //mModelMatrices[3].translate(5,10,0);
-  //mModelMatrices[3].rotate(180, QVector3D(0,0,1));
 }
 
 Viewer::~Viewer() {
@@ -81,7 +69,7 @@ void Viewer::initializeGL() {
     return;
   }
 
-  if ( !mProgram.link() ) {
+  if (!mProgram.link()) {
     std::cerr << "Cannot link shaders." << std::endl;
     return;
   }
@@ -106,8 +94,10 @@ void Viewer::initializeGL() {
   _glGenVertexArrays glGenVertexArrays;
   _glBindVertexArray glBindVertexArray;
 
-  glGenVertexArrays = (_glGenVertexArrays) QGLWidget::context()->getProcAddress("glGenVertexArrays");
-  glBindVertexArray = (_glBindVertexArray) QGLWidget::context()->getProcAddress("glBindVertexArray");
+  glGenVertexArrays = (_glGenVertexArrays) QGLWidget::context()
+    ->getProcAddress("glGenVertexArrays");
+  glBindVertexArray = (_glBindVertexArray) QGLWidget::context()
+    ->getProcAddress("glBindVertexArray");
 
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -121,7 +111,6 @@ void Viewer::initializeGL() {
     return;
   }
 
-  //mVertexBufferObject.allocate(triangleData, 3 * 3 * sizeof(float));
   mVertexBufferObject.allocate(cubeCoords, sizeof(cubeCoords));
 
   mProgram.bind();
@@ -137,11 +126,9 @@ void Viewer::paintGL() {
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   mVertexArrayObject.bind();
 #endif
-
 
   QMatrix4x4 wellTransform;
   // Top left
@@ -154,27 +141,16 @@ void Viewer::paintGL() {
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
     glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
   }
-
   for (int i = 0; i < 11; ++i) {
     wellTransform.translate(1, 0, 0);
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
     glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
   }
-
   for (int i = 0; i < 20; ++i) {
     wellTransform.translate(0, 1, 0);
     mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
     glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
   }
-
-  //mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix());
-  //glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
-  //for (int i = 0; i < 4; i++) {
-
-  //  mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[i]);
-
-  //  glDrawArrays(GL_TRIANGLES, 0, 12*3);
-  //}
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -188,16 +164,46 @@ void Viewer::resizeGL(int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-void Viewer::mousePressEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: button " << event->button() << " pressed\n";
+void Viewer::mousePressEvent (QMouseEvent* event) {
+  if (event->modifiers() & Qt::ShiftModifier) {
+    scaling = true;
+  }
+  lastMouseX = event->x();
+  std::cerr << "Mouse down" << std::endl;
 }
 
-void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: button " << event->button() << " released\n";
+void Viewer::mouseReleaseEvent (QMouseEvent* event) {
+  (void) event;
+  scaling = false;
 }
 
-void Viewer::mouseMoveEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
+void Viewer::mouseMoveEvent (QMouseEvent* event) {
+  int x = event->x();
+  int dx = x - lastMouseX;
+
+  std::cerr << "Movement by " << dx << std::endl;
+
+  if (scaling) {
+    std::cerr << "scaling" << std::endl;
+    float scaleAmount = pow(scaleFactor, dx);
+    scaleWorld(scaleAmount, scaleAmount, scaleAmount);
+  }
+  else {
+    std::cerr << "rotating" << std::endl;
+    // Rotate by something
+    auto buttons = event->buttons();
+    if (buttons & Qt::LeftButton) {
+      // Something with left button (rotate X)
+    }
+    if (buttons & Qt::RightButton) {
+      // Something with right button (rotate Z)
+    }
+    if (buttons & Qt::MidButton) {
+      // Something with mid button (rotate Y)
+    }
+  }
+
+  lastMouseX = x;
 }
 
 QMatrix4x4 Viewer::getCameraMatrix() {
