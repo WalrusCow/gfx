@@ -5,12 +5,8 @@
 #include <QMatrix4x4>
 #include <QtGlobal>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
-#else
-#include <QGLBuffer>
-#endif
 
 #include <vector>
 
@@ -61,12 +57,8 @@ class Viewer : public QGLWidget {
   void updateRotVector(Qt::MouseButton button, bool release);
 
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
-#else
-  QGLBuffer mVertexBufferObject;
-#endif
 
   int mVertexLocation;
   int mMvpMatrixLocation;

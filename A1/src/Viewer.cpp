@@ -8,19 +8,14 @@
 // #include <GL/gl.h>
 #include <GL/glu.h>
 
-
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
 #endif
 
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   , mVertexBufferObject(QOpenGLBuffer::VertexBuffer)
   , mVertexArrayObject(this)
-#else
-  , mVertexBufferObject(QGLBuffer::VertexBuffer)
-#endif
 {
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
@@ -74,37 +69,11 @@ void Viewer::initializeGL() {
     return;
   }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   mVertexArrayObject.create();
   mVertexArrayObject.bind();
 
   mVertexBufferObject.create();
   mVertexBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
-#else
-  /*
-   * if qt version is less than 5.1, use the following commented code
-   * instead of QOpenGLVertexVufferObject. Also use QGLBuffer instead of
-   * QOpenGLBuffer.
-   */
-  uint vao;
-
-  typedef void (APIENTRY *_glGenVertexArrays) (GLsizei, GLuint*);
-  typedef void (APIENTRY *_glBindVertexArray) (GLuint);
-
-  _glGenVertexArrays glGenVertexArrays;
-  _glBindVertexArray glBindVertexArray;
-
-  glGenVertexArrays = (_glGenVertexArrays) QGLWidget::context()
-    ->getProcAddress("glGenVertexArrays");
-  glBindVertexArray = (_glBindVertexArray) QGLWidget::context()
-    ->getProcAddress("glBindVertexArray");
-
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  mVertexBufferObject.create();
-  mVertexBufferObject.setUsagePattern(QGLBuffer::StaticDraw);
-#endif
 
   if (!mVertexBufferObject.bind()) {
     std::cerr << "could not bind vertex buffer to the context." << std::endl;
@@ -126,9 +95,7 @@ void Viewer::paintGL() {
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   mVertexArrayObject.bind();
-#endif
 
   if (qApp->mouseButtons() != Qt::NoButton) {
     pRotDx = 0;
