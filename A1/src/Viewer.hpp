@@ -58,6 +58,7 @@ class Viewer : public QGLWidget {
 
 
   QOpenGLBuffer mVertexBufferObject;
+  QOpenGLBuffer mVboAttributes;
   QOpenGLVertexArrayObject mVertexArrayObject;
 
   int mVertexLocation;

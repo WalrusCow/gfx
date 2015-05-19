@@ -15,6 +15,7 @@
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
     mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
+    mVboAttributes(QOpenGLBuffer::VertexBuffer),
     mVertexArrayObject(this) {
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
@@ -86,7 +87,6 @@ void Viewer::initializeGL() {
   mProgram.enableAttributeArray("vert");
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
-  // mPerspMatrixLocation = mProgram.uniformLocation("cameraMatrix");
   mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
 }
 
