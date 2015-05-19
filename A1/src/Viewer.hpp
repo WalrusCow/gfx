@@ -33,6 +33,8 @@ class Viewer : public QGLWidget {
 
   void setMode(DrawMode mode);
 
+  void resetView();
+
  protected:
   // Events we implement
 

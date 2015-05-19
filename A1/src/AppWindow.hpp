@@ -23,7 +23,7 @@ class AppWindow : public QMainWindow {
   void createActions();
   void createMenu();
 
-  QAction* newAction(const std::string& title, int key);
+  QAction* newAction(const std::string& title, const std::string& tip, int key);
 
 
   QMenu* appMenu;

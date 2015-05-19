@@ -229,3 +229,7 @@ void Viewer::rotateWorld(float angle, float x, float y, float z) {
 void Viewer::scaleWorld(float x, float y, float z) {
   mTransformMatrix.scale(x, y, z);
 }
+
+void Viewer::resetView() {
+  mTransformMatrix.setToIdentity();
+}
