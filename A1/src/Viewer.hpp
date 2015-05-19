@@ -8,8 +8,6 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
-#include <vector>
-#include "Cube.hpp"
 #include "game.hpp"
 
 class Viewer : public QGLWidget {
@@ -32,7 +30,7 @@ class Viewer : public QGLWidget {
   void setMode(DrawMode mode);
 
   void resetView();
-  void viewGame(const Game* game);
+  void viewGame(Game* game);
 
  protected:
   // Events we implement
@@ -52,7 +50,7 @@ class Viewer : public QGLWidget {
 
  private:
   // we do not own this
-  const Game* game = nullptr;
+  Game* game = nullptr;
 
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
@@ -62,11 +60,9 @@ class Viewer : public QGLWidget {
   void initializeWell();
 
   // Draw a cube according to current mode
-  void drawCube();
+  void drawCube(const QMatrix4x4& transform, float* colour);
 
   void updateRotVector(Qt::MouseButton button, bool release);
-
-  std::vector<Cube> cubes;
 
   QOpenGLBuffer positionBuffer;
   QOpenGLBuffer colourBuffer;

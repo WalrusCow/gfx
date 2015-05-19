@@ -35,7 +35,7 @@ void Viewer::setMode(DrawMode mode) {
   }
 }
 
-void Viewer::viewGame(const Game* game) {
+void Viewer::viewGame(Game* game) {
   this->game = game;
 }
 
@@ -106,25 +106,6 @@ void Viewer::initializeGL() {
 }
 
 void Viewer::initializeWell() {
-  QMatrix4x4 wellTransform;
-  // Top left
-  wellTransform.translate(-6, 11, 0);
-
-  // Initialize well cubes
-  // 20 deep and 10 across is 21 down, 11 right, 20 up
-  float wellColour[3] = {0.25, 0.25, 0.25};
-  for (int i = 0; i < 21; ++i) {
-    wellTransform.translate(0, -1, 0);
-    cubes.emplace_back(wellTransform, wellColour);
-  }
-  for (int i = 0; i < 11; ++i) {
-    wellTransform.translate(1, 0, 0);
-    cubes.emplace_back(wellTransform, wellColour);
-  }
-  for (int i = 0; i < 20; ++i) {
-    wellTransform.translate(0, 1, 0);
-    cubes.emplace_back(wellTransform, wellColour);
-  }
 }
 
 void Viewer::paintGL() {
@@ -146,11 +127,37 @@ void Viewer::paintGL() {
   }
 
   auto cameraMatrix = getCameraMatrix();
+  QMatrix4x4 wellTransform;
+  // Top left
+  wellTransform.translate(-6, 11, 0);
 
-  for (const auto& cube : cubes) {
-    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * cube.transform);
-    cube.draw(colourBuffer);
+  // 20 deep and 10 across is 21 down, 11 right, 20 up
+  float wellColour[3] = {0.25, 0.25, 0.25};
+  for (int i = 0; i < 21; ++i) {
+    wellTransform.translate(0, -1, 0);
+    drawCube(cameraMatrix * wellTransform, wellColour);
   }
+  for (int i = 0; i < 11; ++i) {
+    wellTransform.translate(1, 0, 0);
+    drawCube(cameraMatrix * wellTransform, wellColour);
+  }
+  for (int i = 0; i < 20; ++i) {
+    wellTransform.translate(0, 1, 0);
+    drawCube(cameraMatrix * wellTransform, wellColour);
+  }
+}
+
+void Viewer::drawCube(const QMatrix4x4& transform, float* colour) {
+  mProgram.setUniformValue(mMvpMatrixLocation, transform);
+  // 6 faces
+  for (int i = 0; i < 6; ++i) {
+    int off = 3 * 6 * i;
+    for (int j = 0; j < 6; ++j, off += 3) {
+      colourBuffer.write(sizeof(float) * off, colour, 3 * sizeof(float));
+    }
+  }
+
+  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void Viewer::resizeGL(int width, int height) {
