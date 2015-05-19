@@ -105,6 +105,10 @@ void Viewer::paintGL() {
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // Don't show faces that are in the back
+  glEnable(GL_DEPTH_TEST);
+
+  // We are drawing cuubes
   vao.bind();
 
   if (qApp->mouseButtons() != Qt::NoButton) {
