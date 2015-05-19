@@ -145,6 +145,28 @@ void Viewer::paintGL() {
     wellTransform.translate(0, 1, 0);
     drawCube(cameraMatrix * wellTransform, wellColour);
   }
+
+  // Draw in the game
+  if (game == nullptr) return;
+  QMatrix4x4 gameTransform;
+
+  // Bottom left
+  gameTransform.translate(-5, -10, 0);
+
+  int w = game->getWidth();
+  int h = game->getHeight() + 4;
+  for (int r = 0; r < h; ++r) {
+    for (int c = 0; c < w; ++c) {
+      const BoardSpace& bs = game->get(r, c);
+      if (bs.type >= 0) {
+        drawCube(cameraMatrix * gameTransform, wellColour);
+      }
+      // Right one
+      gameTransform.translate(1, 0, 0);
+    }
+    // Up one and left
+    gameTransform.translate(-10, 1, 0);
+  }
 }
 
 void Viewer::drawCube(const QMatrix4x4& transform, float* colour) {
