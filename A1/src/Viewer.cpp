@@ -1,6 +1,5 @@
 #include <iostream>
 #include <math.h>
-#include <stdlib.h>
 #include <GL/glu.h>
 #include <QtWidgets>
 #include <QtOpenGL>
@@ -98,6 +97,29 @@ void Viewer::initializeGL() {
   mProgram.setAttributeBuffer("colour", GL_FLOAT, 0, 3);
 
   mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
+
+  initializeWell();
+}
+
+void Viewer::initializeWell() {
+  QMatrix4x4 wellTransform;
+  // Top left
+  wellTransform.translate(-6, 11, 0);
+
+  // Initialize well cubes
+  // 20 deep and 10 across is 21 down, 11 right, 20 up
+  for (int i = 0; i < 21; ++i) {
+    wellTransform.translate(0, -1, 0);
+    cubes.emplace_back(wellTransform);
+  }
+  for (int i = 0; i < 11; ++i) {
+    wellTransform.translate(1, 0, 0);
+    cubes.emplace_back(wellTransform);
+  }
+  for (int i = 0; i < 20; ++i) {
+    wellTransform.translate(0, 1, 0);
+    cubes.emplace_back(wellTransform);
+  }
 }
 
 void Viewer::paintGL() {
@@ -118,44 +140,13 @@ void Viewer::paintGL() {
     rotateWorld(ROTATE_FACTOR * pRotDx, pRotVec);
   }
 
-  QMatrix4x4 wellTransform;
-  // Top left
-  wellTransform.translate(-6, 11, 0);
 
   auto cameraMatrix = getCameraMatrix();
-  // 20 deep and 10 across is 21 down, 11 right, 20 up
-  for (int i = 0; i < 21; ++i) {
-    wellTransform.translate(0, -1, 0);
-    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    drawCube();
-  }
-  for (int i = 0; i < 11; ++i) {
-    wellTransform.translate(1, 0, 0);
-    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    drawCube();
-  }
-  for (int i = 0; i < 20; ++i) {
-    wellTransform.translate(0, 1, 0);
-    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
-    drawCube();
-  }
-}
 
-void Viewer::drawCube() {
-  float rgb[3];
-  // 6 faces
-  for (int i = 0; i < 6; ++i) {
-    // rgb values
-    for (int j = 0; j < 3; ++j)
-      rgb[j] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-
-    int off = 3 * 6 * i;
-    for (int j = 0; j < 6; ++j, off += 3) {
-      colourBuffer.write(sizeof(float) * off, &rgb, 3 * sizeof(float));
-    }
+  for (const auto& cube : cubes) {
+    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * cube.transform);
+    cube.draw(colourBuffer);
   }
-
-  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void Viewer::resizeGL(int width, int height) {

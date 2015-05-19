@@ -9,6 +9,7 @@
 #include <QOpenGLVertexArrayObject>
 
 #include <vector>
+#include "Cube.hpp"
 
 class Viewer : public QGLWidget {
 
@@ -53,12 +54,14 @@ class Viewer : public QGLWidget {
   void rotateWorld(float angle, float x, float y, float z);
   void rotateWorld(float angle, const QVector3D& vector);
   void scaleWorld(float x, float y, float z);
+  void initializeWell();
 
   // Draw a cube according to current mode
   void drawCube();
 
   void updateRotVector(Qt::MouseButton button, bool release);
 
+  std::vector<Cube> cubes;
 
   QOpenGLBuffer positionBuffer;
   QOpenGLBuffer colourBuffer;
