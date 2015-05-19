@@ -130,6 +130,14 @@ void Viewer::paintGL() {
   mVertexArrayObject.bind();
 #endif
 
+  if (qApp->mouseButtons() != Qt::NoButton) {
+    pRotDx = 0;
+  }
+  // Keep on rotating, man (but not if we are holding a button)
+  if (qApp->mouseButtons() == Qt::NoButton && pRotDx != 0) {
+    rotateWorld(ROTATE_FACTOR * pRotDx, pRotVec);
+  }
+
   QMatrix4x4 wellTransform;
   // Top left
   wellTransform.translate(-6, 11, 0);
@@ -165,15 +173,28 @@ void Viewer::resizeGL(int width, int height) {
 }
 
 void Viewer::mousePressEvent (QMouseEvent* event) {
+  // When any mouse button is pressed, we stop persistent rotation
+  pRotVec.setX(0);
+  pRotVec.setY(0);
+  pRotVec.setZ(0);
+  pRotDx = 0;
+
   if (event->modifiers() & Qt::ShiftModifier) {
     scaling = true;
   }
   lastMouseX = event->x();
+  updateRotVector(event->button(), false);
 }
 
 void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   (void) event;
-  scaling = false;
+  if (scaling) {
+    scaling = false;
+  }
+  else {
+    updateRotVector(event->button(), true);
+  }
+  lastMouseX = -1;
 }
 
 void Viewer::mouseMoveEvent (QMouseEvent* event) {
@@ -181,7 +202,7 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
   int dx = x - lastMouseX;
 
   if (scaling) {
-    float scaleAmount = pow(scaleFactor, dx);
+    float scaleAmount = pow(SCALE_FACTOR, dx);
     scale *= scaleAmount;
     if (scale > MAX_SCALE) {
       scale = MAX_SCALE;
@@ -199,11 +220,11 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     float xCoord = !!(buttons & Qt::LeftButton);
     float yCoord = !!(buttons & Qt::MidButton);
     float zCoord = !!(buttons & Qt::RightButton);
-    rotateWorld(rotateFactor * dx, xCoord, yCoord, zCoord);
-  }
+    rotateWorld(ROTATE_FACTOR * dx, xCoord, yCoord, zCoord);
 
-  lastMouseX = x;
-  lastDx = dx;
+    pRotDx = dx;
+    lastMouseX = x;
+  }
 }
 
 QMatrix4x4 Viewer::getCameraMatrix() {
@@ -222,12 +243,33 @@ void Viewer::translateWorld(float x, float y, float z) {
   mTransformMatrix.translate(x, y, z);
 }
 
+void Viewer::rotateWorld(float angle, const QVector3D& vector) {
+  mTransformMatrix.rotate(angle, vector);
+}
+
 void Viewer::rotateWorld(float angle, float x, float y, float z) {
   mTransformMatrix.rotate(angle, x, y, z);
 }
 
 void Viewer::scaleWorld(float x, float y, float z) {
   mTransformMatrix.scale(x, y, z);
+}
+
+void Viewer::updateRotVector(Qt::MouseButton button, bool release) {
+  switch (button) {
+    case Qt::LeftButton:
+      pRotVec.setX(release);
+      break;
+    case Qt::MidButton:
+      pRotVec.setY(release);
+      break;
+    case Qt::RightButton:
+      pRotVec.setZ(release);
+      break;
+    default:
+      // We do not need to handle any more buttons
+      break;
+  }
 }
 
 void Viewer::resetView() {

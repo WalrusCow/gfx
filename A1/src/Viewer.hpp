@@ -39,23 +39,26 @@ class Viewer : public QGLWidget {
   // Events we implement
 
   // Called when GL is first initialized
-  virtual void initializeGL();
+  virtual void initializeGL() override;
   // Called when our window needs to be redrawn
-  virtual void paintGL();
+  virtual void paintGL() override;
   // Called when the window is resized (formerly on_configure_event)
-  virtual void resizeGL(int width, int height);
+  virtual void resizeGL(int width, int height) override;
   // Called when a mouse button is pressed
-  virtual void mousePressEvent ( QMouseEvent * event );
+  virtual void mousePressEvent (QMouseEvent * event) override;
   // Called when a mouse button is released
-  virtual void mouseReleaseEvent ( QMouseEvent * event );
+  virtual void mouseReleaseEvent (QMouseEvent * event) override;
   // Called when the mouse moves
-  virtual void mouseMoveEvent ( QMouseEvent * event );
+  virtual void mouseMoveEvent (QMouseEvent * event) override;
 
  private:
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
+  void rotateWorld(float angle, const QVector3D& vector);
   void scaleWorld(float x, float y, float z);
+
+  void updateRotVector(Qt::MouseButton button, bool release);
 
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
@@ -76,19 +79,20 @@ class Viewer : public QGLWidget {
 
   bool scaling = false;
 
+  QVector3D pRotVec;
   int lastMouseX;
-  int lastDx;
+  int pRotDx;
 
   // Current scale
   float scale = 1.0f;
   // Amount to scale per pixel moved
-  const float scaleFactor = 1.005;
+  const float SCALE_FACTOR = 1.005;
   // Minimum and maximum scales
-  const float MIN_SCALE = pow(scaleFactor, -400);
-  const float MAX_SCALE = pow(scaleFactor, 100);
+  const float MIN_SCALE = pow(SCALE_FACTOR, -400);
+  const float MAX_SCALE = pow(SCALE_FACTOR, 100);
 
   // Radians to rotate per pixel moved
-  const float rotateFactor = M_PI / 15;
+  const float ROTATE_FACTOR = M_PI / 15;
 
   // Coordinates for a unit cube
   const float cubeCoords[12 * 3 * 3] = {
