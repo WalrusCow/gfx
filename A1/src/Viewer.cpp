@@ -129,7 +129,7 @@ void Viewer::paintGL() {
   auto cameraMatrix = getCameraMatrix();
   QMatrix4x4 wellTransform;
   // Top left
-  wellTransform.translate(-6, 11, 0);
+  wellTransform.translate(-6, 10, 0);
 
   // 20 deep and 10 across is 21 down, 11 right, 20 up
   float wellColour[3] = {0.25, 0.25, 0.25};
@@ -148,10 +148,10 @@ void Viewer::paintGL() {
 
   // Draw in the game
   if (game == nullptr) return;
-  QMatrix4x4 gameTransform;
+  QMatrix4x4 gameCubeTransform;
 
   // Bottom left
-  gameTransform.translate(-5, -10, 0);
+  gameCubeTransform.translate(-5, -10, 0);
 
   int w = game->getWidth();
   int h = game->getHeight() + 4;
@@ -159,13 +159,13 @@ void Viewer::paintGL() {
     for (int c = 0; c < w; ++c) {
       const BoardSpace& bs = game->get(r, c);
       if (bs.type >= 0) {
-        drawCube(cameraMatrix * gameTransform, wellColour);
+        drawCube(cameraMatrix * gameCubeTransform, wellColour);
       }
       // Right one
-      gameTransform.translate(1, 0, 0);
+      gameCubeTransform.translate(1, 0, 0);
     }
     // Up one and left
-    gameTransform.translate(-10, 1, 0);
+    gameCubeTransform.translate(-10, 1, 0);
   }
 }
 

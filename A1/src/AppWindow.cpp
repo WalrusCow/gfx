@@ -6,6 +6,12 @@
 AppWindow::AppWindow() : game(10, 20) {
   setWindowTitle("488 Tetrominoes on the Wall");
 
+  gameTicker = new QTimer(this);
+  connect(gameTicker, &QTimer::timeout, this, [this] {
+    game.tick();
+  });
+  gameTicker->start(500);
+
   QGLFormat glFormat;
   glFormat.setVersion(3, 3);
   glFormat.setProfile(QGLFormat::CoreProfile);

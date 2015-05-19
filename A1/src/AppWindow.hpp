@@ -33,6 +33,7 @@ class AppWindow : public QMainWindow {
       int shortcut,
       const std::function<void()>& onTrigger);
 
+  QTimer* gameTicker;
 
   QMenu* appMenu;
   std::list<QAction*> appMenuActions;
