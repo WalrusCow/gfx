@@ -10,5 +10,5 @@ TARGET = game488
 INCLUDEPATH += .
 
 # Input
-HEADERS += AppWindow.hpp Viewer.hpp Cube.hpp
-SOURCES += main.cpp AppWindow.cpp Viewer.cpp Cube.cpp
+HEADERS += AppWindow.hpp Viewer.hpp Cube.hpp game.hpp
+SOURCES += main.cpp AppWindow.cpp Viewer.cpp Cube.cpp game.cpp

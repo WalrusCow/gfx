@@ -3,7 +3,7 @@
 #include <iostream>
 #include "AppWindow.hpp"
 
-AppWindow::AppWindow() {
+AppWindow::AppWindow() : game(10, 20) {
   setWindowTitle("488 Tetrominoes on the Wall");
 
   QGLFormat glFormat;
@@ -17,6 +17,8 @@ AppWindow::AppWindow() {
   layout->addWidget(m_viewer);
   setCentralWidget(new QWidget);
   centralWidget()->setLayout(layout);
+
+  newGame();
   m_viewer->show();
 
   createActions();
@@ -44,6 +46,11 @@ void AppWindow::keyPressEvent(QKeyEvent *event) {
   }
 }
 
+void AppWindow::newGame() {
+  game.reset();
+  m_viewer->viewGame(&game);
+}
+
 void AppWindow::createActions() {
   newMenuAction("&Quit", "Exit the program", appMenuActions, Qt::Key_Q, [this] {
     QMainWindow::close();
@@ -51,6 +58,10 @@ void AppWindow::createActions() {
 
   newMenuAction("&Reset", "Reset the view", appMenuActions, Qt::Key_R, [this] {
     m_viewer->resetView();
+  });
+
+  newMenuAction("&New Game", "Start a new game", appMenuActions, Qt::Key_N, [this] {
+    newGame();
   });
 
   newMenuAction(

@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "game.hpp"
 #include "Viewer.hpp"
 
 class AppWindow : public QMainWindow {
@@ -16,6 +17,7 @@ class AppWindow : public QMainWindow {
 
  public:
   AppWindow();
+  void newGame();
 
  protected:
   void keyPressEvent(QKeyEvent *event);
@@ -40,4 +42,5 @@ class AppWindow : public QMainWindow {
   std::unordered_map<int, QAction*> shortcutActions;
 
   Viewer* m_viewer;
+  Game game;
 };

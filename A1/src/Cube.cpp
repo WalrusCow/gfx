@@ -34,5 +34,5 @@ void Cube::useColour(float r, float g, float b) {
 }
 
 void Cube::randomizeColours() {
-
+  // TODO: Get 6 RGBs from somewhere
 }

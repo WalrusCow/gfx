@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "Cube.hpp"
+#include "game.hpp"
 
 class Viewer : public QGLWidget {
 
@@ -31,6 +32,7 @@ class Viewer : public QGLWidget {
   void setMode(DrawMode mode);
 
   void resetView();
+  void viewGame(const Game* game);
 
  protected:
   // Events we implement
@@ -49,6 +51,9 @@ class Viewer : public QGLWidget {
   virtual void mouseMoveEvent (QMouseEvent * event) override;
 
  private:
+  // we do not own this
+  const Game* game = nullptr;
+
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
@@ -146,4 +151,15 @@ class Viewer : public QGLWidget {
 
   // Colors for a unit cube
   const float cubeColours[12 * 3 * 3] = {0};
+
+  // Piece colours by id
+  const float pieceColours[7][3] = {
+    {1.0, 0.0, 0.0},
+    {0.0, 1.0, 0.0},
+    {0.0, 0.0, 1.0},
+    {1.0, 1.0, 0.0},
+    {0.0, 1.0, 1.0},
+    {1.0, 0.0, 1.0},
+    {1.0, 1.0, 1.0}
+  };
 };

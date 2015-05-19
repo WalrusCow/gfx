@@ -35,6 +35,10 @@ void Viewer::setMode(DrawMode mode) {
   }
 }
 
+void Viewer::viewGame(const Game* game) {
+  this->game = game;
+}
+
 QSize Viewer::minimumSizeHint() const {
   return QSize(50, 50);
 }
@@ -140,7 +144,6 @@ void Viewer::paintGL() {
   if (pRotDx != 0) {
     rotateWorld(ROTATE_FACTOR * pRotDx, pRotVec);
   }
-
 
   auto cameraMatrix = getCameraMatrix();
 
