@@ -57,9 +57,9 @@ class Viewer : public QGLWidget {
   void updateRotVector(Qt::MouseButton button, bool release);
 
 
-  QOpenGLBuffer mVertexBufferObject;
-  QOpenGLBuffer mVboAttributes;
-  QOpenGLVertexArrayObject mVertexArrayObject;
+  QOpenGLBuffer positionBuffer;
+  QOpenGLBuffer colourBuffer;
+  QOpenGLVertexArrayObject vao;
 
   int mVertexLocation;
   int mMvpMatrixLocation;
@@ -136,5 +136,62 @@ class Viewer : public QGLWidget {
     1.0f, 1.0f, 1.0f, // 12
     1.0f, 0.0f, 1.0f,
     1.0f, 1.0f, 0.0f, // end 12
+  };
+
+  // Colors for a unit cube
+  const float cubeColours[12 * 3 * 3] = {
+    // Bottom (into screen)
+    // red
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+
+    // Top (out of screen)
+    // red
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+
+    // Top (y)
+    // green
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+
+    // Bottom (y)
+    // green
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+
+    // Left (x)
+    // blue
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+
+    // Right (x)
+    // blue
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
   };
 };

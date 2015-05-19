@@ -14,9 +14,9 @@
 
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
-    mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
-    mVboAttributes(QOpenGLBuffer::VertexBuffer),
-    mVertexArrayObject(this) {
+    positionBuffer(QOpenGLBuffer::VertexBuffer),
+    colourBuffer(QOpenGLBuffer::VertexBuffer),
+    vao(this) {
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000/30);
@@ -69,23 +69,34 @@ void Viewer::initializeGL() {
     return;
   }
 
-  mVertexArrayObject.create();
-  mVertexArrayObject.bind();
+  mProgram.bind();
 
-  mVertexBufferObject.create();
-  mVertexBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  vao.create();
+  vao.bind();
 
-  if (!mVertexBufferObject.bind()) {
+  positionBuffer.create();
+  positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+
+  if (!positionBuffer.bind()) {
     std::cerr << "could not bind vertex buffer to the context." << std::endl;
     return;
   }
-
-  mVertexBufferObject.allocate(cubeCoords, sizeof(cubeCoords));
-
-  mProgram.bind();
+  positionBuffer.allocate(cubeCoords, sizeof(cubeCoords));
 
   mProgram.enableAttributeArray("vert");
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+
+  colourBuffer.create();
+  colourBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  if (!colourBuffer.bind()) {
+    std::cerr << "could not bind colour buffer to the context." << std::endl;
+    return;
+  }
+  colourBuffer.allocate(cubeColours, sizeof(cubeColours));
+
+
+  mProgram.enableAttributeArray("colour");
+  mProgram.setAttributeBuffer("colour", GL_FLOAT, 0, 3);
 
   mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
 }
@@ -94,7 +105,7 @@ void Viewer::paintGL() {
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  mVertexArrayObject.bind();
+  vao.bind();
 
   if (qApp->mouseButtons() != Qt::NoButton) {
     pRotDx = 0;
