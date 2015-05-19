@@ -54,7 +54,12 @@ static const Piece PIECES[] = {
         "...."
         ".xx."
         ".xx."
-        "....", 6,			1,1,1,1)
+        "....", 6,			1,1,1,1),
+  Piece(
+        "x..x"
+        "...."
+        "xxxx"
+        ".xx.", 7,			0,0,3,3)
 };
 
 Piece::Piece(const char* desc, int cindex,
@@ -188,7 +193,6 @@ Game::Game(int width, int height)
   int sz = board_width_ * (board_height_+4);
 
   board_ = new BoardSpace[ sz ];
-  //std::fill(board_, board_ + sz, -1);
   generateNewPiece();
 }
 
@@ -196,11 +200,10 @@ void Game::reset()
 {
   cubeId = 0;
   stopped_ = false;
-  for (int i = 0; i < board_width_ * board_height_ + 4; ++i) {
+  for (int i = 0; i < board_width_ * (board_height_ + 4); ++i) {
     board_[i].type = -1;
     board_[i].id = -1;
   }
-  //std::fill(board_, board_ + (board_width_*(board_height_+4)), -1);
   generateNewPiece();
 }
 
@@ -236,7 +239,7 @@ bool Game::doesPieceFit(const Piece& p, int x, int y) const
   for(int r = 0; r < 4; ++r) {
     for(int c = 0; c < 4; ++c) {
       if(p.isOn(r, c) >= 0) {
-        if(get(y-r, x+c).type != -1) {
+        if(get(y-r, x+c).type >= 0) {
           return false;
         }
       }
@@ -322,7 +325,7 @@ void Game::placePiece(const Piece& p, int x, int y)
 	
 void Game::generateNewPiece() 
 {
-  piece_ = PIECES[ rand() % 7 ];
+  piece_ = PIECES[ rand() % 8 ];
   cubeId = piece_.setId(cubeId);
 
   int xleft = (board_width_-3) / 2;
