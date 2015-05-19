@@ -25,8 +25,8 @@ AppWindow::AppWindow() {
 
 void AppWindow::keyPressEvent(QKeyEvent *event) {
   int key = event->key();
-  auto it = menuActions.find(key);
-  if (it != menuActions.end()) {
+  auto it = shortcutActions.find(key);
+  if (it != shortcutActions.end()) {
     // We have a matching menu shortcut
     it->second->trigger();
     return;
@@ -45,20 +45,41 @@ void AppWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void AppWindow::createActions() {
-  QAction* quitAct = new QAction(tr("&Quit"), this);
-  menuActions.insert({Qt::Key_Q, quitAct});
+  QAction* quitAct = newAction("&Quit", Qt::Key_Q);
+  appMenuActions.push_back(quitAct);
 
   // Alternatively, you could use: setShortcuts(Qt::CTRL + Qt::Key_P);
   quitAct->setShortcuts(QKeySequence::Quit);
   quitAct->setStatusTip(tr("Exits the file"));
-
   connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+  QAction* wireModeAct = newAction("&Wire-frame", Qt::Key_W);
+  drawMenuActions.push_back(wireModeAct);
+  connect(wireModeAct, &QAction::triggered, this, [this] {
+    m_viewer->setMode(Viewer::DrawMode::WIRE);
+  });
+
+  QAction* faceModeAct = newAction("&Face", Qt::Key_F);
+  drawMenuActions.push_back(faceModeAct);
+  connect(faceModeAct, &QAction::triggered, this, [this] {
+    m_viewer->setMode(Viewer::DrawMode::FACE);
+  });
 }
 
 void AppWindow::createMenu() {
-  m_menu_app = menuBar()->addMenu(tr("&Application"));
-
-  for (auto& kv : menuActions) {
-    m_menu_app->addAction(kv.second);
+  appMenu = menuBar()->addMenu(tr("&Application"));
+  for (auto& kv : appMenuActions) {
+    appMenu->addAction(kv);
   }
+
+  drawMenu = menuBar()->addMenu(tr("&Draw Mode"));
+  for (auto& kv : drawMenuActions) {
+    drawMenu->addAction(kv);
+  }
+}
+
+QAction* AppWindow::newAction(const std::string& title, int key) {
+  QAction* action = new QAction(tr(title.c_str()), this);
+  shortcutActions.insert({key, action});
+  return action;
 }

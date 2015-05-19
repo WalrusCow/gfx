@@ -26,20 +26,32 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000/30);
 
-  mModelMatrices[0].translate(-5,-10, 0);
 
-  mModelMatrices[1].translate(5,-10,0);
-  mModelMatrices[1].rotate(90, QVector3D(0,0,1));
+  //mModelMatrices[0].translate(-5,-10, 0);
 
-  mModelMatrices[2].translate(-5,10,0);
-  mModelMatrices[2].rotate(270, QVector3D(0,0,1));
+  //mModelMatrices[1].translate(5,-10,0);
+  //mModelMatrices[1].rotate(90, QVector3D(0,0,1));
 
-  mModelMatrices[3].translate(5,10,0);
-  mModelMatrices[3].rotate(180, QVector3D(0,0,1));
+  //mModelMatrices[2].translate(-5,10,0);
+  //mModelMatrices[2].rotate(270, QVector3D(0,0,1));
+
+  //mModelMatrices[3].translate(5,10,0);
+  //mModelMatrices[3].rotate(180, QVector3D(0,0,1));
 }
 
 Viewer::~Viewer() {
 
+}
+
+void Viewer::setMode(DrawMode mode) {
+  switch (mode) {
+    case DrawMode::WIRE:
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      break;
+    case DrawMode::FACE:
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      break;
+  }
 }
 
 QSize Viewer::minimumSizeHint() const {
@@ -131,8 +143,32 @@ void Viewer::paintGL() {
 #endif
 
 
-  mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[0]);
-  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+  QMatrix4x4 wellTransform;
+  // Top left
+  wellTransform.translate(-6, 11, 0);
+
+  auto cameraMatrix = getCameraMatrix();
+  // 20 deep and 10 across is 21 down, 11 right, 20 up
+  for (int i = 0; i < 21; ++i) {
+    wellTransform.translate(0, -1, 0);
+    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
+    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+  }
+
+  for (int i = 0; i < 11; ++i) {
+    wellTransform.translate(1, 0, 0);
+    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
+    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+  }
+
+  for (int i = 0; i < 20; ++i) {
+    wellTransform.translate(0, 1, 0);
+    mProgram.setUniformValue(mMvpMatrixLocation, cameraMatrix * wellTransform);
+    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+  }
+
+  //mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix());
+  //glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
   //for (int i = 0; i < 4; i++) {
 
   //  mProgram.setUniformValue(mMvpMatrixLocation, getCameraMatrix() * mModelMatrices[i]);

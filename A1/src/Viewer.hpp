@@ -12,6 +12,8 @@
 #include <QGLBuffer>
 #endif
 
+#include <vector>
+
 class Viewer : public QGLWidget {
 
   Q_OBJECT
@@ -26,6 +28,10 @@ class Viewer : public QGLWidget {
   // If you want to render a new frame, call do not call paintGL(),
   // instead, call update() to ensure that the view gets a paint
   // event.
+
+  enum class DrawMode { WIRE, FACE };
+
+  void setMode(DrawMode mode);
 
  protected:
   // Events we implement
@@ -61,12 +67,12 @@ class Viewer : public QGLWidget {
   int mMvpMatrixLocation;
 
   QMatrix4x4 mPerspMatrix;
-  QMatrix4x4 mModelMatrices[4];
   QMatrix4x4 mTransformMatrix;
 
   QTimer* mTimer;
   QGLShaderProgram mProgram;
 
+  // Coordinates for a unit cube
   const float cubeCoords[12 * 3 * 3] = {
     // Bottom (into screen)
     0.0f, 0.0f, 0.0f, // 1
@@ -109,11 +115,11 @@ class Viewer : public QGLWidget {
     0.0f, 1.0f, 0.0f, // end 10
 
     // Right (x)
-    1.0f, 0.0f, 0.0f, // 9
+    1.0f, 0.0f, 0.0f, // 11
     1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 9
-    1.0f, 1.0f, 1.0f, // 10
+    1.0f, 1.0f, 0.0f, // end 11
+    1.0f, 1.0f, 1.0f, // 12
     1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 10
+    1.0f, 1.0f, 0.0f, // end 12
   };
 };

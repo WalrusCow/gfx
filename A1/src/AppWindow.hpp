@@ -4,8 +4,9 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <list>
+#include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "Viewer.hpp"
 
@@ -22,9 +23,15 @@ class AppWindow : public QMainWindow {
   void createActions();
   void createMenu();
 
-  // Each menu itself
-  QMenu* m_menu_app;
+  QAction* newAction(const std::string& title, int key);
 
-  std::unordered_map<int, QAction*> menuActions;
+
+  QMenu* appMenu;
+  std::list<QAction*> appMenuActions;
+  QMenu* drawMenu;
+  std::list<QAction*> drawMenuActions;
+
+  std::unordered_map<int, QAction*> shortcutActions;
+
   Viewer* m_viewer;
 };
