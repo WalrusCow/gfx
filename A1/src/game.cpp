@@ -149,7 +149,6 @@ int32_t Piece::setId(int32_t id) {
   this->id = id;
   for (int i = 0; i < 16; ++i) {
     if (desc_[i].c == 'x') {
-      std::cerr<<"adding to id "<<this->id<<std::endl;
       desc_[i].id = id;
       id += 1;
     }
@@ -324,7 +323,6 @@ void Game::placePiece(const Piece& p, int x, int y)
 void Game::generateNewPiece() 
 {
   piece_ = PIECES[ rand() % 7 ];
-  std::cerr<<"New piece"<<std::endl;
   cubeId = piece_.setId(cubeId);
 
   int xleft = (board_width_-3) / 2;

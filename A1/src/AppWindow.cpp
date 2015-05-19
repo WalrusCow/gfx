@@ -60,9 +60,6 @@ void AppWindow::keyPressEvent(QKeyEvent *event) {
     case Qt::Key_Escape:
       QCoreApplication::instance()->quit();
       break;
-    case Qt::Key_T:
-      std::cerr << "Hello!" << std::endl;
-      break;
     default:
       QWidget::keyPressEvent(event);
   }
