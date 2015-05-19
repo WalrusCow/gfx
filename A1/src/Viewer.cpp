@@ -13,10 +13,9 @@
 #endif
 
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
-  : QGLWidget(format, parent)
-  , mVertexBufferObject(QOpenGLBuffer::VertexBuffer)
-  , mVertexArrayObject(this)
-{
+  : QGLWidget(format, parent),
+    mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
+    mVertexArrayObject(this) {
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000/30);
