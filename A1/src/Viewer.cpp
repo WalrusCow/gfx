@@ -182,20 +182,24 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
 
   if (scaling) {
     float scaleAmount = pow(scaleFactor, dx);
+    scale *= scaleAmount;
+    if (scale > MAX_SCALE) {
+      scale = MAX_SCALE;
+      scaleAmount = MAX_SCALE / scale;
+    }
+    else if (scale < MIN_SCALE) {
+      scale = MIN_SCALE;
+      scaleAmount = MIN_SCALE / scale;
+    }
     scaleWorld(scaleAmount, scaleAmount, scaleAmount);
   }
   else {
-    // Rotate by something
     auto buttons = event->buttons();
-    if (buttons & Qt::LeftButton) {
-      rotateWorld(rotateFactor * dx, 1.0f, 0.0f, 0.0f);
-    }
-    if (buttons & Qt::RightButton) {
-      rotateWorld(rotateFactor * dx, 0.0f, 0.0f, 1.0f);
-    }
-    if (buttons & Qt::MidButton) {
-      rotateWorld(rotateFactor * dx, 0.0f, 1.0f, 0.0f);
-    }
+    // 1 if appropriate button is held, else 0
+    float xCoord = !!(buttons & Qt::LeftButton);
+    float yCoord = !!(buttons & Qt::MidButton);
+    float zCoord = !!(buttons & Qt::RightButton);
+    rotateWorld(rotateFactor * dx, xCoord, yCoord, zCoord);
   }
 
   lastMouseX = x;
@@ -227,5 +231,6 @@ void Viewer::scaleWorld(float x, float y, float z) {
 }
 
 void Viewer::resetView() {
+  scale = 1.0f;
   mTransformMatrix.setToIdentity();
 }

@@ -79,7 +79,15 @@ class Viewer : public QGLWidget {
   int lastMouseX;
   int lastDx;
 
+  // Current scale
+  float scale = 1.0f;
+  // Amount to scale per pixel moved
   const float scaleFactor = 1.005;
+  // Minimum and maximum scales
+  const float MIN_SCALE = pow(scaleFactor, -400);
+  const float MAX_SCALE = pow(scaleFactor, 100);
+
+  // Radians to rotate per pixel moved
   const float rotateFactor = M_PI / 15;
 
   // Coordinates for a unit cube
