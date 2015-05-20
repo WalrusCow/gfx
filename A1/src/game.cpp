@@ -59,7 +59,7 @@ static const Piece PIECES[] = {
         "x..x"
         "...."
         "xxxx"
-        ".xx.", 7,			0,0,3,3)
+        ".xx.", 7,			0,0,0,0)
 };
 
 Piece::Piece(const char* desc, int cindex,
