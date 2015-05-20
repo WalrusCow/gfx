@@ -1,3 +1,4 @@
+// William McDonald 20418145 wmcdonal
 #include <QApplication>
 #include <QDesktopWidget>
 #include "AppWindow.hpp"

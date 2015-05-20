@@ -1,3 +1,4 @@
+//William McDonald 20418145 wmcdonal
 #include <iostream>
 #include <math.h>
 #include <GL/glu.h>

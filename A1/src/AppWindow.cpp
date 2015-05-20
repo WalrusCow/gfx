@@ -1,3 +1,4 @@
+// William McDonald wmcdonal 20418145
 #include <QtWidgets>
 #include <QGLFormat>
 #include <iostream>
