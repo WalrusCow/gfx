@@ -10,11 +10,104 @@
 #define GL_MULTISAMPLE 0x809D
 #endif
 
+const float Viewer::SCALE_FACTOR = 1.005f;
+const float Viewer::MIN_SCALE = pow(SCALE_FACTOR, -400);
+const float Viewer::MAX_SCALE = pow(SCALE_FACTOR, 100);
+// Radians to rotate per pixel moved
+const float Viewer::ROTATE_FACTOR = M_PI / 15;
+
+// Coordinates for a unit cube
+const float Viewer::cubeCoords[12 * 3 * 3] = {
+  // Bottom (into screen)
+  0.0f, 0.0f, 0.0f, // 1
+  0.0f, 1.0f, 0.0f,
+  1.0f, 0.0f, 0.0f, // end 1
+  1.0f, 1.0f, 0.0f, // 2
+  0.0f, 1.0f, 0.0f,
+  1.0f, 0.0f, 0.0f, // end 1
+
+  // Top (out of screen)
+  0.0f, 0.0f, 1.0f, // 3
+  0.0f, 1.0f, 1.0f,
+  1.0f, 0.0f, 1.0f, // end 3
+  1.0f, 1.0f, 1.0f, // 4
+  0.0f, 1.0f, 1.0f,
+  1.0f, 0.0f, 1.0f, // end 4
+
+  // Top (y)
+  0.0f, 1.0f, 0.0f, // 5
+  0.0f, 1.0f, 1.0f,
+  1.0f, 1.0f, 0.0f, // end 5
+  1.0f, 1.0f, 1.0f, // 6
+  0.0f, 1.0f, 1.0f,
+  1.0f, 1.0f, 0.0f, // end 6
+
+  // Bottom (y)
+  0.0f, 0.0f, 0.0f, // 7
+  0.0f, 0.0f, 1.0f,
+  1.0f, 0.0f, 0.0f, // end 7
+  1.0f, 0.0f, 1.0f, // 8
+  0.0f, 0.0f, 1.0f,
+  1.0f, 0.0f, 0.0f, // end 8
+
+  // Left (x)
+  0.0f, 0.0f, 0.0f, // 9
+  0.0f, 0.0f, 1.0f,
+  0.0f, 1.0f, 0.0f, // end 9
+  0.0f, 1.0f, 1.0f, // 10
+  0.0f, 0.0f, 1.0f,
+  0.0f, 1.0f, 0.0f, // end 10
+
+  // Right (x)
+  1.0f, 0.0f, 0.0f, // 11
+  1.0f, 0.0f, 1.0f,
+  1.0f, 1.0f, 0.0f, // end 11
+  1.0f, 1.0f, 1.0f, // 12
+  1.0f, 0.0f, 1.0f,
+  1.0f, 1.0f, 0.0f, // end 12
+};
+
+// Piece colours by id
+const float Viewer::pieceColours[7][3] = {
+  {1.0, 0.0, 0.0},
+  {0.0, 1.0, 0.0},
+  {0.0, 0.0, 1.0},
+  {1.0, 1.0, 0.0},
+  {0.0, 1.0, 1.0},
+  {1.0, 0.0, 1.0},
+  {1.0, 1.0, 1.0}
+};
+
+const float Viewer::cubeColours[13][3] = {
+  {1.00, 0.00, 0.00},
+  {1.00, 0.50, 0.00},
+  {1.00, 0.75, 0.75},
+  {0.50, 0.00, 0.00},
+  {0.50, 0.00, 0.50},
+  {0.00, 0.00, 1.00},
+  {0.00, 1.00, 1.00},
+  {0.00, 0.50, 0.50},
+  {0.00, 1.00, 0.00},
+  {0.00, 0.50, 0.00},
+  {0.75, 1.00, 0.75},
+  {1.00, 1.00, 0.00},
+  {1.00, 0.00, 1.00},
+};
+
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
     positionBuffer(QOpenGLBuffer::VertexBuffer),
     colourBuffer(QOpenGLBuffer::VertexBuffer),
-    vao(this) {
+    vao(this)
+#else
+    positionBuffer(QGLBuffer::VertexBuffer),
+    colourBuffer(QGLBuffer::VertexBuffer),
+#endif
+{
+  scale = 1.0f;
+  drawMode = DrawMode::FACE;
+  game = nullptr;
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
   mTimer->start(1000 / 30);
@@ -75,11 +168,44 @@ void Viewer::initializeGL() {
 
   mProgram.bind();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   vao.create();
   vao.bind();
 
   positionBuffer.create();
   positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+
+  colourBuffer.create();
+  colourBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+#else
+  /*
+   * if qt version is less than 5.1, use the following commented code
+   * instead of QOpenGLVertexVufferObject. Also use QGLBuffer instead of
+   * QOpenGLBuffer.
+   */
+  uint vaoo;
+
+  typedef void (APIENTRY *_glGenVertexArrays) (GLsizei, GLuint*);
+  typedef void (APIENTRY *_glBindVertexArray) (GLuint);
+
+  _glGenVertexArrays glGenVertexArrays;
+  _glBindVertexArray glBindVertexArray;
+
+  glGenVertexArrays = (_glGenVertexArrays) QGLWidget::context()
+    ->getProcAddress("glGenVertexArrays");
+  glBindVertexArray = (_glBindVertexArray) QGLWidget::context()
+    ->getProcAddress("glBindVertexArray");
+
+  glGenVertexArrays(1, &vaoo);
+  glBindVertexArray(vaoo);
+
+  colourBuffer.create();
+  colourBuffer.setUsagePattern(QGLBuffer::StaticDraw);
+
+  positionBuffer.create();
+  positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+#endif
+
 
   if (!positionBuffer.bind()) {
     std::cerr << "could not bind vertex buffer to the context." << std::endl;
@@ -90,7 +216,6 @@ void Viewer::initializeGL() {
   mProgram.enableAttributeArray("vert");
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
-  colourBuffer.create();
   colourBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
   if (!colourBuffer.bind()) {
     std::cerr << "could not bind colour buffer to the context." << std::endl;
@@ -119,8 +244,9 @@ void Viewer::paintGL() {
   // Don't show faces that are in the back
   glEnable(GL_DEPTH_TEST);
 
-  // We are drawing cuubes
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   vao.bind();
+#endif
 
   if (qApp->mouseButtons() != Qt::NoButton) {
     pRotDx = 0;

@@ -3,6 +3,10 @@
 #include <iostream>
 #include "AppWindow.hpp"
 
+const int AppWindow::SLOW_MS = 800;
+const int AppWindow::MEDIUM_MS = 500;
+const int AppWindow::FAST_MS = 200;
+
 AppWindow::AppWindow() : game(10, 20) {
   setWindowTitle("488 Tetrominoes on the Wall");
 

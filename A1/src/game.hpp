@@ -18,8 +18,8 @@
 struct Space {
   char c;
   int32_t id;
-  Space() : Space('.', 0) {}
-  Space(char c) : Space(c, 0) {}
+  Space() : c('.'), id(0) {}
+  Space(char c) : c(c), id(0) {}
   Space(char c, int32_t id) : c(c), id(id) {}
 };
 
@@ -67,8 +67,8 @@ struct BoardSpace {
     id = other.id;
     return *this;
   }
-  BoardSpace() : BoardSpace(-1, 0) {}
-  BoardSpace(int type) : BoardSpace(type, 0) {}
+  BoardSpace() : type(-1), id(0) {}
+  BoardSpace(int type) : type(type), id(0) {}
   BoardSpace(int type, int32_t id) : type(type), id(id) {}
 };
 

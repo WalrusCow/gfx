@@ -5,8 +5,13 @@
 #include <QMatrix4x4>
 #include <QtGlobal>
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#else
+#include <QGLBuffer>
+#endif
+
 
 #include "game.hpp"
 
@@ -36,23 +41,23 @@ class Viewer : public QGLWidget {
   // Events we implement
 
   // Called when GL is first initialized
-  virtual void initializeGL() override;
+  virtual void initializeGL();
   // Called when our window needs to be redrawn
-  virtual void paintGL() override;
+  virtual void paintGL();
   // Called when the window is resized (formerly on_configure_event)
-  virtual void resizeGL(int width, int height) override;
+  virtual void resizeGL(int width, int height);
   // Called when a mouse button is pressed
-  virtual void mousePressEvent (QMouseEvent * event) override;
+  virtual void mousePressEvent (QMouseEvent * event);
   // Called when a mouse button is released
-  virtual void mouseReleaseEvent (QMouseEvent * event) override;
+  virtual void mouseReleaseEvent (QMouseEvent * event);
   // Called when the mouse moves
-  virtual void mouseMoveEvent (QMouseEvent * event) override;
+  virtual void mouseMoveEvent (QMouseEvent * event);
 
  private:
   // we do not own this
-  Game* game = nullptr;
+  Game* game;
 
-  DrawMode drawMode = DrawMode::FACE;
+  DrawMode drawMode;
 
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
@@ -68,9 +73,15 @@ class Viewer : public QGLWidget {
 
   void updateRotVector(Qt::MouseButton button, bool release);
 
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   QOpenGLBuffer positionBuffer;
   QOpenGLBuffer colourBuffer;
   QOpenGLVertexArrayObject vao;
+#else
+  QGLBuffer positionBuffer;
+  QGLBuffer colourBuffer;
+#endif
 
   int mVertexLocation;
   int mMvpMatrixLocation;
@@ -86,91 +97,20 @@ class Viewer : public QGLWidget {
   int pRotDx;
 
   // Current scale
-  float scale = 1.0f;
+  float scale;
   // Amount to scale per pixel moved
-  const float SCALE_FACTOR = 1.005;
+  static const float SCALE_FACTOR;
   // Minimum and maximum scales
-  const float MIN_SCALE = pow(SCALE_FACTOR, -400);
-  const float MAX_SCALE = pow(SCALE_FACTOR, 100);
+  static const float MIN_SCALE;
+  static const float MAX_SCALE;
 
   // Radians to rotate per pixel moved
-  const float ROTATE_FACTOR = M_PI / 15;
+  static const float ROTATE_FACTOR;
 
   // Coordinates for a unit cube
-  const float cubeCoords[12 * 3 * 3] = {
-    // Bottom (into screen)
-    0.0f, 0.0f, 0.0f, // 1
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f, // end 1
-    1.0f, 1.0f, 0.0f, // 2
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f, // end 1
-
-    // Top (out of screen)
-    0.0f, 0.0f, 1.0f, // 3
-    0.0f, 1.0f, 1.0f,
-    1.0f, 0.0f, 1.0f, // end 3
-    1.0f, 1.0f, 1.0f, // 4
-    0.0f, 1.0f, 1.0f,
-    1.0f, 0.0f, 1.0f, // end 4
-
-    // Top (y)
-    0.0f, 1.0f, 0.0f, // 5
-    0.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 5
-    1.0f, 1.0f, 1.0f, // 6
-    0.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 6
-
-    // Bottom (y)
-    0.0f, 0.0f, 0.0f, // 7
-    0.0f, 0.0f, 1.0f,
-    1.0f, 0.0f, 0.0f, // end 7
-    1.0f, 0.0f, 1.0f, // 8
-    0.0f, 0.0f, 1.0f,
-    1.0f, 0.0f, 0.0f, // end 8
-
-    // Left (x)
-    0.0f, 0.0f, 0.0f, // 9
-    0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, // end 9
-    0.0f, 1.0f, 1.0f, // 10
-    0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, // end 10
-
-    // Right (x)
-    1.0f, 0.0f, 0.0f, // 11
-    1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 11
-    1.0f, 1.0f, 1.0f, // 12
-    1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, // end 12
-  };
-
+  static const float cubeCoords[12 * 3 * 3];
   // Piece colours by id
-  const float pieceColours[7][3] = {
-    {1.0, 0.0, 0.0},
-    {0.0, 1.0, 0.0},
-    {0.0, 0.0, 1.0},
-    {1.0, 1.0, 0.0},
-    {0.0, 1.0, 1.0},
-    {1.0, 0.0, 1.0},
-    {1.0, 1.0, 1.0}
-  };
+  static const float pieceColours[7][3];
 
-  const float cubeColours[13][3] = {
-    {1.00, 0.00, 0.00},
-    {1.00, 0.50, 0.00},
-    {1.00, 0.75, 0.75},
-    {0.50, 0.00, 0.00},
-    {0.50, 0.00, 0.50},
-    {0.00, 0.00, 1.00},
-    {0.00, 1.00, 1.00},
-    {0.00, 0.50, 0.50},
-    {0.00, 1.00, 0.00},
-    {0.00, 0.50, 0.00},
-    {0.75, 1.00, 0.75},
-    {1.00, 1.00, 0.00},
-    {1.00, 0.00, 1.00},
-  };
+  static const float cubeColours[13][3];
 };

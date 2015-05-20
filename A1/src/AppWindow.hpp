@@ -36,9 +36,9 @@ class AppWindow : public QMainWindow {
 
   QTimer* gameTicker;
 
-  const int SLOW_MS = 800;
-  const int MEDIUM_MS = 500;
-  const int FAST_MS = 200;
+  static const int SLOW_MS;
+  static const int MEDIUM_MS;
+  static const int FAST_MS;
 
   QMenu* appMenu;
   std::list<QAction*> appMenuActions;
