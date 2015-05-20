@@ -95,7 +95,8 @@ class Viewer : public QGLWidget {
 
   QVector3D pRotVec;
   int lastMouseX;
-  int pRotDx;
+  int xRotD, yRotD, zRotD;
+  bool rotX, rotY, rotZ;
 
   // Current scale
   float scale;

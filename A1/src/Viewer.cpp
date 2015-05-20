@@ -106,6 +106,9 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
     colourBuffer(QGLBuffer::VertexBuffer)
 #endif
 {
+  xRotD = yRotD = zRotD = 0;
+  rotX = rotY = rotZ = false;
+
   scale = 1.0f;
   drawMode = DrawMode::FACE;
   game = nullptr;
@@ -248,12 +251,19 @@ void Viewer::paintGL() {
   vao.bind();
 #endif
 
-  if (qApp->mouseButtons() != Qt::NoButton) {
-    pRotDx = 0;
+  auto buttons = qApp->mouseButtons();
+  bool xHeld = buttons & Qt::LeftButton;
+  bool yHeld = buttons & Qt::MidButton;
+  bool zHeld = buttons & Qt::RightButton;
+
+  if (!xHeld && rotX && xRotD > 0) {
+    rotateWorld(ROTATE_FACTOR * xRotD, 1.0, 0.0, 0.0);
   }
-  // Keep on rotating, man
-  if (pRotDx != 0) {
-    rotateWorld(ROTATE_FACTOR * pRotDx, pRotVec);
+  if (!yHeld && rotY && yRotD > 0) {
+    rotateWorld(ROTATE_FACTOR * yRotD, 0.0, 1.0, 0.0);
+  }
+  if (!zHeld && rotZ && zRotD > 0) {
+    rotateWorld(ROTATE_FACTOR * zRotD, 0.0, 0.0, 1.0);
   }
 
   auto cameraMatrix = getCameraMatrix();
@@ -355,10 +365,10 @@ void Viewer::resizeGL(int width, int height) {
 
 void Viewer::mousePressEvent (QMouseEvent* event) {
   // When any mouse button is pressed, we stop persistent rotation
-  pRotVec.setX(0);
-  pRotVec.setY(0);
-  pRotVec.setZ(0);
-  pRotDx = 0;
+  rotX = false;
+  rotY = false;
+  rotZ = false;
+  xRotD = yRotD = zRotD = 0;
 
   lastMouseX = event->x();
 }
@@ -368,7 +378,6 @@ void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   if (!(event->modifiers() & Qt::ShiftModifier)) {
     updateRotVector(event->button(), true);
   }
-  lastMouseX = -1;
 }
 
 void Viewer::mouseMoveEvent (QMouseEvent* event) {
@@ -396,7 +405,15 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     float zCoord = !!(buttons & Qt::RightButton);
     rotateWorld(ROTATE_FACTOR * dx, xCoord, yCoord, zCoord);
 
-    pRotDx = dx;
+    if (xCoord) {
+      xRotD = dx;
+    }
+    if (yCoord) {
+      yRotD = dx;
+    }
+    if (zCoord) {
+      zRotD = dx;
+    }
     lastMouseX = x;
   }
 }
@@ -417,9 +434,9 @@ void Viewer::translateWorld(float x, float y, float z) {
   mTransformMatrix.translate(x, y, z);
 }
 
-void Viewer::rotateWorld(float angle, const QVector3D& vector) {
-  mTransformMatrix.rotate(angle, vector);
-}
+//void Viewer::rotateWorld(float angle, const QVector3D& vector) {
+//  mTransformMatrix.rotate(angle, vector);
+//}
 
 void Viewer::rotateWorld(float angle, float x, float y, float z) {
   mTransformMatrix.rotate(angle, x, y, z);
@@ -432,13 +449,13 @@ void Viewer::scaleWorld(float x, float y, float z) {
 void Viewer::updateRotVector(Qt::MouseButton button, bool release) {
   switch (button) {
     case Qt::LeftButton:
-      pRotVec.setX(release);
+      rotX = true;
       break;
     case Qt::MidButton:
-      pRotVec.setY(release);
+      rotY = true;
       break;
     case Qt::RightButton:
-      pRotVec.setZ(release);
+      rotZ = true;
       break;
     default:
       // We do not need to handle any more buttons
