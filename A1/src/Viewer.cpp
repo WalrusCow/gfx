@@ -10,9 +10,9 @@
 #define GL_MULTISAMPLE 0x809D
 #endif
 
-const float Viewer::SCALE_FACTOR = 1.005f;
-const float Viewer::MIN_SCALE = pow(SCALE_FACTOR, -400);
-const float Viewer::MAX_SCALE = pow(SCALE_FACTOR, 100);
+const float Viewer::SCALE_FACTOR = 1.001f;
+const float Viewer::MIN_SCALE = pow(SCALE_FACTOR, -1200);
+const float Viewer::MAX_SCALE = pow(SCALE_FACTOR, 800);
 // Radians to rotate per pixel moved
 const float Viewer::ROTATE_FACTOR = M_PI / 15;
 
@@ -102,7 +102,7 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
     vao(this)
 #else
     positionBuffer(QGLBuffer::VertexBuffer),
-    colourBuffer(QGLBuffer::VertexBuffer),
+    colourBuffer(QGLBuffer::VertexBuffer)
 #endif
 {
   scale = 1.0f;
@@ -203,7 +203,7 @@ void Viewer::initializeGL() {
   colourBuffer.setUsagePattern(QGLBuffer::StaticDraw);
 
   positionBuffer.create();
-  positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  positionBuffer.setUsagePattern(QGLBuffer::StaticDraw);
 #endif
 
 
@@ -216,7 +216,6 @@ void Viewer::initializeGL() {
   mProgram.enableAttributeArray("vert");
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
-  colourBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
   if (!colourBuffer.bind()) {
     std::cerr << "could not bind colour buffer to the context." << std::endl;
     return;

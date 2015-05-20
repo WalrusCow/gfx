@@ -15,9 +15,19 @@
 class AppWindow : public QMainWindow {
   Q_OBJECT
 
+ public slots:
+  void newGame();
+  void resetView();
+  void faceMode();
+  void wireMode();
+  void multiMode();
+  void slowSpeed();
+  void medSpeed();
+  void fastSpeed();
+  void gameTick();
+
  public:
   AppWindow();
-  void newGame();
 
  protected:
   void keyPressEvent(QKeyEvent *event);
@@ -31,8 +41,7 @@ class AppWindow : public QMainWindow {
       QActionGroup* actionGroup,
       const std::string& tip,
       std::list<QAction*>& menuList,
-      int shortcut,
-      const std::function<void()>& onTrigger);
+      int shortcut);
 
   QTimer* gameTicker;
 
