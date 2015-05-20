@@ -1,0 +1,16 @@
+Name: William McDonald
+Student Number: 20418145
+User-id: wmcdonal
+Assignment: 1
+
+The final executable was compiled on this machine: gl11
+
+How to invoke my program: qmake paint488.pro && make && ./paint488
+
+How to use my extra features: No extra features
+
+
+I have created the following data files, which are in the data directory:
+No data files
+
+My program assumes the following: Run on Ubuntu 12.04 with Qt 5.0
