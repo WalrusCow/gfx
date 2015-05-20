@@ -81,8 +81,6 @@ class Viewer : public QGLWidget {
   QTimer* mTimer;
   QGLShaderProgram mProgram;
 
-  bool scaling = false;
-
   QVector3D pRotVec;
   int lastMouseX;
   int pRotDx;

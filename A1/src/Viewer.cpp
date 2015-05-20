@@ -234,18 +234,12 @@ void Viewer::mousePressEvent (QMouseEvent* event) {
   pRotVec.setZ(0);
   pRotDx = 0;
 
-  if (event->modifiers() & Qt::ShiftModifier) {
-    scaling = true;
-  }
   lastMouseX = event->x();
 }
 
 void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   (void) event;
-  if (scaling) {
-    scaling = false;
-  }
-  else {
+  if (!(event->modifiers() & Qt::ShiftModifier)) {
     updateRotVector(event->button(), true);
   }
   lastMouseX = -1;
@@ -255,7 +249,7 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
   int x = event->x();
   int dx = x - lastMouseX;
 
-  if (scaling) {
+  if (event->modifiers() & Qt::ShiftModifier) {
     float scaleAmount = pow(SCALE_FACTOR, dx);
     scale *= scaleAmount;
     if (scale > MAX_SCALE) {
