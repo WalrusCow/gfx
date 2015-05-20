@@ -334,7 +334,7 @@ void Viewer::setCubeColourById(int cubeId) {
   // 6 faces
   for (int i = 0; i < 6; ++i) {
     int off = 3 * 6 * i;
-    int idx = (cubeId + 7*i) % 13;
+    int idx = abs((cubeId + 7*i)) % 13;
     const float* colour = cubeColours[idx];
     for (int j = 0; j < 6; ++j, off += 3) {
       colourBuffer.write(sizeof(float) * off, colour, 3 * sizeof(float));
@@ -376,7 +376,7 @@ void Viewer::mousePressEvent (QMouseEvent* event) {
 void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   (void) event;
   if (!(event->modifiers() & Qt::ShiftModifier)) {
-    updateRotVector(event->button(), true);
+    updateRotVector(event->button());
   }
 }
 
@@ -434,10 +434,6 @@ void Viewer::translateWorld(float x, float y, float z) {
   mTransformMatrix.translate(x, y, z);
 }
 
-//void Viewer::rotateWorld(float angle, const QVector3D& vector) {
-//  mTransformMatrix.rotate(angle, vector);
-//}
-
 void Viewer::rotateWorld(float angle, float x, float y, float z) {
   mTransformMatrix.rotate(angle, x, y, z);
 }
@@ -446,7 +442,7 @@ void Viewer::scaleWorld(float x, float y, float z) {
   mTransformMatrix.scale(x, y, z);
 }
 
-void Viewer::updateRotVector(Qt::MouseButton button, bool release) {
+void Viewer::updateRotVector(Qt::MouseButton button) {
   switch (button) {
     case Qt::LeftButton:
       rotX = true;

@@ -63,7 +63,6 @@ class Viewer : public QGLWidget {
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
-  void rotateWorld(float angle, const QVector3D& vector);
   void scaleWorld(float x, float y, float z);
   void initializeWell();
 
@@ -72,7 +71,7 @@ class Viewer : public QGLWidget {
   void setCubeColourById(int cubeId);
   void drawCube(const QMatrix4x4& transform, int cubeId, const float* colour);
 
-  void updateRotVector(Qt::MouseButton button, bool release);
+  void updateRotVector(Qt::MouseButton button);
 
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
