@@ -25,11 +25,13 @@ Viewer::~Viewer() {
 }
 
 void Viewer::setMode(DrawMode mode) {
+  drawMode = mode;
   switch (mode) {
     case DrawMode::WIRE:
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       break;
     case DrawMode::FACE:
+    case DrawMode::MULTICOLOUR:
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       break;
   }
@@ -94,7 +96,9 @@ void Viewer::initializeGL() {
     std::cerr << "could not bind colour buffer to the context." << std::endl;
     return;
   }
-  colourBuffer.allocate(cubeColours, sizeof(cubeColours));
+
+  const float allocColours[12 * 3 * 3] = {0};
+  colourBuffer.allocate(allocColours, sizeof(cubeCoords));
 
 
   mProgram.enableAttributeArray("colour");
@@ -131,19 +135,26 @@ void Viewer::paintGL() {
   // Top left
   wellTransform.translate(-6, 10, 0);
 
+  // Negative ids, different from game
+  int wellId = -1;
+
   // 20 deep and 10 across is 21 down, 11 right, 20 up
   float wellColour[3] = {0.25, 0.25, 0.25};
+
   for (int i = 0; i < 21; ++i) {
     wellTransform.translate(0, -1, 0);
-    drawCube(cameraMatrix * wellTransform, wellColour);
+    drawCube(cameraMatrix * wellTransform, wellId, wellColour);
+    wellId -= 1;
   }
   for (int i = 0; i < 11; ++i) {
     wellTransform.translate(1, 0, 0);
-    drawCube(cameraMatrix * wellTransform, wellColour);
+    drawCube(cameraMatrix * wellTransform, wellId, wellColour);
+    wellId -= 1;
   }
   for (int i = 0; i < 20; ++i) {
     wellTransform.translate(0, 1, 0);
-    drawCube(cameraMatrix * wellTransform, wellColour);
+    drawCube(cameraMatrix * wellTransform, wellId, wellColour);
+    wellId -= 1;
   }
 
   // Draw in the game
@@ -159,7 +170,8 @@ void Viewer::paintGL() {
     for (int c = 0; c < w; ++c) {
       const BoardSpace& bs = game->get(r, c);
       if (bs.type >= 0) {
-        drawCube(cameraMatrix * gameCubeTransform, wellColour);
+        const float* colour = cubeColours[bs.type];
+        drawCube(cameraMatrix * gameCubeTransform, bs.id, colour);
       }
       // Right one
       gameCubeTransform.translate(1, 0, 0);
@@ -169,8 +181,32 @@ void Viewer::paintGL() {
   }
 }
 
-void Viewer::drawCube(const QMatrix4x4& transform, float* colour) {
+void Viewer::drawCube(
+    const QMatrix4x4& transform, int cubeId, const float* colour) {
   mProgram.setUniformValue(mMvpMatrixLocation, transform);
+  if (drawMode == DrawMode::MULTICOLOUR) {
+    setCubeColourById(cubeId);
+  }
+  else {
+    setCubeColour(colour);
+  }
+
+  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+}
+
+void Viewer::setCubeColourById(int cubeId) {
+  // 6 faces
+  for (int i = 0; i < 6; ++i) {
+    int off = 3 * 6 * i;
+    int idx = (cubeId + 7*i) % 13;
+    const float* colour = cubeColours[idx];
+    for (int j = 0; j < 6; ++j, off += 3) {
+      colourBuffer.write(sizeof(float) * off, colour, 3 * sizeof(float));
+    }
+  }
+}
+
+void Viewer::setCubeColour(const float* colour) {
   // 6 faces
   for (int i = 0; i < 6; ++i) {
     int off = 3 * 6 * i;
@@ -178,8 +214,6 @@ void Viewer::drawCube(const QMatrix4x4& transform, float* colour) {
       colourBuffer.write(sizeof(float) * off, colour, 3 * sizeof(float));
     }
   }
-
-  glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void Viewer::resizeGL(int width, int height) {

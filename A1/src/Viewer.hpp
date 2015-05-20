@@ -25,7 +25,7 @@ class Viewer : public QGLWidget {
   // instead, call update() to ensure that the view gets a paint
   // event.
 
-  enum class DrawMode { WIRE, FACE };
+  enum class DrawMode { WIRE, FACE, MULTICOLOUR };
 
   void setMode(DrawMode mode);
 
@@ -52,6 +52,8 @@ class Viewer : public QGLWidget {
   // we do not own this
   Game* game = nullptr;
 
+  DrawMode drawMode = DrawMode::FACE;
+
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
@@ -60,7 +62,9 @@ class Viewer : public QGLWidget {
   void initializeWell();
 
   // Draw a cube according to current mode
-  void drawCube(const QMatrix4x4& transform, float* colour);
+  void setCubeColour(const float* colour);
+  void setCubeColourById(int cubeId);
+  void drawCube(const QMatrix4x4& transform, int cubeId, const float* colour);
 
   void updateRotVector(Qt::MouseButton button, bool release);
 
@@ -145,9 +149,6 @@ class Viewer : public QGLWidget {
     1.0f, 1.0f, 0.0f, // end 12
   };
 
-  // Colors for a unit cube
-  const float cubeColours[12 * 3 * 3] = {0};
-
   // Piece colours by id
   const float pieceColours[7][3] = {
     {1.0, 0.0, 0.0},
@@ -157,5 +158,21 @@ class Viewer : public QGLWidget {
     {0.0, 1.0, 1.0},
     {1.0, 0.0, 1.0},
     {1.0, 1.0, 1.0}
+  };
+
+  const float cubeColours[13][3] = {
+    {1.00, 0.00, 0.00},
+    {1.00, 0.50, 0.00},
+    {1.00, 0.75, 0.75},
+    {0.50, 0.00, 0.00},
+    {0.50, 0.00, 0.50},
+    {0.00, 0.00, 1.00},
+    {0.00, 1.00, 1.00},
+    {0.00, 0.50, 0.50},
+    {0.00, 1.00, 0.00},
+    {0.00, 0.50, 0.00},
+    {0.75, 1.00, 0.75},
+    {1.00, 1.00, 0.00},
+    {1.00, 0.00, 1.00},
   };
 };

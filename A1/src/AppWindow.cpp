@@ -100,7 +100,7 @@ void AppWindow::createActions() {
 
   newMenuAction("&Multicoloured", drawGroup,
       "Each cube has 6 unique colours", drawMenuActions, Qt::Key_M, [this] {
-    m_viewer->setMode(Viewer::DrawMode::FACE);
+    m_viewer->setMode(Viewer::DrawMode::MULTICOLOUR);
   });
 
   drawGroup->actions().first()->setChecked(true);
