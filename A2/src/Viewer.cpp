@@ -5,23 +5,15 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "Viewer.hpp"
-// #include "draw.hpp"
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
 #endif
 
-using namespace std;
-
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
-  : QGLWidget(format, parent)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
-  , mVertexBufferObject(QOpenGLBuffer::VertexBuffer)
-  , mVertexArrayObject(this)
-#else
-  , mVertexBufferObject(QGLBuffer::VertexBuffer)
-#endif
-{
+  : QGLWidget(format, parent),
+    mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
+    mVertexArrayObject(this) {
   // Nothing to do here right now.
 }
 
@@ -38,7 +30,7 @@ QSize Viewer::sizeHint() const {
 }
 
 void Viewer::set_perspective(double fov, double aspect,
-               double near, double far) {
+                             double near, double far) {
   // Fill me in!
 }
 
@@ -71,36 +63,11 @@ void Viewer::initializeGL() {
     return;
   }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
   mVertexArrayObject.create();
   mVertexArrayObject.bind();
 
   mVertexBufferObject.create();
   mVertexBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
-#else
-
-  /*
-   * if qt version is less than 5.1, use the following commented code
-   * instead of QOpenGLVertexVufferObject. Also use QGLBuffer instead of
-   * QOpenGLBuffer.
-   */
-  uint vao;
-
-  typedef void (APIENTRY *_glGenVertexArrays) (GLsizei, GLuint*);
-  typedef void (APIENTRY *_glBindVertexArray) (GLuint);
-
-  _glGenVertexArrays glGenVertexArrays;
-  _glBindVertexArray glBindVertexArray;
-
-  glGenVertexArrays = (_glGenVertexArrays) QGLWidget::context()->getProcAddress("glGenVertexArrays");
-  glBindVertexArray = (_glBindVertexArray) QGLWidget::context()->getProcAddress("glBindVertexArray");
-
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  mVertexBufferObject.create();
-  mVertexBufferObject.setUsagePattern(QGLBuffer::DynamicDraw);
-#endif
 
   if (!mVertexBufferObject.bind()) {
     std::cerr << "could not bind vertex buffer to the context." << std::endl;
@@ -134,15 +101,15 @@ void Viewer::paintGL() {
         QVector2D(-0.9, -0.4));
 }
 
-void Viewer::mousePressEvent ( QMouseEvent * event ) {
+void Viewer::mousePressEvent(QMouseEvent* event) {
   std::cerr << "Stub: button " << event->button() << " pressed\n";
 }
 
-void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
+void Viewer::mouseReleaseEvent(QMouseEvent* event) {
   std::cerr << "Stub: button " << event->button() << " released\n";
 }
 
-void Viewer::mouseMoveEvent ( QMouseEvent * event ) {
+void Viewer::mouseMoveEvent(QMouseEvent* event) {
   std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
 }
 

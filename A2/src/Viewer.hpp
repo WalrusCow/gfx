@@ -1,18 +1,12 @@
-#ifndef CS488_VIEWER_HPP
-#define CS488_VIEWER_HPP
+#pragma once
 
 #include <QGLWidget>
 #include <QGLShaderProgram>
 #include <QMatrix4x4>
 #include <QtGlobal>
-// #include "algebra.hpp"
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
-#else
-#include <QGLBuffer>
-#endif
 
 class Viewer : public QGLWidget {
 
@@ -40,7 +34,6 @@ class Viewer : public QGLWidget {
   void reset_view();
 
  protected:
-
   // Events we implement
 
   // Called when GL is first initialized
@@ -63,14 +56,10 @@ class Viewer : public QGLWidget {
   // Call this before you begin drawing. Width and height are the width
   // and height of the GL window.
   void draw_init();
- private:
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
+ private:
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
-#else
-  QGLBuffer mVertexBufferObject;
-#endif
 
   QGLShaderProgram mProgram;
 
@@ -80,5 +69,3 @@ class Viewer : public QGLWidget {
   // You will want to declare some more matrices here
   QMatrix4x4 m_projection;
 };
-
-#endif
