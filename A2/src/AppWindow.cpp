@@ -21,13 +21,15 @@ AppWindow::AppWindow() {
 }
 
 void AppWindow::createActions() {
-  // Creates a new action for quiting and pushes it onto the menu actions vector
-
   newMenuAction("&Quit", nullptr, "Exit the program",
       quitMenuActions, Qt::Key_Q, [this] () {
     close();
   })->setShortcuts(QKeySequence::Quit);
 
+  newMenuAction("&Reset", nullptr, "Reset all transformations",
+      quitMenuActions, Qt::Key_A, [this] () {
+    // TODO: Reset everything
+  });
 
   QActionGroup* modeGroup = new QActionGroup(this);
   // Model actions
