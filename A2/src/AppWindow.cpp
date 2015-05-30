@@ -35,12 +35,79 @@ void AppWindow::createActions() {
 
   // Connect the action with the signal and slot designated
   connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+
+  QActionGroup* modeGroup = new QActionGroup(this);
+  // Model actions
+  newMenuAction("Rotate Model", modeGroup, "Rotate the model",
+      modeMenuActions, Qt::Key_R, [this] () {
+    // Rotate the model
+  });
+  newMenuAction("Translate Model", modeGroup, "Translate the model",
+      modeMenuActions, Qt::Key_T, [this] () {
+    // Translate the model
+  });
+  newMenuAction("Scale Model", modeGroup, "Scale the model",
+      modeMenuActions, Qt::Key_S, [this] () {
+    // Scale the model
+  });
+
+  // View actions
+  newMenuAction("Rotate View", modeGroup, "Rotate the view",
+      modeMenuActions, Qt::Key_O, [this] () {
+    // Rotate the view
+  });
+  newMenuAction("Translate View", modeGroup, "Translate the view",
+      modeMenuActions, Qt::Key_N, [this] () {
+    // Translate the view
+  });
+  newMenuAction("View Perspective", modeGroup, "Change view perspective",
+      modeMenuActions, Qt::Key_P, [this] () {
+    // Change perspective
+  });
 }
 
 void AppWindow::createMenu() {
-  m_menu_app = menuBar()->addMenu(tr("&Application"));
+  appMenu = menuBar()->addMenu(tr("&Application"));
 
   for (auto& action : m_menu_actions) {
-    m_menu_app->addAction(action);
+    appMenu->addAction(action);
   }
+
+  modeMenu = menuBar()->addMenu(tr("&Mode"));
 }
+
+void AppWindow::keyPressEvent(QKeyEvent* event) {
+  int key = event->key();
+  // Trigger menu actions
+  auto it = shortcutActions.find(key);
+  if (it != shortcutActions.end()) {
+    it->second->trigger();
+    return;
+  }
+  // Other handlers?
+}
+
+
+QAction* AppWindow::newMenuAction(
+    const std::string& title,
+    QActionGroup* actionGroup,
+    const std::string& tip,
+    std::list<QAction*>& menuList,
+    int shortcut,
+    const std::function<void()> onTrigger) {
+
+  QAction* action = new QAction(tr(title.c_str()), this);
+  action->setStatusTip(tr(tip.c_str()));
+  if (actionGroup) {
+    action->setCheckable(true);
+    action->setActionGroup(actionGroup);
+  }
+
+  connect(action, &QAction::triggered, this, onTrigger);
+  shortcutActions.insert({shortcut, action});
+  menuList.push_back(action);
+
+  return action;
+}
+
