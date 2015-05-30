@@ -11,7 +11,6 @@ AppWindow::AppWindow() {
   glFormat.setSampleBuffers(true);
 
   QVBoxLayout *layout = new QVBoxLayout;
-  // m_menubar = new QMenuBar;
   m_viewer = new Viewer(glFormat, this);
   layout->addWidget(m_viewer);
   setCentralWidget(new QWidget);
@@ -23,31 +22,24 @@ AppWindow::AppWindow() {
 
 void AppWindow::createActions() {
   // Creates a new action for quiting and pushes it onto the menu actions vector
-  QAction* quitAct = new QAction(tr("&Quit"), this);
-  m_menu_actions.push_back(quitAct);
 
-  // We set the accelerator keys
-  // Alternatively, you could use: setShortcuts(Qt::CTRL + Qt::Key_P);
-  quitAct->setShortcuts(QKeySequence::Quit);
-
-  // Set the tip
-  quitAct->setStatusTip(tr("Exits the file"));
-
-  // Connect the action with the signal and slot designated
-  connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+  newMenuAction("&Quit", nullptr, "Exit the program",
+      quitMenuActions, Qt::Key_Q, [this] () {
+    close();
+  })->setShortcuts(QKeySequence::Quit);
 
 
   QActionGroup* modeGroup = new QActionGroup(this);
   // Model actions
-  newMenuAction("Rotate Model", modeGroup, "Rotate the model",
+  newMenuAction("&Rotate Model", modeGroup, "Rotate the model",
       modeMenuActions, Qt::Key_R, [this] () {
     // Rotate the model
   });
-  newMenuAction("Translate Model", modeGroup, "Translate the model",
+  newMenuAction("&Translate Model", modeGroup, "Translate the model",
       modeMenuActions, Qt::Key_T, [this] () {
     // Translate the model
   });
-  newMenuAction("Scale Model", modeGroup, "Scale the model",
+  newMenuAction("&Scale Model", modeGroup, "Scale the model",
       modeMenuActions, Qt::Key_S, [this] () {
     // Scale the model
   });
@@ -65,16 +57,20 @@ void AppWindow::createActions() {
       modeMenuActions, Qt::Key_P, [this] () {
     // Change perspective
   });
+
+  modeGroup->actions().first()->setChecked(true);
 }
 
 void AppWindow::createMenu() {
   appMenu = menuBar()->addMenu(tr("&Application"));
-
-  for (auto& action : m_menu_actions) {
+  for (auto& action : quitMenuActions) {
     appMenu->addAction(action);
   }
 
   modeMenu = menuBar()->addMenu(tr("&Mode"));
+  for (auto& action : modeMenuActions) {
+    modeMenu->addAction(action);
+  }
 }
 
 void AppWindow::keyPressEvent(QKeyEvent* event) {

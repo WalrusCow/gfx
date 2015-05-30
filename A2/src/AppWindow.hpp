@@ -4,7 +4,6 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include <QMainWindow>
 #include <QMenuBar>
@@ -35,12 +34,11 @@ class AppWindow : public QMainWindow {
 
   // Each menu itself
   QMenu* appMenu;
+  std::list<QAction*> quitMenuActions;
 
   QMenu* modeMenu;
   std::list<QAction*> modeMenuActions;
 
   std::unordered_map<int, QAction*> shortcutActions;
-
-  std::vector<QAction*> m_menu_actions;
   Viewer* m_viewer;
 };
