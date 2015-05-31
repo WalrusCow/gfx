@@ -60,6 +60,11 @@ void AppWindow::createActions() {
     // Change perspective
   });
 
+  newMenuAction("Viewport", modeGroup, "Change the viewport",
+      modeMenuActions, Qt::Key_V, [this] () {
+    // Draw the viewport
+  });
+
   modeGroup->actions().first()->setChecked(true);
 }
 
