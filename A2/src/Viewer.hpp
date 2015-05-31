@@ -9,6 +9,7 @@
 #include <QOpenGLVertexArrayObject>
 
 #include "Model.hpp"
+#include "ViewPoint.hpp"
 
 class Viewer : public QGLWidget {
 
@@ -67,11 +68,8 @@ class Viewer : public QGLWidget {
 
   int mColorLocation;
 
-  // *** Fill me in ***
   // You will want to declare some more matrices here
   QMatrix4x4 m_projection;
-  QMatrix4x4 boxModelMatrix;
-  QMatrix4x4 modelScale;
 
   Model boxModel = Model({
       // "Front"
@@ -87,9 +85,9 @@ class Viewer : public QGLWidget {
       {{1.0, -1.0, -1.0}, {1.0, 1.0, -1.0}},
 
       // Middle lines
-      {{1.0, 1.0, 1.0}, {-1.0, 1.0, -1.0}},
-      {{-1.0, 1.0, 1.0}, {-1.0, -1.0, -1.0}},
-      {{-1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}},
-      {{1.0, -1.0, 1.0}, {1.0, 1.0, -1.0}},
+      {{1.0, 1.0, 1.0}, {1.0, 1.0, -1.0}},
+      {{-1.0, 1.0, 1.0}, {-1.0, 1.0, -1.0}},
+      {{-1.0, -1.0, 1.0}, {-1.0, -1.0, -1.0}},
+      {{1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}},
   });
 };

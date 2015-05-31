@@ -87,24 +87,26 @@ void Viewer::initializeGL() {
 void Viewer::paintGL() {
   draw_init();
 
-  // Here is where your drawing code should go.
-
-  /* A few of lines are drawn below to show how it's done. */
   set_colour(QColor(1.0, 1.0, 1.0));
 
-  draw_line(QVector2D(-0.9, -0.9),
-        QVector2D(0.9, 0.9));
-  draw_line(QVector2D(0.9, -0.9),
-        QVector2D(-0.9, 0.9));
+  const auto v = boxModel.getLines();
 
-  draw_line(QVector2D(-0.9, -0.9),
-        QVector2D(-0.4, -0.9));
-  draw_line(QVector2D(-0.9, -0.9),
-        QVector2D(-0.9, -0.4));
+  // TODO: Perspective
+  for (const auto& line : v) {
+    auto p1 = QVector2D(line.start[0]/2, line.start[1]/2);
+    auto p2 = QVector2D(line.end[0]/2, line.end[1]/2);
+    draw_line(p1, p2);
+  }
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
   std::cerr << "Stub: button " << event->button() << " pressed\n";
+
+  boxModel.translate(0.0, 0.05, 0);
+  boxModel.rotateX(M_PI / 32);
+  //boxModel.rotateY(M_PI / 32);
+  update();
+  return;
 
   const auto v = boxModel.getLines();
   std::cerr << "before:"<<v[0].start << std::endl;
