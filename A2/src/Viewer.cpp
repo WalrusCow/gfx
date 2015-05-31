@@ -16,7 +16,10 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
     mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
     mVertexArrayObject(this) {
-  // Nothing to do here right now.
+
+  refreshTimer = new QTimer(this);
+  connect(refreshTimer, SIGNAL(timeout()), this, SLOT(update()));
+  refreshTimer->start(1000 / 30);
 }
 
 Viewer::~Viewer() {
@@ -92,13 +95,26 @@ void Viewer::paintGL() {
 
   set_colour(QColor(1.0, 1.0, 1.0));
 
+  auto viewM = viewPoint.getViewMatrix();
+
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
-    const auto v = model.getLines();
+    auto v = model.getLines();
 
     // TODO: Perspective
-    for (const auto& line : v) {
-      auto p1 = QVector2D(line.start[0]/2, line.start[1]/2);
-      auto p2 = QVector2D(line.end[0]/2, line.end[1]/2);
+    for (auto& line : v) {
+      line.start = viewM * line.start;
+      line.end = viewM * line.end;
+
+      auto z = line.start[2];
+      if (z < 0) {
+        std::cerr << "z is negative!!!" << std::endl;
+      }
+      auto p1 = QVector2D(line.start[0] / z, line.start[1] / z);
+      z = line.end[2];
+      if (z < 0) {
+        std::cerr << "z2 is negative!!!" << std::endl;
+      }
+      auto p2 = QVector2D(line.end[0] / z, line.end[1] / z);
       draw_line(p1, p2);
     }
   }
@@ -112,7 +128,6 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
   boxGnomon.translate(0.0, 0.05, 0);
   boxModel.rotateX(M_PI / 32);
   boxGnomon.rotateX(M_PI / 32);
-  update();
   return;
 }
 

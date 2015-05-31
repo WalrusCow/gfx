@@ -11,5 +11,5 @@ TARGET = a2
 INCLUDEPATH += .
 
 # Input
-HEADERS += AppWindow.hpp Viewer.hpp xform.hpp Model.hpp ViewPoint.hpp Movable.hpp
-SOURCES += main.cpp AppWindow.cpp Viewer.cpp xform.cpp Model.cpp ViewPoint.cpp Movable.cpp
+HEADERS += AppWindow.hpp Viewer.hpp xform.hpp Model.hpp ViewPoint.hpp Movable.hpp algebra.hpp
+SOURCES += main.cpp AppWindow.cpp Viewer.cpp xform.cpp Model.cpp ViewPoint.cpp Movable.cpp algebra.cpp

@@ -36,9 +36,13 @@ class Viewer : public QGLWidget {
   // original state. Set the viewport to its initial size.
   void reset_view();
 
- protected:
-  // Events we implement
+  enum class Mode {
+    VIEW_ROTATE, VIEW_TRANSLATE, VIEW_PERSPECTIVE,
+    MODEL_ROTATE, MODEL_TRANSLATE, MODEL_SCALE,
+    VIEWPORT,
+  };
 
+ protected:
   // Called when GL is first initialized
   virtual void initializeGL();
   // Called when our window needs to be redrawn
@@ -64,7 +68,11 @@ class Viewer : public QGLWidget {
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
 
+  QTimer* refreshTimer;
+
   QGLShaderProgram mProgram;
+
+  Mode mode = Mode::MODEL_ROTATE;
 
   int mColorLocation;
 
@@ -103,4 +111,6 @@ class Viewer : public QGLWidget {
       {{0, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {0, 0, 1}}
   });
+
+  ViewPoint viewPoint;
 };
