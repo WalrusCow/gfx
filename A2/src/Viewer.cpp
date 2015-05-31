@@ -82,6 +82,9 @@ void Viewer::initializeGL() {
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
   mColorLocation = mProgram.uniformLocation("frag_color");
+
+  boxModel.rotateZ(M_PI / 16);
+  boxGnomon.rotateZ(M_PI / 16);
 }
 
 void Viewer::paintGL() {
@@ -89,32 +92,28 @@ void Viewer::paintGL() {
 
   set_colour(QColor(1.0, 1.0, 1.0));
 
-  const auto v = boxModel.getLines();
+  for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
+    const auto v = model.getLines();
 
-  // TODO: Perspective
-  for (const auto& line : v) {
-    auto p1 = QVector2D(line.start[0]/2, line.start[1]/2);
-    auto p2 = QVector2D(line.end[0]/2, line.end[1]/2);
-    draw_line(p1, p2);
+    // TODO: Perspective
+    for (const auto& line : v) {
+      auto p1 = QVector2D(line.start[0]/2, line.start[1]/2);
+      auto p2 = QVector2D(line.end[0]/2, line.end[1]/2);
+      draw_line(p1, p2);
+    }
   }
+
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
   std::cerr << "Stub: button " << event->button() << " pressed\n";
 
   boxModel.translate(0.0, 0.05, 0);
+  boxGnomon.translate(0.0, 0.05, 0);
   boxModel.rotateX(M_PI / 32);
-  //boxModel.rotateY(M_PI / 32);
+  boxGnomon.rotateX(M_PI / 32);
   update();
   return;
-
-  const auto v = boxModel.getLines();
-  std::cerr << "before:"<<v[0].start << std::endl;
-  boxModel.rotateX(M_PI);
-  boxModel.translate(0.0, 1.0, 0.0);
-  boxModel.rotateX(M_PI / 2);
-  const auto w = boxModel.getLines();
-  std::cerr << "after:"<<w[0].start << std::endl;
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event) {

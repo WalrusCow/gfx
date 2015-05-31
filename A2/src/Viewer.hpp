@@ -69,7 +69,8 @@ class Viewer : public QGLWidget {
   int mColorLocation;
 
   // You will want to declare some more matrices here
-  QMatrix4x4 m_projection;
+  // ... liar
+  //QMatrix4x4 m_projection;
 
   Model boxModel = Model({
       // "Front"
@@ -89,5 +90,17 @@ class Viewer : public QGLWidget {
       {{-1.0, 1.0, 1.0}, {-1.0, 1.0, -1.0}},
       {{-1.0, -1.0, 1.0}, {-1.0, -1.0, -1.0}},
       {{1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}},
+  });
+
+  Model boxGnomon = Model({
+      {{0, 0, 0}, {1, 0, 0}},
+      {{0, 0, 0}, {0, 1, 0}},
+      {{0, 0, 0}, {0, 0, 1}}
+  });
+
+  Model worldGnomon = Model({
+      {{0, 0, 0}, {1, 0, 0}},
+      {{0, 0, 0}, {0, 1, 0}},
+      {{0, 0, 0}, {0, 0, 1}}
   });
 };
