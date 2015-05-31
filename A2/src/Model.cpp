@@ -15,32 +15,35 @@ constexpr double hypot(double a, double b, double c) {
   return std::sqrt(a*a + b*b + c*c);
 }
 
-}
-
-void Model::rotate(double rad, const Vector3D& axis) {
-  // First, we need to translate to the origin
-
-  // Note that we are doing this inside-out (in opposite order) in order to
-  // apply the inverse operation at the same time as the operation.
-  Matrix4x4 xform = zRotationMatrix(rad);
+Matrix4x4 alignToZAxis(const Matrix4x4& startMatrix, const Vector3D& axis) {
+  Matrix4x4 result = startMatrix;
 
   // We need to rotate so the axis is on the world z axis
   // .. but only if the axis isn't already on the world z axis!
   if (!isZero(axis[0]) || !isZero(axis[1])) {
     // Rotate about world y axis to get to world z axis
-    double yHyp = hypot(xAxis[0], xAxis[1], xAxis[2]);
-    double yAngle = std::acos(xAxis[2] / yHyp);
-    xform = yRotationMatrix(-yAngle) * xform * yRotationMatrix(yAngle);
+    double yHyp = hypot(axis[0], axis[1], axis[2]);
+    double yAngle = std::acos(axis[2] / yHyp);
+    result = yRotationMatrix(-yAngle) * result * yRotationMatrix(yAngle);
 
     // Rotate about world z axis to get to xz plane
-    double zHyp = std::hypot(xAxis[0], xAxis[1]);
-    double zAngle = std::acos(xAxis[0] / zHyp);
-    xform = zRotationMatrix(-zAngle) * xform * zRotationMatrix(zAngle);
+    double zHyp = std::hypot(axis[0], axis[1]);
+    double zAngle = std::acos(axis[0] / zHyp);
+    result = zRotationMatrix(-zAngle) * result * zRotationMatrix(zAngle);
   }
+
+  return result;
+}
+
+}
+
+void Model::rotate(double rad, const Vector3D& axis) {
+  // Note that we are doing this inside-out (in opposite order) in order to
+  // apply the inverse operation at the same time as the operation.
+  Matrix4x4 xform = alignToZAxis(zRotationMatrix(rad), axis);
 
   // TODO: We could maintain this. It only changes on "translate"
   Point3D centre = modelMatrix * origin;
-
   xform = translationMatrix(centre[0], centre[1], centre[2]) * xform *
           translationMatrix(-centre[0], -centre[1], -centre[2]);
 
@@ -76,9 +79,12 @@ void Model::translate(double x, double y, double z) {
   // back to the origin, then rotate to the original axes, then slide,
   // then rotate back, then translate back to where we were originally
 
-  //auto xform = translationMatrix(x, y, z);
+  Matrix4x4 xform = alignToZAxis(translationMatrix(x, y, z), zAxis);
 
-  // Rotate to original axes position
-  //xform = 
+  // Now translate to origin lol
+  Point3D centre = modelMatrix * origin;
+  xform = translationMatrix(centre[0], centre[1], centre[2]) * xform *
+          translationMatrix(-centre[0], -centre[1], -centre[2]);
 
+  modelMatrix = xform * modelMatrix;
 }
