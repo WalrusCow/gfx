@@ -1,13 +1,14 @@
 #pragma once
 
+#include <vector>
+
 #include "algebra.hpp"
 
 class Line {
  public:
-  Line(Point2D start, Point2D end) : start(start), end(end) {
-  }
-  Point2D start;
-  Point2D end;
+  Line(Point3D start, Point3D end) : start(start), end(end) {}
+  Point3D start;
+  Point3D end;
 };
 
 class Model {

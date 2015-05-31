@@ -1,3 +1,5 @@
+#include "Viewer.hpp"
+
 #include <cmath>
 #include <iostream>
 
@@ -5,7 +7,6 @@
 #include <QtOpenGL>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "Viewer.hpp"
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
@@ -104,6 +105,14 @@ void Viewer::paintGL() {
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
   std::cerr << "Stub: button " << event->button() << " pressed\n";
+
+  const auto v = boxModel.getLines();
+  std::cerr << "before:"<<v[0].start << std::endl;
+  boxModel.rotateX(M_PI);
+  boxModel.translate(0.0, 1.0, 0.0);
+  boxModel.rotateX(M_PI / 2);
+  const auto w = boxModel.getLines();
+  std::cerr << "after:"<<w[0].start << std::endl;
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event) {

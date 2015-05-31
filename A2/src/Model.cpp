@@ -1,6 +1,8 @@
 #include "Model.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <iostream>
 
 #include "xform.hpp"
 
@@ -75,16 +77,25 @@ void Model::rotateZ(double rad) {
 }
 
 void Model::translate(double x, double y, double z) {
-  // In order to translate about our own shit, we have to translate
-  // back to the origin, then rotate to the original axes, then slide,
-  // then rotate back, then translate back to where we were originally
+  // Simply move relative to our local axes
+  auto v1 = x * xAxis;
+  auto v2 = y * yAxis;
+  auto v3 = z * zAxis;
 
-  Matrix4x4 xform = alignToZAxis(translationMatrix(x, y, z), zAxis);
-
-  // Now translate to origin lol
-  Point3D centre = modelMatrix * origin;
-  xform = translationMatrix(centre[0], centre[1], centre[2]) * xform *
-          translationMatrix(-centre[0], -centre[1], -centre[2]);
-
+  auto xform =  translationMatrix(v1[0] + v2[0] + v3[0],
+                                  v1[1] + v2[1] + v3[1],
+                                  v1[2] + v2[2] + v3[2]);
   modelMatrix = xform * modelMatrix;
+}
+
+std::vector<Line> Model::getLines() const {
+  std::vector<Line> res;
+  res.reserve(lines.size());
+
+  // Multiply each point
+  std::transform(lines.begin(), lines.end(), res.begin(), [&] (const Line& l) {
+    return Line(modelMatrix * l.start, modelMatrix * l.end);
+  });
+
+  return res;
 }

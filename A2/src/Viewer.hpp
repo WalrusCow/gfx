@@ -8,6 +8,8 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
+#include "Model.hpp"
+
 class Viewer : public QGLWidget {
 
   Q_OBJECT
@@ -70,4 +72,24 @@ class Viewer : public QGLWidget {
   QMatrix4x4 m_projection;
   QMatrix4x4 boxModelMatrix;
   QMatrix4x4 modelScale;
+
+  Model boxModel = Model({
+      // "Front"
+      {{1.0, 1.0, 1.0}, {-1.0, 1.0, 1.0}},
+      {{-1.0, 1.0, 1.0}, {-1.0, -1.0, 1.0}},
+      {{-1.0, -1.0, 1.0}, {1.0, -1.0, 1.0}},
+      {{1.0, -1.0, 1.0}, {1.0, 1.0, 1.0}},
+
+      // "Back"
+      {{1.0, 1.0, -1.0}, {-1.0, 1.0, -1.0}},
+      {{-1.0, 1.0, -1.0}, {-1.0, -1.0, -1.0}},
+      {{-1.0, -1.0, -1.0}, {1.0, -1.0, -1.0}},
+      {{1.0, -1.0, -1.0}, {1.0, 1.0, -1.0}},
+
+      // Middle lines
+      {{1.0, 1.0, 1.0}, {-1.0, 1.0, -1.0}},
+      {{-1.0, 1.0, 1.0}, {-1.0, -1.0, -1.0}},
+      {{-1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}},
+      {{1.0, -1.0, 1.0}, {1.0, 1.0, -1.0}},
+  });
 };
