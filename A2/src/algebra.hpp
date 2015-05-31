@@ -487,4 +487,26 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c)
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 }
 
+class Line2D {
+ public:
+  Line2D(Point2D start, Point2D end) : start(start), end(end) {}
+  Point2D start;
+  Point2D end;
+};
+
+inline std::ostream& operator <<(std::ostream& os, const Line2D& l) {
+  return os << "l<" << l.start << ", " << l.end << ">";
+}
+
+class Line3D {
+ public:
+  Line3D(Point3D start, Point3D end) : start(start), end(end) {}
+  Point3D start;
+  Point3D end;
+};
+
+inline std::ostream& operator <<(std::ostream& os, const Line3D& l) {
+  return os << "l<" << l.start << ", " << l.end << ">";
+}
+
 #endif // CS488_ALGEBRA_HPP

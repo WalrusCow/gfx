@@ -22,12 +22,12 @@ void Model::scale(double x, double y, double z) {
   modelMatrix = xform * modelMatrix;
 }
 
-std::vector<Line> Model::getLines() const {
-  std::vector<Line> res;
+std::vector<Line3D> Model::getLines() const {
+  std::vector<Line3D> res;
   res.reserve(lines.size());
 
-  auto xform = [&] (const Line& l) {
-    return Line(modelMatrix * l.start, modelMatrix * l.end);
+  auto xform = [&] (const Line3D& l) {
+    return Line3D(modelMatrix * l.start, modelMatrix * l.end);
   };
 
   // Multiply each point
