@@ -1,7 +1,8 @@
+#include <cmath>
+#include <iostream>
+
 #include <QtWidgets>
 #include <QtOpenGL>
-#include <iostream>
-#include <cmath>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "Viewer.hpp"

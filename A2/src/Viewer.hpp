@@ -68,4 +68,6 @@ class Viewer : public QGLWidget {
   // *** Fill me in ***
   // You will want to declare some more matrices here
   QMatrix4x4 m_projection;
+  QMatrix4x4 boxModelMatrix;
+  QMatrix4x4 modelScale;
 };
