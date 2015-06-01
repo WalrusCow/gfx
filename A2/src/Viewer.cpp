@@ -169,8 +169,8 @@ void Viewer::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void Viewer::scale(Model& model, int dx, bool L, bool M, bool R) {
-  double val = dx * SCALE_FACTOR;
-  model.scale(L ? val : 0, M ? val : 0, R ? val : 0);
+  double val = std::pow(SCALE_FACTOR, dx);
+  model.scale(L ? val : 1, M ? val : 1, R ? val : 1);
 }
 
 void Viewer::rotate(Movable& obj, int dx, bool L, bool M, bool R) {
