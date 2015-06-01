@@ -9,6 +9,8 @@ class Movable {
   void rotateZ(double rad);
   void translate(double x, double y, double z);
 
+  virtual void reset();
+
  protected:
   // Composed model transformations
   Matrix4x4 modelMatrix;

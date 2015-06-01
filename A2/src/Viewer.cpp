@@ -8,6 +8,8 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include "AppWindow.hpp"
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
 #endif
@@ -26,6 +28,7 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
     mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
     mVertexArrayObject(this) {
 
+  appWindow = static_cast<AppWindow*>(parent);
   refreshTimer = new QTimer(this);
   connect(refreshTimer, SIGNAL(timeout()), this, SLOT(update()));
   refreshTimer->start(1000 / 30);
@@ -44,11 +47,14 @@ QSize Viewer::sizeHint() const {
 }
 
 void Viewer::resetView() {
-  // TODO: Fill me in!
+  boxModel.reset();
+  boxGnomon.reset();
+  viewPoint.reset();
 }
 
 void Viewer::setMode(Mode newMode) {
   mode = newMode;
+  appWindow->updateMessage(getModeString(), near, far);
 }
 
 void Viewer::initializeGL() {
@@ -224,6 +230,7 @@ void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
   fov = std::max(MIN_FOV, std::min(MAX_FOV, fov));
   if (M) near += dx * TRANSLATE_FACTOR;
   if (R) far += dx * TRANSLATE_FACTOR;
+  appWindow->updateMessage(getModeString(),near,far);
 }
 
 Matrix4x4 Viewer::perspectiveMatrix() {
@@ -246,6 +253,27 @@ Matrix4x4 Viewer::perspectiveMatrix() {
     {0, 0, 1, 0}
   };
 
+}
+
+std::string Viewer::getModeString() {
+  switch (mode) {
+  case Mode::VIEW_ROTATE:
+    return "Rotate view";
+  case Mode::VIEW_TRANSLATE:
+    return "Translate view";
+  case Mode::VIEW_PERSPECTIVE:
+    return "Perspective";
+  case Mode::MODEL_ROTATE:
+    return "Rotate model";
+  case Mode::MODEL_TRANSLATE:
+    return "Translate model";
+  case Mode::MODEL_SCALE:
+    return "Scale model";
+  case Mode::VIEWPORT:
+    return "Viewport";
+  }
+  // Error
+  return "";
 }
 
 // Drawing Functions

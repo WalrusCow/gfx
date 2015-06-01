@@ -39,3 +39,7 @@ void Movable::translate(double x, double y, double z) {
   auto mat = translationMatrix(x, y, z);
   modelMatrix *= mat;
 }
+
+void Movable::reset() {
+  modelMatrix = Matrix4x4();
+}

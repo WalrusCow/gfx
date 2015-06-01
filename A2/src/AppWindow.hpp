@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
+#include <QLabel>
 #include <QAction>
 #include "Viewer.hpp"
 
@@ -16,6 +17,7 @@ class AppWindow : public QMainWindow {
 
  public:
   AppWindow();
+  void updateMessage(const std::string& mode, double near, double far);
 
  protected:
   void keyPressEvent(QKeyEvent* event);
@@ -41,4 +43,5 @@ class AppWindow : public QMainWindow {
 
   std::unordered_map<int, QAction*> shortcutActions;
   Viewer* viewer;
+  QLabel* messageLabel;
 };

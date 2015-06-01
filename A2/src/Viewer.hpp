@@ -1,15 +1,17 @@
 #pragma once
 
+#include <string>
+
 #include <QGLWidget>
 #include <QGLShaderProgram>
-#include <QMatrix4x4>
 #include <QtGlobal>
-
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
 #include "Model.hpp"
 #include "ViewPoint.hpp"
+
+class AppWindow;
 
 class Viewer : public QGLWidget {
 
@@ -34,6 +36,7 @@ class Viewer : public QGLWidget {
 
   void setMode(Mode newMode);
 
+
  protected:
   virtual void initializeGL();
   virtual void paintGL();
@@ -52,6 +55,8 @@ class Viewer : public QGLWidget {
   void draw_init();
 
  private:
+  std::string getModeString();
+
   void scale(Model& model, int dx, bool L, bool M, bool R);
   void rotate(Movable& obj, int dx, bool L, bool M, bool R);
   void translate(Movable& obj, int dx, bool L, bool M, bool R);
@@ -76,6 +81,8 @@ class Viewer : public QGLWidget {
   QOpenGLVertexArrayObject mVertexArrayObject;
   QGLShaderProgram mProgram;
   int mColorLocation;
+
+  AppWindow* appWindow;
 
   QTimer* refreshTimer;
   Mode mode = Mode::MODEL_ROTATE;

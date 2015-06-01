@@ -8,4 +8,5 @@ class ViewPoint : public Movable {
   ViewPoint();
 
   Matrix4x4 getViewMatrix() const;
+  void reset();
 };

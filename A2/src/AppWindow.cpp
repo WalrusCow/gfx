@@ -1,6 +1,8 @@
-#include <QtWidgets>
-#include <iostream>
 #include "AppWindow.hpp"
+
+#include <iostream>
+#include <sstream>
+#include <QtWidgets>
 
 AppWindow::AppWindow() {
   setWindowTitle("488 Assignment Two");
@@ -14,6 +16,10 @@ AppWindow::AppWindow() {
   viewer = new Viewer(glFormat, this);
   layout->addWidget(viewer);
   setCentralWidget(new QWidget);
+
+  messageLabel = new QLabel(this);
+  layout->addWidget(messageLabel);
+
   centralWidget()->setLayout(layout);
 
   createActions();
@@ -67,6 +73,7 @@ void AppWindow::createActions() {
 
   // Display the first option as checked
   modeGroup->actions().first()->setChecked(true);
+  viewer->setMode(Viewer::Mode::MODEL_ROTATE);
 }
 
 void AppWindow::createMenu() {
@@ -92,7 +99,6 @@ void AppWindow::keyPressEvent(QKeyEvent* event) {
   // Other handlers?
 }
 
-
 QAction* AppWindow::newMenuAction(
     const std::string& title,
     QActionGroup* actionGroup,
@@ -115,3 +121,9 @@ QAction* AppWindow::newMenuAction(
   return action;
 }
 
+void AppWindow::updateMessage(
+    const std::string& mode, double near, double far) {
+  std::ostringstream s;
+  s << "Mode: " << mode << "\nNear plane: " << near << "\nFar plane: " << far;
+  messageLabel->setText(tr(s.str().c_str()));
+}
