@@ -82,30 +82,36 @@ void Movable::rotate(double rad, const Vector3D& axis) {
 }
 
 void Movable::rotateX(double rad) {
-  rotate(rad, xAxis);
+  //rotate(rad, xAxis);
   // Maintain axes
   auto mat = xRotationMatrix(rad);
+  modelMatrix = modelMatrix * mat;
   yAxis = mat * yAxis;
   zAxis = mat * zAxis;
 }
 
 void Movable::rotateY(double rad) {
-  rotate(rad, yAxis);
+  //rotate(rad, yAxis);
   // Maintain axes
   auto mat = yRotationMatrix(rad);
+  modelMatrix = modelMatrix * mat;
   xAxis = mat * xAxis;
   zAxis = mat * zAxis;
 }
 
 void Movable::rotateZ(double rad) {
-  rotate(rad, zAxis);
+  //rotate(rad, zAxis);
   // Maintain axes
   auto mat = zRotationMatrix(rad);
+  modelMatrix = modelMatrix * mat;
   xAxis = mat * xAxis;
   yAxis = mat * yAxis;
 }
 
 void Movable::translate(double x, double y, double z) {
+  auto mat = translationMatrix(x, y, z);
+  modelMatrix = modelMatrix * mat;
+  return;
   // Simply move relative to our local axes
   auto v1 = x * xAxis;
   auto v2 = y * yAxis;
