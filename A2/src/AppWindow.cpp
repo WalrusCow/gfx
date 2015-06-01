@@ -11,8 +11,8 @@ AppWindow::AppWindow() {
   glFormat.setSampleBuffers(true);
 
   QVBoxLayout *layout = new QVBoxLayout;
-  m_viewer = new Viewer(glFormat, this);
-  layout->addWidget(m_viewer);
+  viewer = new Viewer(glFormat, this);
+  layout->addWidget(viewer);
   setCentralWidget(new QWidget);
   centralWidget()->setLayout(layout);
 
@@ -28,43 +28,44 @@ void AppWindow::createActions() {
 
   newMenuAction("&Reset", nullptr, "Reset all transformations",
       quitMenuActions, Qt::Key_A, [this] () {
-    // TODO: Reset everything
+    viewer->resetView();
   });
 
   QActionGroup* modeGroup = new QActionGroup(this);
   // Model actions
   newMenuAction("&Rotate Model", modeGroup, "Rotate the model",
       modeMenuActions, Qt::Key_R, [this] () {
-    // Rotate the model
+      viewer->setMode(Viewer::Mode::MODEL_ROTATE);
   });
   newMenuAction("&Translate Model", modeGroup, "Translate the model",
       modeMenuActions, Qt::Key_T, [this] () {
-    // Translate the model
+    viewer->setMode(Viewer::Mode::MODEL_TRANSLATE);
   });
   newMenuAction("&Scale Model", modeGroup, "Scale the model",
       modeMenuActions, Qt::Key_S, [this] () {
-    // Scale the model
+    viewer->setMode(Viewer::Mode::MODEL_SCALE);
   });
 
   // View actions
   newMenuAction("Rotate View", modeGroup, "Rotate the view",
       modeMenuActions, Qt::Key_O, [this] () {
-    // Rotate the view
+    viewer->setMode(Viewer::Mode::VIEW_ROTATE);
   });
   newMenuAction("Translate View", modeGroup, "Translate the view",
       modeMenuActions, Qt::Key_N, [this] () {
-    // Translate the view
+    viewer->setMode(Viewer::Mode::VIEW_TRANSLATE);
   });
   newMenuAction("View Perspective", modeGroup, "Change view perspective",
       modeMenuActions, Qt::Key_P, [this] () {
-    // Change perspective
+    viewer->setMode(Viewer::Mode::VIEW_PERSPECTIVE);
   });
 
   newMenuAction("Viewport", modeGroup, "Change the viewport",
       modeMenuActions, Qt::Key_V, [this] () {
-    // Draw the viewport
+    viewer->setMode(Viewer::Mode::VIEWPORT);
   });
 
+  // Display the first option as checked
   modeGroup->actions().first()->setChecked(true);
 }
 

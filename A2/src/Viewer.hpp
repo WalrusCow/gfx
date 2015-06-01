@@ -28,13 +28,15 @@ class Viewer : public QGLWidget {
 
   // Restore all the transforms and perspective parameters to their
   // original state. Set the viewport to its initial size.
-  void reset_view();
+  void resetView();
 
   enum class Mode {
     VIEW_ROTATE, VIEW_TRANSLATE, VIEW_PERSPECTIVE,
     MODEL_ROTATE, MODEL_TRANSLATE, MODEL_SCALE,
     VIEWPORT,
   };
+
+  void setMode(Mode newMode);
 
  protected:
   virtual void initializeGL();

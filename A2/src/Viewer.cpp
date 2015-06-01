@@ -44,8 +44,12 @@ void Viewer::set_perspective(double fov, double aspect,
   // Fill me in!
 }
 
-void Viewer::reset_view() {
+void Viewer::resetView() {
   // Fill me in!
+}
+
+void Viewer::setMode(Mode newMode) {
+  mode = newMode;
 }
 
 void Viewer::initializeGL() {
