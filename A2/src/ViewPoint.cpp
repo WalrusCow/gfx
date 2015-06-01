@@ -12,21 +12,9 @@ ViewPoint::ViewPoint() {
   modelMatrix = reflMatrix * modelMatrix;
   rotateY(M_PI);
   // Back up to get a better view
-  translate(0, 0, -3);
+  translate(0, 0, -5);
 }
 
 Matrix4x4 ViewPoint::getViewMatrix() const {
   return modelMatrix.invert();
-}
-
-void ViewPoint::changeFov(double rad) {
-  // TODO
-}
-
-void ViewPoint::translateNearPlane(double z) {
-  // TODO
-}
-
-void ViewPoint::translateFarPlane(double z) {
-  // TODO
 }

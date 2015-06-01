@@ -15,7 +15,11 @@
 const double Viewer::SCALE_FACTOR = 1.001;
 const double Viewer::ROTATE_FACTOR = M_PI / 320;
 const double Viewer::TRANSLATE_FACTOR = 0.01;
-const double Viewer::FOV_FACTOR = 0.5;
+const double Viewer::FOV_FACTOR = M_PI / 640;
+// About 5 degrees
+const double Viewer::MIN_FOV = M_PI / 36;
+// Can't go to PI without disaster :)
+const double Viewer::MAX_FOV = M_PI - (M_PI / 9);
 
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
@@ -39,13 +43,8 @@ QSize Viewer::sizeHint() const {
   return QSize(300, 300);
 }
 
-void Viewer::set_perspective(double fov, double aspect,
-                             double near, double far) {
-  // Fill me in!
-}
-
 void Viewer::resetView() {
-  // Fill me in!
+  // TODO: Fill me in!
 }
 
 void Viewer::setMode(Mode newMode) {
@@ -94,9 +93,6 @@ void Viewer::initializeGL() {
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
   mColorLocation = mProgram.uniformLocation("frag_color");
-
-  boxModel.rotateZ(M_PI / 16);
-  boxGnomon.rotateZ(M_PI / 16);
 }
 
 void Viewer::paintGL() {
@@ -105,6 +101,12 @@ void Viewer::paintGL() {
   set_colour(QColor(1.0, 1.0, 1.0));
 
   auto viewM = viewPoint.getViewMatrix();
+
+  auto perspectiveM = perspectiveMatrix();
+
+  auto good = [] (double b) {
+    return b > -1 && b < 1;
+  };
 
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
@@ -115,12 +117,41 @@ void Viewer::paintGL() {
       line.start = viewM * line.start;
       line.end = viewM * line.end;
 
-      // We need to get the 
+      // We need these because our vectors are 3D not 4D...
+      auto startZ = line.start[2];
+      auto endZ = line.end[2];
 
-      auto z = line.start[2];
-      auto p1 = QVector2D(line.start[0] / z, line.start[1] / z);
-      z = line.end[2];
-      auto p2 = QVector2D(line.end[0] / z, line.end[1] / z);
+      // now multiply to project it onto the near plane
+      line.start = perspectiveM * line.start;
+      line.end = perspectiveM * line.end;
+
+      // Clip before normalizing
+      //bool result = clipLine(&line);
+
+      line.start[0] /= startZ;
+      line.start[1] /= startZ;
+      line.start[2] /= startZ;
+
+      line.end[0] /= endZ;
+      line.end[1] /= endZ;
+      line.end[2] /= endZ;
+
+      if (!good(line.start[0]) || !good(line.start[1]) || !good(line.start[2])
+          || !good(line.end[0]) || !good (line.end[1]) ||!good(line.end[2])) {
+        std::cerr << "Bad line: " << line<<std::endl;
+      }
+
+
+      // Now we also have to divide by ze or some shit?
+
+      // Now we need to transform these into NDC (perspective matrix)
+      //line.start = toNdc(line.start);
+      //line.end = toNdc(line.end);
+
+      //auto z = line.start[2];
+      auto p1 = QVector2D(line.start[0], line.start[1]);
+      //z = line.end[2];
+      auto p2 = QVector2D(line.end[0], line.end[1]);
       draw_line(p1, p2);
     }
   }
@@ -188,9 +219,33 @@ void Viewer::translate(Movable& obj, int dx, bool L, bool M, bool R) {
 }
 
 void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
-  if (L) viewPoint.changeFov(dx * FOV_FACTOR);
-  if (M) viewPoint.translateNearPlane(dx * TRANSLATE_FACTOR);
-  if (R) viewPoint.translateFarPlane(dx * TRANSLATE_FACTOR);
+  if (L) fov += dx * FOV_FACTOR;
+  // Enforce bounds
+  fov = std::max(MIN_FOV, std::min(MAX_FOV, fov));
+  if (M) near += dx * TRANSLATE_FACTOR;
+  if (R) far += dx * TRANSLATE_FACTOR;
+}
+
+Matrix4x4 Viewer::perspectiveMatrix() {
+  auto n = near;
+  auto f = far;
+  auto s = n * std::tan(fov / 2);
+  // From class notes
+  //return {
+  //  {1, 0, 0, 0},
+  //  {0, 1, 0, 0},
+  //  {0, 0, n + f/n, -f},
+  //  {0, 0, 1/n, 0}
+  //};
+
+  // From openGL (?)
+  return {
+    {n/s, 0, 0, 0},
+    {0, n/s, 0, 0},
+    {0, 0, (f+n)/(f-n), (-2*f*n)/(f-n)},
+    {0, 0, 1, 0}
+  };
+
 }
 
 // Drawing Functions

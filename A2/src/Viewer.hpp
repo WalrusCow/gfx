@@ -22,10 +22,6 @@ class Viewer : public QGLWidget {
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
 
-  // Set the parameters of the current perspective projection using
-  // the semantics of gluPerspective().
-  void set_perspective(double fov, double aspect, double near, double far);
-
   // Restore all the transforms and perspective parameters to their
   // original state. Set the viewport to its initial size.
   void resetView();
@@ -61,10 +57,20 @@ class Viewer : public QGLWidget {
   void translate(Movable& obj, int dx, bool L, bool M, bool R);
   void changePerspective(int dx, bool L, bool M, bool R);
 
+  bool clipLine(Line3D* line);
+
+  Matrix4x4 perspectiveMatrix();
+
+  double near = 3;
+  double far = 8;
+  double fov = M_PI / 4;
+
   static const double SCALE_FACTOR;
   static const double ROTATE_FACTOR;
   static const double TRANSLATE_FACTOR;
   static const double FOV_FACTOR;
+  static const double MIN_FOV;
+  static const double MAX_FOV;
 
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
