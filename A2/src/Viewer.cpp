@@ -12,6 +12,11 @@
 #define GL_MULTISAMPLE 0x809D
 #endif
 
+const double Viewer::SCALE_FACTOR = 1.001;
+const double Viewer::ROTATE_FACTOR = M_PI / 320;
+const double Viewer::TRANSLATE_FACTOR = 0.01;
+const double Viewer::FOV_FACTOR = 0.5;
+
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
     mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
@@ -63,7 +68,7 @@ void Viewer::initializeGL() {
     return;
   }
 
-  if ( !mProgram.link() ) {
+  if (!mProgram.link()) {
     std::cerr << "Cannot link shaders." << std::endl;
     return;
   }
@@ -106,14 +111,8 @@ void Viewer::paintGL() {
       line.end = viewM * line.end;
 
       auto z = line.start[2];
-      if (z < 0) {
-        std::cerr << "z is negative!!!" << std::endl;
-      }
       auto p1 = QVector2D(line.start[0] / z, line.start[1] / z);
       z = line.end[2];
-      if (z < 0) {
-        std::cerr << "z2 is negative!!!" << std::endl;
-      }
       auto p2 = QVector2D(line.end[0] / z, line.end[1] / z);
       draw_line(p1, p2);
     }
@@ -122,7 +121,9 @@ void Viewer::paintGL() {
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
-  std::cerr << "Stub: button " << event->button() << " pressed\n";
+  //std::cerr << "Stub: button " << event->button() << " pressed\n";
+
+  lastMouseX = event->x();
 
   boxModel.translate(0.0, 0.05, 0);
   boxGnomon.translate(0.0, 0.05, 0);
@@ -137,6 +138,63 @@ void Viewer::mouseReleaseEvent(QMouseEvent* event) {
 
 void Viewer::mouseMoveEvent(QMouseEvent* event) {
   std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
+
+  int dx = lastMouseX - event->x();
+  lastMouseX = event->x();
+
+  auto buttons = event->buttons();
+  bool left = !!(buttons & Qt::LeftButton);
+  bool mid = !!(buttons & Qt::MidButton);
+  bool right = !!(buttons & Qt::RightButton);
+
+  switch (mode) {
+  case Mode::VIEW_ROTATE:
+    rotate(viewPoint, dx, left, mid, right);
+    break;
+  case Mode::VIEW_TRANSLATE:
+    translate(viewPoint, dx, left, mid, right);
+    break;
+  case Mode::VIEW_PERSPECTIVE:
+    changePerspective(dx, left, mid, right);
+    break;
+  case Mode::MODEL_ROTATE:
+    rotate(boxModel, dx, left, mid, right);
+    rotate(boxGnomon, dx, left, mid, right);
+    break;
+  case Mode::MODEL_TRANSLATE:
+    translate(boxModel, dx, left, mid, right);
+    translate(boxGnomon, dx, left, mid, right);
+    break;
+  case Mode::MODEL_SCALE:
+    scale(boxModel, dx, left, mid, right);
+    break;
+  case Mode::VIEWPORT:
+    // Nothing to do here
+    break;
+  }
+}
+
+void Viewer::scale(Model& model, int dx, bool L, bool M, bool R) {
+  double val = dx * SCALE_FACTOR;
+  model.scale(L ? val : 0, M ? val : 0, R ? val : 0);
+}
+
+void Viewer::rotate(Movable& obj, int dx, bool L, bool M, bool R) {
+  double val = dx * ROTATE_FACTOR;
+  if (L) obj.rotateX(val);
+  if (M) obj.rotateY(val);
+  if (R) obj.rotateZ(val);
+}
+
+void Viewer::translate(Movable& obj, int dx, bool L, bool M, bool R) {
+  double val = dx * TRANSLATE_FACTOR;
+  obj.translate(L ? val : 0, M ? val : 0, R ? val : 0);
+}
+
+void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
+  if (L) viewPoint.changeFov(dx * FOV_FACTOR);
+  if (M) viewPoint.translateNearPlane(dx * TRANSLATE_FACTOR);
+  if (R) viewPoint.translateFarPlane(dx * TRANSLATE_FACTOR);
 }
 
 // Drawing Functions

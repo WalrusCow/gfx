@@ -25,7 +25,7 @@ class ViewPoint : public Movable {
   Matrix4x4 getViewMatrix() const;
 
   // TODO: Clipping
-  void setFOV(double rad);
-  void setNearPlane(double z);
-  void setFarPlane(double z);
+  void changeFov(double rad);
+  void translateNearPlane(double z);
+  void translateFarPlane(double z);
 };

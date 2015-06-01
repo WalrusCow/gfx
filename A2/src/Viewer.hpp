@@ -65,6 +65,12 @@ class Viewer : public QGLWidget {
   void draw_init();
 
  private:
+
+  void scale(Model& model, int dx, bool L, bool M, bool R);
+  void rotate(Movable& obj, int dx, bool L, bool M, bool R);
+  void translate(Movable& obj, int dx, bool L, bool M, bool R);
+  void changePerspective(int dx, bool L, bool M, bool R);
+
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
 
@@ -75,6 +81,7 @@ class Viewer : public QGLWidget {
   Mode mode = Mode::MODEL_ROTATE;
 
   int mColorLocation;
+  int lastMouseX;
 
   // You will want to declare some more matrices here
   // ... liar
@@ -111,6 +118,11 @@ class Viewer : public QGLWidget {
       {{0, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {0, 0, 1}}
   });
+
+  static const double SCALE_FACTOR;
+  static const double ROTATE_FACTOR;
+  static const double TRANSLATE_FACTOR;
+  static const double FOV_FACTOR;
 
   ViewPoint viewPoint;
 };

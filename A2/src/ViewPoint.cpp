@@ -19,3 +19,15 @@ Matrix4x4 ViewPoint::getViewMatrix() const {
   }
   return viewMatrix;
 }
+
+void ViewPoint::changeFov(double rad) {
+  // TODO
+}
+
+void ViewPoint::translateNearPlane(double z) {
+  // TODO
+}
+
+void ViewPoint::translateFarPlane(double z) {
+  // TODO
+}
