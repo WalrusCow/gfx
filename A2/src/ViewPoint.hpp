@@ -5,25 +5,7 @@
 
 class ViewPoint : public Movable {
  public:
-  ViewPoint() {
-    yAxis = {0, 1, 0};
-    zAxis = {0, 0, 1};
-    // Backwards for view
-    xAxis = {-1, 0, 0};
-
-    Matrix4x4 reflMatrix = {
-      {-1, 0, 0, 0},
-      {0, 1, 0, 0},
-      {0, 0, 1, 0},
-      {0, 0, 0, 1}
-    };
-
-    // First reflect x
-    modelMatrix = reflMatrix * modelMatrix;
-    rotateY(M_PI);
-    // Back up to get a better view
-    translate(0, 0, -3);
-  }
+  ViewPoint();
 
   // Clip the line (modify it in place) and return if it is included
   // or not.

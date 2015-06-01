@@ -1,5 +1,25 @@
 #include "ViewPoint.hpp"
 
+ViewPoint::ViewPoint() {
+  yAxis = {0, 1, 0};
+  zAxis = {0, 0, 1};
+  // Backwards for view
+  xAxis = {-1, 0, 0};
+
+  Matrix4x4 reflMatrix = {
+    {-1, 0, 0, 0},
+    {0, 1, 0, 0},
+    {0, 0, 1, 0},
+    {0, 0, 0, 1}
+  };
+
+  // First reflect x
+  modelMatrix = reflMatrix * modelMatrix;
+  rotateY(M_PI);
+  // Back up to get a better view
+  translate(0, 0, -3);
+}
+
 Matrix4x4 ViewPoint::getViewMatrix() const {
   // Do a change of frame from standard frame (world frame) to our frame
   // (which consists of the axes and the "origin" we have)
