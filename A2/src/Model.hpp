@@ -13,7 +13,6 @@ class Model : public Movable {
     name(std::move(name)), lines(std::move(lines)) {}
 
   void scale(double x, double y, double z);
-  void rotateX(double rad);
 
   // We want to expose the transformed lines
   std::vector<Line3D> getLines() const;

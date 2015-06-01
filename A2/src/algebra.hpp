@@ -385,6 +385,11 @@ inline Matrix4x4 operator *(const Matrix4x4& a, const Matrix4x4& b)
   return ret;
 }
 
+inline Matrix4x4 operator *=(Matrix4x4& a, const Matrix4x4& b) {
+  a = a * b;
+  return a;
+}
+
 inline Vector3D operator *(const Matrix4x4& M, const Vector3D& v)
 {
   return Vector3D(

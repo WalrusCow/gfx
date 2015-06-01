@@ -105,10 +105,6 @@ void Viewer::paintGL() {
 
   set_colour(QColor(1.0, 1.0, 1.0));
 
-  //auto k = boxGnomon.getLines();
-  //auto a = k[0];
-  //std::cerr << "gnomon: " << a << std::endl;
-
   auto viewM = viewPoint.getViewMatrix();
 
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
@@ -124,12 +120,8 @@ void Viewer::paintGL() {
       z = line.end[2];
       auto p2 = QVector2D(line.end[0] / z, line.end[1] / z);
       draw_line(p1, p2);
-      //if (pnt)
-      //std::cerr << "line: " << line << std::endl;
     }
   }
-  pnt=false;
-
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
@@ -141,7 +133,7 @@ void Viewer::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event) {
-  int dx = lastMouseX - event->x();
+  int dx = event->x() - lastMouseX;
   lastMouseX = event->x();
 
   auto buttons = event->buttons();

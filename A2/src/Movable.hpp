@@ -4,16 +4,15 @@
 
 class Movable {
  public:
-  virtual void rotateX(double rad);
-  virtual void rotateY(double rad);
-  virtual void rotateZ(double rad);
+  void rotateX(double rad);
+  void rotateY(double rad);
+  void rotateZ(double rad);
 
   void translate(double x, double y, double z);
 
   Matrix4x4 alignToZAxis(const Matrix4x4& startMatrix, const Vector3D& axis);
 
  protected:
-  void rotate(double rad, const Vector3D& axis);
   // Composed model transformations
   Matrix4x4 modelMatrix;
 
