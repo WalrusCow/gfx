@@ -12,7 +12,6 @@ class ViewPoint : public Movable {
   bool clipLine(Line3D* line);
 
   // Turn a 3D point into a 2D version of where it should be
-
   Point2D projectPoint(const Point3D& point);
 
   Matrix4x4 getViewMatrix() const;

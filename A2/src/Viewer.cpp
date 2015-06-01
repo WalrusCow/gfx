@@ -99,7 +99,6 @@ void Viewer::initializeGL() {
   boxGnomon.rotateZ(M_PI / 16);
 }
 
-bool pnt = true;
 void Viewer::paintGL() {
   draw_init();
 
@@ -112,8 +111,11 @@ void Viewer::paintGL() {
 
     // TODO: Perspective
     for (auto& line : v) {
+      // Now we have the view coordinates
       line.start = viewM * line.start;
       line.end = viewM * line.end;
+
+      // We need to get the 
 
       auto z = line.start[2];
       auto p1 = QVector2D(line.start[0] / z, line.start[1] / z);
