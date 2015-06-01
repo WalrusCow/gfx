@@ -34,3 +34,15 @@ std::vector<Line3D> Model::getLines() const {
   std::transform(lines.begin(), lines.end(), std::back_inserter(res), xform);
   return res;
 }
+
+void Model::rotateX(double rad) {
+  Movable::rotateX(rad);
+  if (name == "Box") {
+    std::cerr << "Box x axis: " << xAxis << std::endl;
+  }
+  if (name == "BoxGnomon") {
+    std::cerr << "Box gnomon x: " << lines[0].end << std::endl;
+    std::cerr << "Box gnomon x xform: " << modelMatrix * lines[0].end << std::endl;
+    std::cerr << "Box gnomon x axis: " << xAxis << std::endl;
+  }
+}

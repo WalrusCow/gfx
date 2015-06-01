@@ -95,10 +95,15 @@ void Viewer::initializeGL() {
   boxGnomon.rotateZ(M_PI / 16);
 }
 
+bool pnt = true;
 void Viewer::paintGL() {
   draw_init();
 
   set_colour(QColor(1.0, 1.0, 1.0));
+
+  //auto k = boxGnomon.getLines();
+  //auto a = k[0];
+  //std::cerr << "gnomon: " << a << std::endl;
 
   auto viewM = viewPoint.getViewMatrix();
 
@@ -115,29 +120,25 @@ void Viewer::paintGL() {
       z = line.end[2];
       auto p2 = QVector2D(line.end[0] / z, line.end[1] / z);
       draw_line(p1, p2);
+      //if (pnt)
+      //std::cerr << "line: " << line << std::endl;
     }
   }
+  pnt=false;
 
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
-  //std::cerr << "Stub: button " << event->button() << " pressed\n";
-
   lastMouseX = event->x();
-
-  boxModel.translate(0.0, 0.05, 0);
-  boxGnomon.translate(0.0, 0.05, 0);
-  boxModel.rotateX(M_PI / 32);
-  boxGnomon.rotateX(M_PI / 32);
   return;
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event) {
-  std::cerr << "Stub: button " << event->button() << " released\n";
+  //std::cerr << "Stub: button " << event->button() << " released\n";
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event) {
-  std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
+  //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
 
   int dx = lastMouseX - event->x();
   lastMouseX = event->x();

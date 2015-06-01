@@ -4,9 +4,9 @@
 
 class Movable {
  public:
-  void rotateX(double rad);
-  void rotateY(double rad);
-  void rotateZ(double rad);
+  virtual void rotateX(double rad);
+  virtual void rotateY(double rad);
+  virtual void rotateZ(double rad);
 
   void translate(double x, double y, double z);
 

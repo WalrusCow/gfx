@@ -87,7 +87,7 @@ class Viewer : public QGLWidget {
   // ... liar
   //QMatrix4x4 m_projection;
 
-  Model boxModel = Model({
+  Model boxModel = Model("Box", {
       // "Front"
       {{1.0, 1.0, 1.0}, {-1.0, 1.0, 1.0}},
       {{-1.0, 1.0, 1.0}, {-1.0, -1.0, 1.0}},
@@ -107,13 +107,13 @@ class Viewer : public QGLWidget {
       {{1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}},
   });
 
-  Model boxGnomon = Model({
+  Model boxGnomon = Model("BoxGnomon", {
       {{0, 0, 0}, {1, 0, 0}},
       {{0, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {0, 0, 1}}
   });
 
-  Model worldGnomon = Model({
+  Model worldGnomon = Model("WorldGnomon", {
       {{0, 0, 0}, {1, 0, 0}},
       {{0, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {0, 0, 1}}

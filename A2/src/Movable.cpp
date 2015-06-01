@@ -21,18 +21,46 @@ Matrix4x4 Movable::alignToZAxis(const Matrix4x4& startMatrix,
                                 const Vector3D& axis) {
   Matrix4x4 result = startMatrix;
 
+  std::cerr << "rotating with respect to " << axis << std::endl;
+
   // We need to rotate so the axis is on the world z axis
   // .. but only if the axis isn't already on the world z axis!
   if (!isZero(axis[0]) || !isZero(axis[1])) {
+
+    //double h = hypot(axis[0], axis[1], axis[2]);
+    // Angle to xz plane is pi/2 - angle to normal=y
+    // a.dot(b) == |a||b|cos(theta)
+    // but a and b are unit vectors!
+    //axis[1] == h*cos(theta)
+    double angleToXZ = (M_PI / 2) - std::acos(axis[1]);
+
+    auto newP = zRotationMatrix(angleToXZ) * axis;
+
+    // Now after doing that we will need the angle to the YZ plane
+    double angleToYZ = (M_PI / 2) - std::acos(newP[0]);
+
     // Rotate about world y axis to get to world z axis
-    double yHyp = hypot(axis[0], axis[1], axis[2]);
-    double yAngle = std::acos(axis[2] / yHyp);
-    result = yRotationMatrix(-yAngle) * result * yRotationMatrix(yAngle);
+    //double yHyp = hypot(axis[0], axis[1], axis[2]);
+    //double yAngle = -1 * std::asin(axis[1] / yHyp);
+    double yAngle = angleToYZ;
+    auto yM = yRotationMatrix(yAngle);
+    result = yM.invert() * result * yM;
+    std::cerr << "y angle: " << yAngle << std::endl;
 
     // Rotate about world z axis to get to xz plane
-    double zHyp = std::hypot(axis[0], axis[1]);
-    double zAngle = std::acos(axis[0] / zHyp);
-    result = zRotationMatrix(-zAngle) * result * zRotationMatrix(zAngle);
+    //double zHyp = hypot(axis[0], axis[1]);
+    //double zAngle = std::asin(axis[1] / yHyp);
+    double zAngle = angleToXZ;
+    auto zM = zRotationMatrix(zAngle);
+    result = zM.invert() * result * zM;
+    std::cerr << "z angle: " << zAngle << std::endl;
+
+    std::cerr << "Before rotation: " << axis << std::endl;
+    std::cerr << "Should be on XZ plane: " << zM * axis << std::endl;
+    std::cerr << "Should be on Z axis: " << yM * zM * axis << std::endl;
+  }
+  else {
+    std::cerr << "nothing to do" << std::endl;
   }
 
   return result;
@@ -65,7 +93,7 @@ void Movable::rotateY(double rad) {
   rotate(rad, yAxis);
   // Maintain axes
   auto mat = yRotationMatrix(rad);
-  xAxis = mat * yAxis;
+  xAxis = mat * xAxis;
   zAxis = mat * zAxis;
 }
 
