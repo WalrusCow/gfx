@@ -22,12 +22,6 @@ class Viewer : public QGLWidget {
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
 
-  // If you want to render a new frame, call do not call paintGL(),
-  // instead, call update() to ensure that the view gets a paint
-  // event.
-
-  // *** Fill in these functions (in viewer.cpp) ***
-
   // Set the parameters of the current perspective projection using
   // the semantics of gluPerspective().
   void set_perspective(double fov, double aspect, double near, double far);
@@ -43,15 +37,10 @@ class Viewer : public QGLWidget {
   };
 
  protected:
-  // Called when GL is first initialized
   virtual void initializeGL();
-  // Called when our window needs to be redrawn
   virtual void paintGL();
-  // Called when a mouse button is pressed
   virtual void mousePressEvent(QMouseEvent* event);
-  // Called when a mouse button is released
   virtual void mouseReleaseEvent(QMouseEvent* event);
-  // Called when the mouse moves
   virtual void mouseMoveEvent(QMouseEvent* event);
 
   // Draw a line -- call draw_init first!
@@ -65,27 +54,24 @@ class Viewer : public QGLWidget {
   void draw_init();
 
  private:
-
   void scale(Model& model, int dx, bool L, bool M, bool R);
   void rotate(Movable& obj, int dx, bool L, bool M, bool R);
   void translate(Movable& obj, int dx, bool L, bool M, bool R);
   void changePerspective(int dx, bool L, bool M, bool R);
 
+  static const double SCALE_FACTOR;
+  static const double ROTATE_FACTOR;
+  static const double TRANSLATE_FACTOR;
+  static const double FOV_FACTOR;
+
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
+  QGLShaderProgram mProgram;
+  int mColorLocation;
 
   QTimer* refreshTimer;
-
-  QGLShaderProgram mProgram;
-
   Mode mode = Mode::MODEL_ROTATE;
-
-  int mColorLocation;
   int lastMouseX;
-
-  // You will want to declare some more matrices here
-  // ... liar
-  //QMatrix4x4 m_projection;
 
   Model boxModel = Model("Box", {
       // "Front"
@@ -118,11 +104,6 @@ class Viewer : public QGLWidget {
       {{0, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {0, 0, 1}}
   });
-
-  static const double SCALE_FACTOR;
-  static const double ROTATE_FACTOR;
-  static const double TRANSLATE_FACTOR;
-  static const double FOV_FACTOR;
 
   ViewPoint viewPoint;
 };

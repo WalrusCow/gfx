@@ -134,12 +134,9 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event) {
-  //std::cerr << "Stub: button " << event->button() << " released\n";
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event) {
-  //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
-
   int dx = lastMouseX - event->x();
   lastMouseX = event->x();
 
