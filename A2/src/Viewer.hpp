@@ -62,7 +62,12 @@ class Viewer : public QGLWidget {
   void translate(Movable& obj, int dx, bool L, bool M, bool R);
   void changePerspective(int dx, bool L, bool M, bool R);
 
-  bool clipLine(Line3D* line);
+  // Clip a line in 3D to a plane
+  // Modifies the line in-place if necessary
+  // Returns false if the whole line is clipped out
+  bool clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt);
+  //bool clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt,
+  //              double w1, double w2);
 
   Matrix4x4 perspectiveMatrix();
 
