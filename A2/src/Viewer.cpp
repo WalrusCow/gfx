@@ -158,12 +158,33 @@ void Viewer::paintGL() {
   Point2D vp1, vp2;
   getAdjustedViewportBounds(&vp1, &vp2);
 
-  // Draw all in white
-  set_colour(QColor(1.0, 1.0, 1.0));
+  int idx = 0;
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
+    idx += 1;
     auto v = model.getLines();
 
+    int jdx = -1;
     for (auto& line : v) {
+      jdx += 1;
+      // Last minute colour additions lol
+      if (idx == 1) {
+        if (jdx < 4) {
+          set_colour(QColor(0.0, 1.0, 1.0));
+        }
+        else {
+          set_colour(QColor(1.0, 1.0, 1.0));
+        }
+      }
+      else if (idx == 2) {
+        // Draw box gnomon as some kind of red
+        set_colour(QColor(1.0, 1.0, 0.0));
+      }
+      else {
+        // Draw world gnomon in fancy colours
+        set_colour(QColor(jdx == 0 ? 1.0 : 0.0,
+                          jdx == 1 ? 1.0 : 0.0,
+                          jdx == 2 ? 1.0 : 0.0));
+      }
       // Now we have the view coordinates
       line.start = viewM * line.start;
       line.end = viewM * line.end;
