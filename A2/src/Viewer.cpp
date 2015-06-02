@@ -111,10 +111,6 @@ void Viewer::paintGL() {
 
   auto perspectiveM = perspectiveMatrix();
 
-  //auto good = [] (double b) {
-  //  return b > -1 && b < 1;
-  //};
-
   // Norms for clipping
   Vector3D nearNorm = {0, 0, 1};
   Vector3D farNorm = {0, 0, -1};
@@ -130,6 +126,7 @@ void Viewer::paintGL() {
   Point3D leftPoint = {-1, 0, 0};
   Point3D rightPoint = {1, 0, 0};
   Point3D topPoint = {0, 1, 0};
+  Point3D bottomPoint = {0, -1, 0};
 
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
@@ -140,10 +137,11 @@ void Viewer::paintGL() {
       line.start = viewM * line.start;
       line.end = viewM * line.end;
 
-      // Now we want to clip the line to the near plane first
+      // Now we want to clip the line to the near and far planes first, to
+      // avoid ambiguity. (Actually, we only need to do the near one, but
+      // far is the same so why not do that too) :)
       if (!clipLine(&line, nearNorm, nearPoint) ||
           !clipLine(&line, farNorm, farPoint)) {
-        std::cerr << "Removing line completely" << std::endl;
         continue;
       }
 
@@ -151,19 +149,9 @@ void Viewer::paintGL() {
       auto startZ = line.start[2];
       auto endZ = line.end[2];
 
-
-      // now multiply to project it onto the near plane
+      // Now multiply to project it onto the near plane
       line.start = perspectiveM * line.start;
       line.end = perspectiveM * line.end;
-
-
-      //if (!clipLine(&line, farNorm, farPoint, 
-
-      // Clip before normalizing
-      //if (!clipLine(&line)) {
-        // Line is clipped out
-      //}
-      // Do clipping before
 
       line.start[0] /= startZ;
       line.start[1] /= startZ;
@@ -173,11 +161,13 @@ void Viewer::paintGL() {
       line.end[1] /= endZ;
       line.end[2] /= endZ;
 
-      //if (!good(line.start[0]) || !good(line.start[1]) || !good(line.start[2])
-      //    || !good(line.end[0]) || !good (line.end[1]) ||!good(line.end[2])) {
-      //  // Should have clipped this
-      //  std::cerr << "Bad line: " << line<<std::endl;
-      //}
+      // We can clip these afterwards
+      if (!clipLine(&line, rightNorm, rightPoint) ||
+          !clipLine(&line, leftNorm, leftPoint) ||
+          !clipLine(&line, topNorm, topPoint) ||
+          !clipLine(&line, bottomNorm, bottomPoint)) {
+        continue;
+      }
 
       auto p1 = QVector2D(line.start[0], line.start[1]);
       auto p2 = QVector2D(line.end[0], line.end[1]);
@@ -185,12 +175,6 @@ void Viewer::paintGL() {
     }
   }
 }
-
-//bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt,
-//                      double w1, double w2) {
-//  // Fuck me
-//  return clipLine(line, norm, {pt[0]*scale,pt[1]*scale,pt[2]*scale});
-//}
 
 bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt) {
   auto edgeCoordA = (line->start - pt).dot(norm);
@@ -212,6 +196,8 @@ bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt) {
   else {
     line->end = line->start + t * c;
   }
+  if (norm[2] !=1&&norm[2]!=-1)
+  std::cerr << "Clippering!" << std::endl;
   return true;
 }
 
@@ -291,12 +277,12 @@ void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
 Matrix4x4 Viewer::perspectiveMatrix() {
   auto n = near;
   auto f = far;
-  auto s = n * std::tan(fov / 2);
+  auto s = std::tan(fov / 2);
 
   // From openGL (?)
   return {
-    {n/s, 0, 0, 0},
-    {0, n/s, 0, 0},
+    {1/s, 0, 0, 0},
+    {0, 1/s, 0, 0},
     {0, 0, (f+n)/(f-n), (-2*f*n)/(f-n)},
     {0, 0, 1, 0}
   };
