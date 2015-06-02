@@ -81,6 +81,7 @@ class Viewer : public QGLWidget {
   static const double FOV_FACTOR;
   static const double MIN_FOV;
   static const double MAX_FOV;
+  static const double MIN_NEAR;
 
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
@@ -114,15 +115,15 @@ class Viewer : public QGLWidget {
   });
 
   Model boxGnomon = Model("BoxGnomon", {
-      {{0, 0, 0}, {1, 0, 0}},
-      {{0, 0, 0}, {0, 1, 0}},
-      {{0, 0, 0}, {0, 0, 1}}
+      {{0, 0, 0}, {0.5, 0, 0}},
+      {{0, 0, 0}, {0, 0.5, 0}},
+      {{0, 0, 0}, {0, 0, 0.5}}
   });
 
   Model worldGnomon = Model("WorldGnomon", {
-      {{0, 0, 0}, {1, 0, 0}},
-      {{0, 0, 0}, {0, 1, 0}},
-      {{0, 0, 0}, {0, 0, 1}}
+      {{0, 0, 0}, {0.5, 0, 0}},
+      {{0, 0, 0}, {0, 0.5, 0}},
+      {{0, 0, 0}, {0, 0, 0.5}}
   });
 
   ViewPoint viewPoint;

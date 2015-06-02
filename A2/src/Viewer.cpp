@@ -22,6 +22,7 @@ const double Viewer::FOV_FACTOR = M_PI / 640;
 const double Viewer::MIN_FOV = M_PI / 36;
 // Can't go to PI without disaster :)
 const double Viewer::MAX_FOV = M_PI - (M_PI / 9);
+const double Viewer::MIN_NEAR = 0.1;
 
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
@@ -117,6 +118,8 @@ void Viewer::paintGL() {
   // Norms for clipping
   Vector3D nearNorm = {0, 0, 1};
   Vector3D farNorm = {0, 0, -1};
+
+  // TODO: Why can't I just clip to the planes?
   Vector3D leftNorm = {1, 0, 0};
   Vector3D rightNorm = {-1, 0, 0};
   Vector3D topNorm = {0, -1, 0};
@@ -279,6 +282,9 @@ void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
   fov = std::max(MIN_FOV, std::min(MAX_FOV, fov));
   if (M) near += dx * TRANSLATE_FACTOR;
   if (R) far += dx * TRANSLATE_FACTOR;
+
+  near = std::max(MIN_NEAR, std::min(near, far));
+  far = std::max(MIN_NEAR, std::max(near, far));
   appWindow->updateMessage(getModeString(),near,far);
 }
 
