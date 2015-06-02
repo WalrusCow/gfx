@@ -35,10 +35,6 @@ Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   refreshTimer->start(1000 / 30);
 }
 
-Viewer::~Viewer() {
-  // Nothing to do here right now.
-}
-
 QSize Viewer::minimumSizeHint() const {
   return QSize(50, 50);
 }
@@ -51,6 +47,8 @@ void Viewer::resetView() {
   boxModel.reset();
   boxGnomon.reset();
   viewPoint.reset();
+  near = 3;
+  far = 8;
 }
 
 void Viewer::setMode(Mode newMode) {
@@ -108,19 +106,17 @@ void Viewer::paintGL() {
   set_colour(QColor(1.0, 1.0, 1.0));
 
   auto viewM = viewPoint.getViewMatrix();
-
   auto perspectiveM = perspectiveMatrix();
 
-  // Norms for clipping
+  // Norms of clipping planes
   Vector3D nearNorm = {0, 0, 1};
   Vector3D farNorm = {0, 0, -1};
-
-  // TODO: Why can't I just clip to the planes?
   Vector3D leftNorm = {1, 0, 0};
   Vector3D rightNorm = {-1, 0, 0};
   Vector3D topNorm = {0, -1, 0};
   Vector3D bottomNorm = {0, 1, 0};
 
+  // Points on clipping planes
   Point3D nearPoint = {0, 0, near};
   Point3D farPoint = {0, 0, far};
   Point3D leftPoint = {-1, 0, 0};
@@ -131,7 +127,6 @@ void Viewer::paintGL() {
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
 
-    // TODO: Perspective
     for (auto& line : v) {
       // Now we have the view coordinates
       line.start = viewM * line.start;
@@ -153,13 +148,10 @@ void Viewer::paintGL() {
       line.start = perspectiveM * line.start;
       line.end = perspectiveM * line.end;
 
-      line.start[0] /= startZ;
-      line.start[1] /= startZ;
-      line.start[2] /= startZ;
-
-      line.end[0] /= endZ;
-      line.end[1] /= endZ;
-      line.end[2] /= endZ;
+      for (int i = 0; i < 3; ++i) {
+        line.start[i] /= startZ;
+        line.end[i] /= endZ;
+      }
 
       // We can clip these afterwards
       if (!clipLine(&line, rightNorm, rightPoint) ||
@@ -196,8 +188,6 @@ bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt) {
   else {
     line->end = line->start + t * c;
   }
-  if (norm[2] !=1&&norm[2]!=-1)
-  std::cerr << "Clippering!" << std::endl;
   return true;
 }
 
@@ -264,14 +254,16 @@ void Viewer::translate(Movable& obj, int dx, bool L, bool M, bool R) {
 
 void Viewer::changePerspective(int dx, bool L, bool M, bool R) {
   if (L) fov += dx * FOV_FACTOR;
-  // Enforce bounds
+  // Enforce limits
   fov = std::max(MIN_FOV, std::min(MAX_FOV, fov));
+
   if (M) near += dx * TRANSLATE_FACTOR;
   if (R) far += dx * TRANSLATE_FACTOR;
 
+  // Enforce limits
   near = std::max(MIN_NEAR, std::min(near, far));
   far = std::max(MIN_NEAR, std::max(near, far));
-  appWindow->updateMessage(getModeString(),near,far);
+  appWindow->updateMessage(getModeString(), near, far);
 }
 
 Matrix4x4 Viewer::perspectiveMatrix() {
@@ -279,14 +271,13 @@ Matrix4x4 Viewer::perspectiveMatrix() {
   auto f = far;
   auto s = std::tan(fov / 2);
 
-  // From openGL (?)
+  // Similar to OpenGL
   return {
     {1/s, 0, 0, 0},
     {0, 1/s, 0, 0},
     {0, 0, (f+n)/(f-n), (-2*f*n)/(f-n)},
     {0, 0, 1, 0}
   };
-
 }
 
 std::string Viewer::getModeString() {

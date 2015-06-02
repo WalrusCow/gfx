@@ -35,6 +35,7 @@ void AppWindow::createActions() {
   newMenuAction("&Reset", nullptr, "Reset all transformations",
       quitMenuActions, Qt::Key_A, [this] () {
     viewer->resetView();
+    viewer->setMode(Viewer::Mode::MODEL_ROTATE);
   });
 
   QActionGroup* modeGroup = new QActionGroup(this);

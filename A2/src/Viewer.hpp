@@ -19,7 +19,6 @@ class Viewer : public QGLWidget {
 
  public:
   Viewer(const QGLFormat& format, QWidget *parent = 0);
-  virtual ~Viewer();
 
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
@@ -35,7 +34,6 @@ class Viewer : public QGLWidget {
   };
 
   void setMode(Mode newMode);
-
 
  protected:
   virtual void initializeGL();
@@ -87,10 +85,11 @@ class Viewer : public QGLWidget {
   int mColorLocation;
 
   AppWindow* appWindow;
-
   QTimer* refreshTimer;
   Mode mode = Mode::MODEL_ROTATE;
   int lastMouseX;
+
+  ViewPoint viewPoint;
 
   Model boxModel = Model("Box", {
       // "Front"
@@ -123,6 +122,4 @@ class Viewer : public QGLWidget {
       {{0, 0, 0}, {0, 0.5, 0}},
       {{0, 0, 0}, {0, 0, 0.5}}
   });
-
-  ViewPoint viewPoint;
 };
