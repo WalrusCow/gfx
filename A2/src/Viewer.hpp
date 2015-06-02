@@ -81,6 +81,8 @@ class Viewer : public QGLWidget {
   bool clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt);
 
   Matrix4x4 perspectiveMatrix();
+
+  void getAdjustedViewportBounds(Point2D* p1, Point2D* p2);
   Point2D adjustForViewport(
       const Point2D& pt, const Point2D& vp1, const Point2D& vp2);
 

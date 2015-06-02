@@ -110,6 +110,23 @@ void Viewer::initializeGL() {
   mColorLocation = mProgram.uniformLocation("frag_color");
 }
 
+void Viewer::getAdjustedViewportBounds(Point2D* p1, Point2D* p2) {
+  // TODO: Use resizeEvent to handle clipping viewport to window if window shrinks
+  // Convert vp1 and vp2 into points in range [-1, 1]
+  auto w = width();
+  const auto vpLeft = -1 + 2 * (std::min(vp1[0], vp2[0]) / w);
+  const auto vpRight = -1 + 2 * (std::max(vp1[0], vp2[0]) / w);
+
+  // Note that pixels are top to bottom, but we draw bottom to top
+  auto h = height();
+  const auto vpBottom = -1 + 2 * (std::min(h-vp1[1], h-vp2[1]) / h);
+  const auto vpTop = -1 + 2 * (std::max(h-vp1[1], h-vp2[1]) / h);
+
+  // TODO: Draw this too
+  *p1 = { vpLeft, vpBottom };
+  *p2 = { vpRight, vpTop };
+}
+
 void Viewer::paintGL() {
   draw_init();
 
@@ -135,14 +152,8 @@ void Viewer::paintGL() {
   Point3D bottomPoint = {0, -1, 0};
 
   // Convert vp1 and vp2 into points in range [-1, 1]
-  const auto vpLeft = -1 + 2 * (std::min(vp1[0], vp2[0]) / width());
-  const auto vpRight = -1 + 2 * (std::max(vp1[0], vp2[0]) / width());
-  const auto vpBottom = -1 + 2 * (std::min(vp1[1], vp2[1]) / height());
-  const auto vpTop = -1 + 2 * (std::max(vp1[1], vp2[1]) / height());
-  std::cerr<<"Got vp: l="<<vpLeft<<",r="<<vpRight<<",b="<<vpBottom<<",t="<<vpTop<<'\n';
-  // TODO: Draw this too
-  Point2D vp1 = { vpLeft, vpBottom };
-  Point2D vp2 = { vpRight, vpTop };
+  Point2D vp1, vp2;
+  getAdjustedViewportBounds(&vp1, &vp2);
 
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
@@ -327,7 +338,6 @@ void Viewer::updateViewport(const Point2D& p1, const Point2D& p2) {
   // Update the viewport datas
   vp1 = p1;
   vp2 = p2;
-  std::cerr << "New viewport is " << vp1 << " and " << vp2 << std::endl;
 }
 
 Point2D Viewer::adjustForViewport(
