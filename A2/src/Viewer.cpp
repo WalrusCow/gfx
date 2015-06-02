@@ -59,6 +59,7 @@ void Viewer::resetView() {
   near = DEFAULT_NEAR;
   far = DEFAULT_FAR;
   fov = DEFAULT_FOV;
+  updateViewport(DEFAULT_VP1, DEFAULT_VP2);
 }
 
 void Viewer::setMode(Mode newMode) {
