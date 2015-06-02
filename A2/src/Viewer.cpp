@@ -24,6 +24,14 @@ const double Viewer::MIN_FOV = M_PI / 36;
 const double Viewer::MAX_FOV = M_PI - (M_PI / 9);
 const double Viewer::MIN_NEAR = 0.1;
 
+// Default values
+const double Viewer::DEFAULT_NEAR = 3;
+const double Viewer::DEFAULT_FAR = 8;
+const double Viewer::DEFAULT_FOV = M_PI / 4;
+
+const Point2D Viewer::DEFAULT_VP1 = {15, 15};
+const Point2D Viewer::DEFAULT_VP2 = {285, 285};
+
 Viewer::Viewer(const QGLFormat& format, QWidget *parent)
   : QGLWidget(format, parent),
     mVertexBufferObject(QOpenGLBuffer::VertexBuffer),
@@ -47,11 +55,13 @@ void Viewer::resetView() {
   boxModel.reset();
   boxGnomon.reset();
   viewPoint.reset();
-  near = 3;
-  far = 8;
+  near = DEFAULT_NEAR;
+  far = DEFAULT_FAR;
+  fov = DEFAULT_FOV;
 }
 
 void Viewer::setMode(Mode newMode) {
+  vpDrag = false;
   mode = newMode;
   appWindow->updateMessage(getModeString(), near, far);
 }
@@ -124,6 +134,16 @@ void Viewer::paintGL() {
   Point3D topPoint = {0, 1, 0};
   Point3D bottomPoint = {0, -1, 0};
 
+  // Convert vp1 and vp2 into points in range [-1, 1]
+  const auto vpLeft = -1 + 2 * (std::min(vp1[0], vp2[0]) / width());
+  const auto vpRight = -1 + 2 * (std::max(vp1[0], vp2[0]) / width());
+  const auto vpBottom = -1 + 2 * (std::min(vp1[1], vp2[1]) / height());
+  const auto vpTop = -1 + 2 * (std::max(vp1[1], vp2[1]) / height());
+  std::cerr<<"Got vp: l="<<vpLeft<<",r="<<vpRight<<",b="<<vpBottom<<",t="<<vpTop<<'\n';
+  // TODO: Draw this too
+  Point2D vp1 = { vpLeft, vpBottom };
+  Point2D vp2 = { vpRight, vpTop };
+
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
 
@@ -148,12 +168,15 @@ void Viewer::paintGL() {
       line.start = perspectiveM * line.start;
       line.end = perspectiveM * line.end;
 
+      // We no longer care about depth
+      // TODO: Convert to 2D
       for (int i = 0; i < 3; ++i) {
         line.start[i] /= startZ;
         line.end[i] /= endZ;
       }
 
-      // We can clip these afterwards
+      // We can clip these afterwards (in 2D, since we don't care about depth)
+      // TODO: 2D
       if (!clipLine(&line, rightNorm, rightPoint) ||
           !clipLine(&line, leftNorm, leftPoint) ||
           !clipLine(&line, topNorm, topPoint) ||
@@ -161,9 +184,18 @@ void Viewer::paintGL() {
         continue;
       }
 
-      auto p1 = QVector2D(line.start[0], line.start[1]);
-      auto p2 = QVector2D(line.end[0], line.end[1]);
-      draw_line(p1, p2);
+      const Line2D windowLine = {
+        {line.start[0], line.start[1]},
+        {line.end[0], line.end[1]}
+      };
+
+      const Line2D viewportLine = {
+        adjustForViewport(windowLine.start, vp1, vp2),
+        adjustForViewport(windowLine.end, vp1, vp2)
+      };
+
+      // TODO: Convert to Point2D
+      draw_line(viewportLine.start, viewportLine.end);
     }
   }
 }
@@ -193,10 +225,21 @@ bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt) {
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
   lastMouseX = event->x();
+  vpDrag = false;
+  if ((event->buttons() & Qt::LeftButton) && mode == Mode::VIEWPORT) {
+    vpDrag = true;
+    vpDragStart[0] = event->x();
+    vpDragStart[1] = event->y();
+  }
   return;
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event) {
+  if (vpDrag && mode == Mode::VIEWPORT) {
+    vpDragEnd[0] = event->x();
+    vpDragEnd[1] = event->y();
+    updateViewport(vpDragStart, vpDragEnd);
+  }
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event) {
@@ -280,6 +323,35 @@ Matrix4x4 Viewer::perspectiveMatrix() {
   };
 }
 
+void Viewer::updateViewport(const Point2D& p1, const Point2D& p2) {
+  // Update the viewport datas
+  vp1 = p1;
+  vp2 = p2;
+  std::cerr << "New viewport is " << vp1 << " and " << vp2 << std::endl;
+}
+
+Point2D Viewer::adjustForViewport(
+    const Point2D& pt, const Point2D& vp1, const Point2D& vp2) {
+  // Map a 2D point in NDC to its proper viewport coordinates
+  // Note that we draw on the window in range [-1, 1] as a percentage
+  // of how far along we are.
+  auto percentLeft = (pt[0] + 1) / 2;
+  auto percentUp = (pt[1] + 1) / 2;
+
+  auto vpLeft = std::min(vp1[0], vp2[0]);
+  auto vpRight = std::max(vp1[0], vp2[0]);
+  auto vpBottom = std::min(vp1[1], vp2[1]);
+  auto vpTop = std::max(vp1[1], vp2[1]);
+
+  auto vpWidth = std::abs(vpRight - vpLeft);
+  auto vpHeight = std::abs(vpTop - vpBottom);
+
+  return {
+    vpLeft + percentLeft * vpWidth,
+    vpBottom + percentUp * vpHeight
+  };
+}
+
 std::string Viewer::getModeString() {
   switch (mode) {
   case Mode::VIEW_ROTATE:
@@ -304,11 +376,11 @@ std::string Viewer::getModeString() {
 // Drawing Functions
 // ******************* Do Not Touch ************************ //
 
-void Viewer::draw_line(const QVector2D& p1, const QVector2D& p2) {
+void Viewer::draw_line(const Point2D& p1, const Point2D& p2) {
 
   const GLfloat lineVertices[] = {
-  p1.x(), p1.y(), 1.0,
-  p2.x(), p2.y(), 1.0
+    p1[0], p1[1], 1.0,
+    p2[0], p2[1], 1.0
   };
 
   mVertexBufferObject.allocate(lineVertices, 3 * 2 * sizeof(float));

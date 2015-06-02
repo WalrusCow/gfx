@@ -43,7 +43,7 @@ class Viewer : public QGLWidget {
   virtual void mouseMoveEvent(QMouseEvent* event);
 
   // Draw a line -- call draw_init first!
-  void draw_line(const QVector2D& p1, const QVector2D& p2) ;
+  void draw_line(const Point2D& p1, const Point2D& p2) ;
 
   // Set the current colour
   void set_colour(const QColor& col);
@@ -53,24 +53,6 @@ class Viewer : public QGLWidget {
   void draw_init();
 
  private:
-  std::string getModeString();
-
-  void scale(Model& model, int dx, bool L, bool M, bool R);
-  void rotate(Movable& obj, int dx, bool L, bool M, bool R);
-  void translate(Movable& obj, int dx, bool L, bool M, bool R);
-  void changePerspective(int dx, bool L, bool M, bool R);
-
-  // Clip a line in 3D to a plane
-  // Modifies the line in-place if necessary
-  // Returns false if the whole line is clipped out
-  bool clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt);
-
-  Matrix4x4 perspectiveMatrix();
-
-  double near = 3;
-  double far = 8;
-  double fov = M_PI / 4;
-
   static const double SCALE_FACTOR;
   static const double ROTATE_FACTOR;
   static const double TRANSLATE_FACTOR;
@@ -78,6 +60,33 @@ class Viewer : public QGLWidget {
   static const double MIN_FOV;
   static const double MAX_FOV;
   static const double MIN_NEAR;
+
+  static const double DEFAULT_NEAR;
+  static const double DEFAULT_FAR;
+  static const double DEFAULT_FOV;
+  static const Point2D DEFAULT_VP1;
+  static const Point2D DEFAULT_VP2;
+
+  std::string getModeString();
+
+  void scale(Model& model, int dx, bool L, bool M, bool R);
+  void rotate(Movable& obj, int dx, bool L, bool M, bool R);
+  void translate(Movable& obj, int dx, bool L, bool M, bool R);
+  void changePerspective(int dx, bool L, bool M, bool R);
+  void updateViewport(const Point2D& p1, const Point2D& p2);
+
+  // Clip a line in 3D to a plane
+  // Modifies the line in-place if necessary
+  // Returns false if the whole line is clipped out
+  bool clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt);
+
+  Matrix4x4 perspectiveMatrix();
+  Point2D adjustForViewport(
+      const Point2D& pt, const Point2D& vp1, const Point2D& vp2);
+
+  double near = DEFAULT_NEAR;
+  double far = DEFAULT_FAR;
+  double fov = DEFAULT_FOV;
 
   QOpenGLBuffer mVertexBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
@@ -87,7 +96,17 @@ class Viewer : public QGLWidget {
   AppWindow* appWindow;
   QTimer* refreshTimer;
   Mode mode = Mode::MODEL_ROTATE;
+
+  // Last mouse coordinates received during drag
   int lastMouseX;
+
+  // Whether or not we are dragging for viewport
+  bool vpDrag;
+  // Viewport points (in pixels)
+  Point2D vpDragStart;
+  Point2D vpDragEnd;
+  Point2D vp1 = DEFAULT_VP1;
+  Point2D vp2 = DEFAULT_VP2;
 
   ViewPoint viewPoint;
 
