@@ -1,3 +1,4 @@
+// William McDonald 20418145 wmcdonal
 #include "AppWindow.hpp"
 
 #include <iostream>

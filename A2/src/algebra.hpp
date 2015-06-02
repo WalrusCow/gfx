@@ -1,3 +1,4 @@
+// William McDonald 20418145 wmcdonal
 //---------------------------------------------------------------------------
 //
 // CS488 -- Introduction to Computer Graphics
