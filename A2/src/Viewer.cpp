@@ -126,6 +126,7 @@ void Viewer::getAdjustedViewportBounds(Point2D* p1, Point2D* p2) {
 }
 
 void Viewer::resizeEvent(QResizeEvent* event) {
+  (void) event;
   updateViewport(vp1, vp2);
 }
 
