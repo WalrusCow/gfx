@@ -36,11 +36,12 @@ class Viewer : public QGLWidget {
   void setMode(Mode newMode);
 
  protected:
-  virtual void initializeGL();
-  virtual void paintGL();
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
+  void initializeGL() override;
+  void paintGL() override;
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void resizeEvent(QResizeEvent* event) override;
 
   // Draw a line -- call draw_init first!
   void draw_line(const Point2D& p1, const Point2D& p2) ;

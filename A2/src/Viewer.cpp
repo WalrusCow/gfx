@@ -111,26 +111,26 @@ void Viewer::initializeGL() {
 }
 
 void Viewer::getAdjustedViewportBounds(Point2D* p1, Point2D* p2) {
-  // TODO: Use resizeEvent to handle clipping viewport to window if window shrinks
   // Convert vp1 and vp2 into points in range [-1, 1]
   auto w = width();
-  const auto vpLeft = -1 + 2 * (std::min(vp1[0], vp2[0]) / w);
-  const auto vpRight = -1 + 2 * (std::max(vp1[0], vp2[0]) / w);
+  const auto vpLeft = -1 + 2 * (vp1[0] / w);
+  const auto vpRight = -1 + 2 * (vp2[0] / w);
 
   // Note that pixels are top to bottom, but we draw bottom to top
   auto h = height();
-  const auto vpBottom = -1 + 2 * (std::min(h-vp1[1], h-vp2[1]) / h);
-  const auto vpTop = -1 + 2 * (std::max(h-vp1[1], h-vp2[1]) / h);
+  const auto vpBottom = -1 + 2 * ((h - vp2[1]) / h);
+  const auto vpTop = -1 + 2 * ((h - vp1[1]) / h);
 
-  // TODO: Draw this too
   *p1 = { vpLeft, vpBottom };
   *p2 = { vpRight, vpTop };
 }
 
+void Viewer::resizeEvent(QResizeEvent* event) {
+  updateViewport(vp1, vp2);
+}
+
 void Viewer::paintGL() {
   draw_init();
-
-  set_colour(QColor(1.0, 1.0, 1.0));
 
   auto viewM = viewPoint.getViewMatrix();
   auto perspectiveM = perspectiveMatrix();
@@ -155,6 +155,8 @@ void Viewer::paintGL() {
   Point2D vp1, vp2;
   getAdjustedViewportBounds(&vp1, &vp2);
 
+  // Draw all in white
+  set_colour(QColor(1.0, 1.0, 1.0));
   for (const auto& model : {boxModel, boxGnomon, worldGnomon}) {
     auto v = model.getLines();
 
@@ -205,10 +207,16 @@ void Viewer::paintGL() {
         adjustForViewport(windowLine.end, vp1, vp2)
       };
 
-      // TODO: Convert to Point2D
       draw_line(viewportLine.start, viewportLine.end);
     }
   }
+
+  // Finally, draw viewport lines
+  set_colour(QColor(0.0, 0.0, 0.0));
+  draw_line(vp1, {vp1[0], vp2[1]});
+  draw_line(vp1, {vp2[0], vp1[1]});
+  draw_line({vp1[0], vp2[1]}, vp2);
+  draw_line({vp2[0], vp1[1]}, vp2);
 }
 
 bool Viewer::clipLine(Line3D* line, const Vector3D& norm, const Point3D& pt) {
@@ -335,9 +343,13 @@ Matrix4x4 Viewer::perspectiveMatrix() {
 }
 
 void Viewer::updateViewport(const Point2D& p1, const Point2D& p2) {
-  // Update the viewport datas
-  vp1 = p1;
-  vp2 = p2;
+  // Enforce points within widget bounds
+  auto vpLeft = std::max(0.0, std::min(p1[0], p2[0]));
+  auto vpRight = std::min((double) width(), std::max(p1[0], p2[0]));
+  auto vpBottom = std::max(0.0, std::min(p1[1], p2[1]));
+  auto vpTop = std::min((double) height(), std::max(p1[1], p2[1]));
+  vp1 = { vpLeft, vpBottom };
+  vp2 = { vpRight, vpTop };
 }
 
 Point2D Viewer::adjustForViewport(
@@ -389,8 +401,8 @@ std::string Viewer::getModeString() {
 void Viewer::draw_line(const Point2D& p1, const Point2D& p2) {
 
   const GLfloat lineVertices[] = {
-    p1[0], p1[1], 1.0,
-    p2[0], p2[1], 1.0
+    (float)p1[0], (float)p1[1], 1.0,
+    (float)p2[0], (float)p2[1], 1.0
   };
 
   mVertexBufferObject.allocate(lineVertices, 3 * 2 * sizeof(float));
