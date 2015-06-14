@@ -1,0 +1,5 @@
+puppeteer
+Makefile
+*.o
+*.a
+moc_*
