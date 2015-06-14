@@ -1,9 +1,6 @@
-#ifndef SCENE_LUA_HPP
-#define SCENE_LUA_HPP
+#pragma once
 
 #include <string>
 #include "scene.hpp"
 
 SceneNode* import_lua(const std::string& filename);
-
-#endif

@@ -1,18 +1,15 @@
-#ifndef CS488_PRIMITIVE_HPP
-#define CS488_PRIMITIVE_HPP
+#pragma once
 
 #include "algebra.hpp"
 
 class Primitive {
-public:
+ public:
   virtual ~Primitive();
   virtual void walk_gl(bool picking) const = 0;
 };
 
 class Sphere : public Primitive {
-public:
+ public:
   virtual ~Sphere();
   virtual void walk_gl(bool picking) const;
 };
-
-#endif

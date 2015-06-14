@@ -1,14 +1,9 @@
 #include "primitive.hpp"
 
-Primitive::~Primitive()
-{
-}
+Primitive::~Primitive() {}
 
-Sphere::~Sphere()
-{
-}
+Sphere::~Sphere() {}
 
-void Sphere::walk_gl(bool picking) const
-{
+void Sphere::walk_gl(bool picking) const {
   // Fill me in
 }
