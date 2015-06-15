@@ -1,17 +1,23 @@
+// William McDonald 20418145 wmcdonal
+#include "Viewer.hpp"
+
+#include <iostream>
+#include <cmath>
+
 #include <QtWidgets>
 #include <QtOpenGL>
-#include "Viewer.hpp"
-#include <iostream>
-#include <math.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
 #endif
 
-Viewer::Viewer(const QGLFormat& format, QWidget *parent)
-  : QGLWidget(format, parent),
-  mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
-  mVertexArrayObject(this) {
+Viewer::Viewer(const QGLFormat& format,
+               std::unique_ptr<SceneNode> rootNode,
+               QWidget *parent)
+               : QGLWidget(format, parent),
+               sceneRoot(std::move(rootNode)),
+               mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
+               mVertexArrayObject(this) {
 }
 
 Viewer::~Viewer() {
@@ -59,8 +65,8 @@ void Viewer::initializeGL() {
   double radius = w < h ?  (float)w * 0.25 : (float)h * 0.25;
 
   for(size_t i = 0; i < 40; ++i) {
-    circleData[i*3] = radius * cos(i*2*M_PI/40);
-    circleData[i*3 + 1] = radius * sin(i*2*M_PI/40);
+    circleData[i*3] = radius * std::cos(i*2*M_PI/40);
+    circleData[i*3 + 1] = radius * std::sin(i*2*M_PI/40);
     circleData[i*3 + 2] = 0.0;
   }
 
@@ -96,7 +102,6 @@ void Viewer::paintGL() {
   // Draw stuff
 
   draw_trackball_circle();
-
 }
 
 void Viewer::resizeGL(int width, int height) {

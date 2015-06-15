@@ -5,7 +5,7 @@
 
 #include <QtWidgets>
 
-AppWindow::AppWindow() {
+AppWindow::AppWindow(std::unique_ptr<SceneNode> rootNode) {
   setWindowTitle("Puppet Master");
 
   QGLFormat glFormat;
@@ -14,7 +14,7 @@ AppWindow::AppWindow() {
   glFormat.setSampleBuffers(true);
 
   QVBoxLayout *layout = new QVBoxLayout;
-  viewer = new Viewer(glFormat, this);
+  viewer = new Viewer(glFormat, std::move(rootNode), this);
   layout->addWidget(viewer);
   setCentralWidget(new QWidget);
   centralWidget()->setLayout(layout);

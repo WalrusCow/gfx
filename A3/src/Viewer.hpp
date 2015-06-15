@@ -1,19 +1,25 @@
+// William McDonald 20418145 wmcdonal
 #pragma once
+
+#include <memory>
 
 #include <QGLWidget>
 #include <QGLShaderProgram>
 #include <QMatrix4x4>
 #include <QtGlobal>
-
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+
+#include "scene.hpp"
 
 class Viewer : public QGLWidget {
 
   Q_OBJECT
 
  public:
-  Viewer(const QGLFormat& format, QWidget *parent = 0);
+  Viewer(const QGLFormat& format,
+         std::unique_ptr<SceneNode> rootNode,
+         QWidget *parent = 0);
   virtual ~Viewer();
 
   QSize minimumSizeHint() const;
@@ -44,6 +50,8 @@ class Viewer : public QGLWidget {
   void draw_trackball_circle();
 
  private:
+  std::unique_ptr<SceneNode> sceneRoot;
+
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);

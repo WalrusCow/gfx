@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,13 +12,15 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+
+#include "scene.hpp"
 #include "Viewer.hpp"
 
 class AppWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  AppWindow();
+  AppWindow(std::unique_ptr<SceneNode> rootNode);
 
  protected:
   void keyPressEvent(QKeyEvent* event) override;
