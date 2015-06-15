@@ -222,9 +222,8 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
   //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
   // So, while moving... update the top of the stack.
   int dx = event->x() - lastMouseX;
-  std::cerr<<dx<<std::endl;
   //int dy = event->y() - lastMouseY;
-  xform.rotate(M_PI / 100 * dx, 1, 0, 0);
+  xform.rotate(M_PI / 30 * dx, 1, 0, 0);
   update();
 
   if (currentMode == Viewer::Mode::POSITION) {
@@ -345,13 +344,13 @@ void Viewer::setMode(Viewer::Mode mode) {
 void Viewer::initSphereData(float* arr, double theta) {
   int tri = 0;
   // Three vertices, each with (x, y, z)
-  int triNums = 3 * 3;
+  int triSize = 3 * 3;
 
-  // Helper
+  // Helper to write a triangle determined by 3 points
   auto writeTri = [&] (const std::vector<QVector3D> pts) {
     for (int pt = 0; pt < 3; ++pt) {
       for (int i = 0; i < 3; ++i) {
-        arr[triNums * tri + 3 * pt + i] = pts[pt][i];
+        arr[triSize * tri + 3 * pt + i] = pts[pt][i];
       }
     }
     tri += 1;
@@ -359,13 +358,19 @@ void Viewer::initSphereData(float* arr, double theta) {
 
   for (double i = 0; i < 2 * M_PI; i += theta) {
     for (double j = -M_PI / 2; j < M_PI / 2; j += theta) {
-      auto x1 = std::cos(i); auto x2 = std::cos(i + theta);
-      auto y1 = std::sin(j); auto y2 = std::sin(j + theta);
-      auto z1 = std::sin(i); auto z2 = std::sin(i + theta);
-      QVector3D p1(x1, y1, z1); QVector3D p2(x2, y1, z2);
-      QVector3D p4(x1, y2, z1); QVector3D p3(x2, y2, z2);
+      auto y1 = std::sin(j);
+      auto y2 = std::sin(j + theta);
+      auto j1 = std::cos(j);
+      auto j2 = std::cos(j + theta);
+
+      // Clockwise starting from bottom right if you look out from centre
+      QVector3D p1(j1 * std::cos(i), y1, j1 * std::sin(i));
+      QVector3D p2(j1 * std::cos(i + theta), y1, j1 * std::sin(i + theta));
+      QVector3D p3(j2 * std::cos(i + theta), y2, j2 * std::sin(i + theta));
+      QVector3D p4(j2 * std::cos(i), y2, j2 * std::sin(i));
+
       writeTri({p1, p2, p4});
-      writeTri({p4, p2, p3});
+      writeTri({p2, p3, p4});
     }
   }
 }
