@@ -1,10 +1,16 @@
+// William McDonald 20418145 wmcdonal
 #pragma once
+
+#include <functional>
+#include <list>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
-#include <vector>
 #include "Viewer.hpp"
 
 class AppWindow : public QMainWindow {
@@ -13,13 +19,29 @@ class AppWindow : public QMainWindow {
  public:
   AppWindow();
 
+ protected:
+  void keyPressEvent(QKeyEvent* event) override;
+
  private:
   void createActions();
   void createMenu();
 
-  // Each menu itself
-  QMenu* m_menu_app;
+  QAction* newMenuAction(
+      const std::string& title,
+      QActionGroup* actionGroup,
+      const std::string& tip,
+      std::list<QAction*>& menuList,
+      int shortcut,
+      const std::function<void()> onTrigger);
 
-  std::vector<QAction*> m_menu_actions;
-  Viewer* m_viewer;
+  // Each menu itself
+  QMenu* appMenu;
+  std::list<QAction*> quitMenuActions;
+
+  QMenu* modeMenu;
+  std::list<QAction*> modeMenuActions;
+
+  std::unordered_map<int, QAction*> shortcutActions;
+
+  Viewer* viewer;
 };
