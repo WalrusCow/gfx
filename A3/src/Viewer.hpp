@@ -39,6 +39,13 @@ class Viewer : public QGLWidget {
   // Get the net transforms for the object with given id
   QMatrix4x4 getTransforms(int id);
 
+  // Draw a sphere with given transform and colour
+  void drawSphere(const QMatrix4x4& transform, const QColor& colour);
+
+  void pushWalkMatrix(const QMatrix4x4& matrix);
+  void popWalkMatrix();
+  QMatrix4x4 getWalkMatrix();
+
  protected:
   void initializeGL() override;
   void paintGL() override;
@@ -55,6 +62,9 @@ class Viewer : public QGLWidget {
   // For dragging
   int lastMouseX;
   int lastMouseY;
+
+  // For walking
+  std::list<QMatrix4x4> walkStack;
 
   // Ids we have currently picked
   // TODO: Picking

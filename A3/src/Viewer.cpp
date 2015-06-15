@@ -20,6 +20,7 @@ Viewer::Viewer(const QGLFormat& format,
                mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
                mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
                mVao(this) {
+  walkStack.push_back(QMatrix4x4());
 }
 
 Viewer::~Viewer() {
@@ -246,30 +247,25 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
 }
 
 QMatrix4x4 Viewer::getCameraMatrix() {
-  // Todo: Ask if we want to keep this.
   QMatrix4x4 vMatrix;
 
   QMatrix4x4 cameraTransformation;
-  QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, 20.0);
+  auto cameraPosition = QVector3D(0, 0, 2.0);
   QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
 
   vMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
-
   return mPerspMatrix * vMatrix * mTransformMatrix;
 }
 
 void Viewer::translateWorld(float x, float y, float z) {
-  // Todo: Ask if we want to keep this.
   mTransformMatrix.translate(x, y, z);
 }
 
 void Viewer::rotateWorld(float angle, float x, float y, float z) {
-  // Todo: Ask if we want to keep this.
   mTransformMatrix.rotate(angle, x, y, z);
 }
 
 void Viewer::scaleWorld(float x, float y, float z) {
-  // Todo: Ask if we want to keep this.
   mTransformMatrix.scale(x, y, z);
 }
 
@@ -287,13 +283,6 @@ void Viewer::paintGL() {
   sceneRoot->walk_gl(this);
 
   set_colour(QColor(1.0, 0.0, 0.0));
-
-  auto m = getCameraMatrix();
-  mSphereBufferObject.bind();
-  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-
-  mProgram.setUniformValue(mMvpMatrixLocation, m);
-  glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 
   draw_trackball_circle();
 }
@@ -379,4 +368,28 @@ void Viewer::initCircleData(float* buffer, double radius, double theta) {
     buffer[i * 3 + 1] = radius * std::sin(i * 2 * theta);
     buffer[i * 3 + 2] = 0.0;
   }
+}
+
+void Viewer::pushWalkMatrix(const QMatrix4x4& matrix) {
+  walkStack.push_back(walkStack.back() * matrix);
+}
+
+void Viewer::popWalkMatrix() {
+  walkStack.pop_back();
+}
+
+QMatrix4x4 Viewer::getWalkMatrix() {
+  return walkStack.back();
+}
+
+void Viewer::drawSphere(const QMatrix4x4& transform, const QColor& colour) {
+  std::cerr << "Drawing sphere" << std::endl;
+  set_colour(colour);
+
+  auto m = getCameraMatrix();
+  mSphereBufferObject.bind();
+  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+
+  mProgram.setUniformValue(mMvpMatrixLocation, m * transform);
+  glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 }

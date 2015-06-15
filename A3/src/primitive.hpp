@@ -1,13 +1,15 @@
 #pragma once
 
+class Viewer;
+
 class Primitive {
  public:
   virtual ~Primitive();
-  virtual void walk_gl(bool picking) const = 0;
+  virtual void walk_gl(Viewer* viewer, bool picking = false) const = 0;
 };
 
 class Sphere : public Primitive {
  public:
   virtual ~Sphere();
-  virtual void walk_gl(bool picking) const;
+  void walk_gl(Viewer* viewer, bool picking = false) const override;
 };

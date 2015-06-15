@@ -15,7 +15,7 @@ class SceneNode {
   SceneNode(const std::string& name);
   virtual ~SceneNode();
 
-  virtual void walk_gl(const Viewer* viewer, bool picking = false) const;
+  virtual void walk_gl(Viewer* viewer, bool picking = false) const;
 
   const QMatrix4x4& get_transform() const { return m_trans; }
   const QMatrix4x4& get_inverse() const { return m_invtrans; }
@@ -71,7 +71,7 @@ class JointNode : public SceneNode {
   JointNode(const std::string& name);
   virtual ~JointNode();
 
-  void walk_gl(const Viewer* viewer, bool picking = false) const override;
+  void walk_gl(Viewer* viewer, bool picking = false) const override;
 
   virtual bool is_joint() const;
 
@@ -91,7 +91,7 @@ class GeometryNode : public SceneNode {
   GeometryNode(const std::string& name, Primitive* primitive);
   virtual ~GeometryNode();
 
-  void walk_gl(const Viewer* viewer, bool picking = false) const override;
+  void walk_gl(Viewer* viewer, bool picking = false) const override;
 
   const Material* get_material() const;
   Material* get_material();

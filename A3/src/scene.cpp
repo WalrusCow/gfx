@@ -1,12 +1,19 @@
 #include "scene.hpp"
 #include <iostream>
 
+#include "Viewer.hpp"
+
 SceneNode::SceneNode(const std::string& name) : m_name(name) {}
 
 SceneNode::~SceneNode() {}
 
-void SceneNode::walk_gl(const Viewer* viewer, bool picking) const {
-  // Fill me in
+void SceneNode::walk_gl(Viewer* viewer, bool picking) const {
+  std::cerr << "Walk gl " << m_name << std::endl;
+  viewer->pushWalkMatrix(m_trans);
+  for (auto& child : children) {
+    child->walk_gl(viewer, picking);
+  }
+  viewer->popWalkMatrix();
 }
 
 void SceneNode::rotate(char axis, double angle) {
@@ -45,8 +52,8 @@ JointNode::JointNode(const std::string& name) : SceneNode(name) {
 JointNode::~JointNode() {
 }
 
-void JointNode::walk_gl(const Viewer* viewer, bool picking) const {
-  // Fill me in
+void JointNode::walk_gl(Viewer* viewer, bool picking) const {
+  SceneNode::walk_gl(viewer, picking);
 }
 
 bool JointNode::is_joint() const {
@@ -72,6 +79,12 @@ GeometryNode::GeometryNode(const std::string& name, Primitive* primitive)
 GeometryNode::~GeometryNode() {
 }
 
-void GeometryNode::walk_gl(const Viewer* viewer, bool picking) const {
-  // Fill me in
+void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
+  std::cerr << "Walk gl geom " << m_name << std::endl;
+  viewer->pushWalkMatrix(m_trans);
+  m_primitive->walk_gl(viewer, picking);
+  for (auto& child : children) {
+    child->walk_gl(viewer, picking);
+  }
+  viewer->popWalkMatrix();
 }
