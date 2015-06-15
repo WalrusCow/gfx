@@ -36,10 +36,13 @@
 // -- University of Waterloo Computer Graphics Lab 2005
 
 #include "scene_lua.hpp"
-#include <iostream>
+
 #include <cctype>
 #include <cstring>
 #include <cstdio>
+#include <iostream>
+#include <QColor>
+#include <QVector3D>
 #include "lua488.hpp"
 
 // Uncomment the following line to enable debugging messages
@@ -172,8 +175,8 @@ int gr_material_cmd(lua_State* L) {
   }
   double shininess = luaL_checknumber(L, 3);
 
-  data->material = new PhongMaterial(Colour(kd[0], kd[1], kd[2]),
-                                     Colour(ks[0], ks[1], ks[2]),
+  data->material = new PhongMaterial(QColor(kd[0], kd[1], kd[2]),
+                                     QColor(ks[0], ks[1], ks[2]),
                                      shininess);
 
   luaL_newmetatable(L, "gr.material");
@@ -240,7 +243,7 @@ int gr_node_scale_cmd(lua_State* L) {
     values[i] = luaL_checknumber(L, i + 2);
   }
 
-  self->scale(Vector3D(values[0], values[1], values[2]));
+  self->scale(QVector3D(values[0], values[1], values[2]));
 
   return 0;
 }
@@ -261,7 +264,7 @@ int gr_node_translate_cmd(lua_State* L) {
     values[i] = luaL_checknumber(L, i + 2);
   }
 
-  self->translate(Vector3D(values[0], values[1], values[2]));
+  self->translate(QVector3D(values[0], values[1], values[2]));
 
   return 0;
 }

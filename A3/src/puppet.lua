@@ -1,6 +1,6 @@
 --
 -- CS488 -- Introduction to Computer Graphics
--- 
+--
 -- a3mark.lua
 --
 -- A very simple scene creating a trivial puppet.  The TAs will be

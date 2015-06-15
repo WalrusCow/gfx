@@ -139,9 +139,9 @@ void Viewer::translateWorld(float x, float y, float z) {
   mTransformMatrix.translate(x, y, z);
 }
 
-void Viewer::rotateWorld(float x, float y, float z) {
+void Viewer::rotateWorld(float angle, float x, float y, float z) {
   // Todo: Ask if we want to keep this.
-  mTransformMatrix.rotate(x, y, z);
+  mTransformMatrix.rotate(angle, x, y, z);
 }
 
 void Viewer::scaleWorld(float x, float y, float z) {

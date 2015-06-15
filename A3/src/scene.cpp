@@ -14,13 +14,13 @@ void SceneNode::rotate(char axis, double angle) {
   // Fill me in
 }
 
-void SceneNode::scale(const Vector3D& amount) {
-  std::cerr << "Stub: Scale " << m_name << " by " << amount << std::endl;
+void SceneNode::scale(const QVector3D& amount) {
+  //std::cerr << "Stub: Scale " << m_name << " by " << amount << std::endl;
   // Fill me in
 }
 
-void SceneNode::translate(const Vector3D& amount) {
-  std::cerr << "Stub: Translate " << m_name << " by " << amount << std::endl;
+void SceneNode::translate(const QVector3D& amount) {
+  //std::cerr << "Stub: Translate " << m_name << " by " << amount << std::endl;
   // Fill me in
 }
 

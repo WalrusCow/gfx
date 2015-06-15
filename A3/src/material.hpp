@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algebra.hpp"
+#include <QColor>
 
 class Material {
  public:
@@ -13,14 +13,14 @@ class Material {
 
 class PhongMaterial : public Material {
  public:
-  PhongMaterial(const Colour& kd, const Colour& ks, double shininess);
+  PhongMaterial(const QColor& kd, const QColor& ks, double shininess);
   virtual ~PhongMaterial();
 
   virtual void apply_gl() const;
 
  private:
-  Colour m_kd;
-  Colour m_ks;
+  QColor m_kd;
+  QColor m_ks;
 
   double m_shininess;
 };

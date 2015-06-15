@@ -1,7 +1,5 @@
 #pragma once
 
-#include "algebra.hpp"
-
 class Primitive {
  public:
   virtual ~Primitive();
