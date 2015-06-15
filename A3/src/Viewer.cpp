@@ -19,7 +19,7 @@ Viewer::Viewer(const QGLFormat& format,
                sceneRoot(std::move(sceneRoot)),
                mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
                mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
-               mVertexArrayObject(this) {
+               mVao(this) {
 }
 
 Viewer::~Viewer() {
@@ -60,8 +60,8 @@ void Viewer::initializeGL() {
     return;
   }
 
-  mVertexArrayObject.create();
-  mVertexArrayObject.bind();
+  mVao.create();
+  mVao.bind();
 
   float circleData[120];
   auto w = width();
@@ -90,9 +90,7 @@ void Viewer::initializeGL() {
   mSphereBufferObject.allocate(sphereData, sizeof(sphereData));
 
   mProgram.bind();
-
   mProgram.enableAttributeArray("vert");
-  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
 
   mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
   mColorLocation = mProgram.uniformLocation("frag_color");
@@ -280,6 +278,8 @@ void Viewer::paintGL() {
 
   auto m = getCameraMatrix();
   mSphereBufferObject.bind();
+  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+
   mProgram.setUniformValue(mMvpMatrixLocation, m);
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 
@@ -306,6 +306,7 @@ void Viewer::draw_trackball_circle() {
 
   // Bind buffer object
   mCircleBufferObject.bind();
+  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
   mProgram.setUniformValue(mMvpMatrixLocation, orthoMatrix * transformMatrix);
 
   // Draw buffer

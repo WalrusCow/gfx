@@ -102,7 +102,7 @@ class Viewer : public QGLWidget {
 
   QOpenGLBuffer mCircleBufferObject;
   QOpenGLBuffer mSphereBufferObject;
-  QOpenGLVertexArrayObject mVertexArrayObject;
+  QOpenGLVertexArrayObject mVao;
 
   int mMvpMatrixLocation;
   int mColorLocation;
