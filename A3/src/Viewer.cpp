@@ -124,29 +124,41 @@ void Viewer::doOp(std::set<int> ids, QMatrix4x4 matrix) {
   opStack.emplace_back(std::move(ids), std::move(matrix));
 }
 
-void Viewer::redoOp() {
+bool Viewer::redoOp() {
   if (opStackPosition + 1 == (int) opStack.size()) {
-    // TODO: Cannot
+    // Cannot redo past the end
+    return false;
   }
+
   opStackPosition += 1;
+
+  // Redo in map
+  auto& entry = opStack[opStackPosition];
+  auto m = entry.matrix;
+  for (int i : entry.ids) {
+    opMap[i] = opMap[i] * m;
+  }
+  return true;
 }
 
 
-void Viewer::undoOp() {
-  // Undo
+bool Viewer::undoOp() {
   if (opStackPosition < 0) {
-    // TODO: Cannot. Throw error?
+    // Cannot undo past the end
+    return false;
   }
 
-  auto& entry = opStack[opStackPosition];
   // Undo in map
+  auto& entry = opStack[opStackPosition];
   auto m = entry.matrix.inverted();
   for (int i : entry.ids) {
     opMap[i] = opMap[i] * m;
   }
 
   // Don't actually remove from the stack - just decrease counter
+  // That way we can increase counter to redo
   opStackPosition -= 1;
+  return true;
 }
 
 QMatrix4x4 Viewer::getTransforms(int id) {

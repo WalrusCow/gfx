@@ -29,6 +29,47 @@ class Viewer : public QGLWidget {
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
 
+  enum class Mode { POSITION, JOINTS };
+  void setMode(Mode mode);
+
+  bool redoOp();
+  // Pop a matrix for when walking (or can we use normal stack?)
+  bool undoOp();
+
+  // Get the net transforms for the object with given id
+  QMatrix4x4 getTransforms(int id);
+
+ protected:
+  void initializeGL() override;
+  void paintGL() override;
+  void resizeGL(int width, int height) override;
+  void mousePressEvent (QMouseEvent* event) override;
+  void mouseReleaseEvent (QMouseEvent* event) override;
+  void mouseMoveEvent (QMouseEvent* event) override;
+
+ private:
+  // TODO: Names
+  const double theta = M_PI / 40;
+  const int numTriangles = 2 * (2 * M_PI)/theta * M_PI/theta;
+
+  // For dragging
+  int lastMouseX;
+  int lastMouseY;
+
+  // Ids we have currently picked
+  // TODO: Picking
+  std::set<int> pickedIds;
+  int find_pick_id(int x, int y){(void)x;(void)y;return 0;}
+
+  // What scene we are drawing
+  std::unique_ptr<SceneNode> sceneRoot;
+
+  // What mode are we in for operations?
+  Mode currentMode = Mode::POSITION;
+
+  // Add an operation affecting some set of ids to the undo/redo stack
+  void doOp(std::set<int> ids, QMatrix4x4 matrix);
+
   struct OpStackEntry {
     OpStackEntry(std::set<int> ids, QMatrix4x4 matrix)
         : ids(std::move(ids)), matrix(std::move(matrix)) {}
@@ -37,77 +78,40 @@ class Viewer : public QGLWidget {
     std::set<int> ids;
     QMatrix4x4 matrix;
   };
-
-  enum class Mode { POSITION, JOINTS };
-  Mode currentMode = Mode::POSITION;
-  void setMode(Mode mode);
-  int lastMouseX;
-  int lastMouseY;
-
-  // Ids we have currently picked
-  std::set<int> pickedIds;
-
-  // TODO
-  int find_pick_id(int x, int y){(void)x;(void)y;return 0;}
-
-  // Push a matrix for when walking (or can we use normal stack?)
-  // Let's see... Each node will simply push, do, pop. So that should be ok..
-  void doOp(std::set<int> ids, QMatrix4x4 matrix);
-  void redoOp();
-  // Pop a matrix for when walking (or can we use normal stack?)
-  void undoOp();
-
-  // Also we want a stack of the list (could use a vector here)
-  // TODO: Make private
   std::vector<OpStackEntry> opStack;
-  // Map ids to matrices
-  std::unordered_map<int, QMatrix4x4> opMap;
   // Where in the stack we are
   int opStackPosition = -1;
+  // Track each object's net transformations
+  std::unordered_map<int, QMatrix4x4> opMap;
 
-  QMatrix4x4 getTransforms(int id);
-
-  // TODO: This must be w.r.t. world coordinates
+  // Puppet position and rotation matrices (no need for undo/redo)
   QMatrix4x4 puppetPosition;
-  // TODO: How to handle this properly???
-  // Undo then redo?
   QMatrix4x4 puppetRotation;
 
- protected:
-  virtual void initializeGL();
-  virtual void paintGL();
-  virtual void resizeGL(int width, int height);
-  virtual void mousePressEvent ( QMouseEvent * event );
-  virtual void mouseReleaseEvent ( QMouseEvent * event );
-  virtual void mouseMoveEvent ( QMouseEvent * event );
-
-  // Draw a circle for the trackball, with OpenGL commands.
-  // Assumes the context for the viewer is active.
+  // Draw circle for trackball
   void draw_trackball_circle();
+  // Set colour for OpenGL drawing
+  void set_colour(const QColor& col);
 
- private:
-  const double theta = M_PI / 40;
-  const int numTriangles = 2 * (2 * M_PI)/theta * M_PI/theta;
+  // For camera transform
+  QMatrix4x4 mPerspMatrix;
+  QMatrix4x4 mTransformMatrix;
 
-  std::unique_ptr<SceneNode> sceneRoot;
-
+  // Functions for getting/modifying camera
   QMatrix4x4 getCameraMatrix();
   void translateWorld(float x, float y, float z);
   void rotateWorld(float angle, float x, float y, float z);
   void scaleWorld(float x, float y, float z);
-  void set_colour(const QColor& col);
 
-  void initSphereData(float* vertexBuffer, double theta);
-  void initCircleData(float* buffer, double radius, double theta);
-
+  // OpenGL required members
   QOpenGLBuffer mCircleBufferObject;
   QOpenGLBuffer mSphereBufferObject;
   QOpenGLVertexArrayObject mVao;
-
+  QGLShaderProgram mProgram;
   int mMvpMatrixLocation;
   int mColorLocation;
 
-  QMatrix4x4 mPerspMatrix;
-  QMatrix4x4 mTransformMatrix;
-  QGLShaderProgram mProgram;
+  // Initialize openGL buffers
+  void initSphereData(float* vertexBuffer, double theta);
+  void initCircleData(float* buffer, double radius, double theta);
 };
