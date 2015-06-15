@@ -73,9 +73,6 @@ class Viewer : public QGLWidget {
   // Undo then redo?
   QMatrix4x4 puppetRotation;
 
-  // TODO: remove
-  QMatrix4x4 xform;
-
  protected:
   virtual void initializeGL();
   virtual void paintGL();
@@ -90,6 +87,7 @@ class Viewer : public QGLWidget {
 
  private:
   const double theta = M_PI / 40;
+  const int numTriangles = 2 * (2 * M_PI)/theta * M_PI/theta;
 
   std::unique_ptr<SceneNode> sceneRoot;
 
@@ -98,7 +96,9 @@ class Viewer : public QGLWidget {
   void rotateWorld(float angle, float x, float y, float z);
   void scaleWorld(float x, float y, float z);
   void set_colour(const QColor& col);
-  void initSphereData(float* arr, double theta);
+
+  void initSphereData(float* vertexBuffer, double theta);
+  void initCircleData(float* buffer, double radius, double theta);
 
   QOpenGLBuffer mCircleBufferObject;
   QOpenGLBuffer mSphereBufferObject;

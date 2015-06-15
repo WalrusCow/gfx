@@ -20,7 +20,6 @@ Viewer::Viewer(const QGLFormat& format,
                mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
                mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
                mVertexArrayObject(this) {
-                 xform.translate(0,0,16);
 }
 
 Viewer::~Viewer() {
@@ -43,8 +42,8 @@ void Viewer::initializeGL() {
   }
 
   glShadeModel(GL_SMOOTH);
-  glClearColor( 0.4, 0.4, 0.4, 0.0 );
-  //glEnable(GL_DEPTH_TEST);
+  glClearColor(0.4, 0.4, 0.4, 0.0);
+  glEnable(GL_DEPTH_TEST);
 
   if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
@@ -56,33 +55,19 @@ void Viewer::initializeGL() {
     return;
   }
 
-  if ( !mProgram.link() ) {
+  if (!mProgram.link()) {
     std::cerr << "Cannot link shaders." << std::endl;
     return;
   }
 
-  float circleData[120];
-
-  auto w = width();
-  auto h = height();
-  double radius = w < h ?  (float)w * 0.25 : (float)h * 0.25;
-
-  for(size_t i = 0; i < 40; ++i) {
-    circleData[i*3] = radius * std::cos(i*2*M_PI/40);
-    circleData[i*3 + 1] = radius * std::sin(i*2*M_PI/40);
-    circleData[i*3 + 2] = 0.0;
-  }
-
-  //double theta = M_PI / 10;
-  // (3 * pi) / theta
-  // Note that we go around circumference (2pi) and then half vertical (pi)
-  int numTri =  2* 2*M_PI/theta * M_PI/theta;
-  // Nine floats per triangle
-  float sphereData[numTri*9];
-  initSphereData(sphereData, theta);
-
   mVertexArrayObject.create();
   mVertexArrayObject.bind();
+
+  float circleData[120];
+  auto w = width();
+  auto h = height();
+  double radius = w < h ? (float)w * 0.25 : (float)h * 0.25;
+  initCircleData(circleData, radius, M_PI / 40);
 
   mCircleBufferObject.create();
   mCircleBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -90,8 +75,12 @@ void Viewer::initializeGL() {
     std::cerr << "Could not bind circle vertex buffer." << std::endl;
     return;
   }
+  mCircleBufferObject.allocate(circleData, sizeof(circleData));
 
-  mSphereBufferObject.allocate(circleData, sizeof(circleData));
+  // Nine floats per triangle
+  float sphereData[numTriangles * 9];
+  initSphereData(sphereData, theta);
+
   mSphereBufferObject.create();
   mSphereBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
   if (!mSphereBufferObject.bind()) {
@@ -221,10 +210,9 @@ void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
 void Viewer::mouseMoveEvent (QMouseEvent* event) {
   //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
   // So, while moving... update the top of the stack.
-  int dx = event->x() - lastMouseX;
-  //int dy = event->y() - lastMouseY;
-  xform.rotate(M_PI / 30 * dx, 1, 0, 0);
-  update();
+  //int dx = event->x() - lastMouseX;
+  // Y coordinates on screen are upside down
+  //int dy = lastMouseY - event->y();
 
   if (currentMode == Viewer::Mode::POSITION) {
     // Position mode
@@ -291,21 +279,16 @@ void Viewer::paintGL() {
   set_colour(QColor(1.0, 0.0, 0.0));
 
   auto m = getCameraMatrix();
-  //QMatrix4x4 xform;
-  //xform.translate(0, 0, 16);
   mSphereBufferObject.bind();
+  mProgram.setUniformValue(mMvpMatrixLocation, m);
+  glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 
-  mProgram.setUniformValue(mMvpMatrixLocation, m * xform);
-
-  int numTri =  2* 2*M_PI/theta * M_PI/theta;
-  glDrawArrays(GL_TRIANGLES, 0, numTri * 9);
-
-  //draw_trackball_circle();
+  draw_trackball_circle();
 }
 
 void Viewer::draw_trackball_circle() {
-  int current_width = width();
-  int current_height = height();
+  auto w = width();
+  auto h = height();
 
   // Set up for orthogonal drawing to draw a circle on screen.
   // You'll want to make the rest of the function conditional on
@@ -315,12 +298,11 @@ void Viewer::draw_trackball_circle() {
 
   // Set orthographic Matrix
   QMatrix4x4 orthoMatrix;
-  orthoMatrix.ortho(0.0, (float)current_width,
-                    0.0, (float)current_height, -0.1, 0.1);
+  orthoMatrix.ortho(0.0, (float)w, 0.0, (float)h, -0.1, 0.1);
 
   // Translate the view to the middle
   QMatrix4x4 transformMatrix;
-  transformMatrix.translate(width()/2.0, height()/2.0, 0.0);
+  transformMatrix.translate(w/2.0, h/2.0, 0.0);
 
   // Bind buffer object
   mCircleBufferObject.bind();
@@ -341,22 +323,24 @@ void Viewer::setMode(Viewer::Mode mode) {
   currentMode = mode;
 }
 
-void Viewer::initSphereData(float* arr, double theta) {
-  int tri = 0;
-  // Three vertices, each with (x, y, z)
-  int triSize = 3 * 3;
+// Use quadrilaterals to model a sphere
+void Viewer::initSphereData(float* vertexBuffer, double theta) {
+  int tri = 0; // How many triangles we drew
+  int triSize = 3 * 3; // Three vertices, each with (x, y, z)
 
   // Helper to write a triangle determined by 3 points
   auto writeTri = [&] (const std::vector<QVector3D> pts) {
     for (int pt = 0; pt < 3; ++pt) {
       for (int i = 0; i < 3; ++i) {
-        arr[triSize * tri + 3 * pt + i] = pts[pt][i];
+        vertexBuffer[triSize * tri + 3 * pt + i] = pts[pt][i];
       }
     }
     tri += 1;
   };
 
+  // This loop goes around the circumference (standing on XZ plane)
   for (double i = 0; i < 2 * M_PI; i += theta) {
+    // This loop goes from the bottom to the top
     for (double j = -M_PI / 2; j < M_PI / 2; j += theta) {
       auto y1 = std::sin(j);
       auto y2 = std::sin(j + theta);
@@ -369,8 +353,17 @@ void Viewer::initSphereData(float* arr, double theta) {
       QVector3D p3(j2 * std::cos(i + theta), y2, j2 * std::sin(i + theta));
       QVector3D p4(j2 * std::cos(i), y2, j2 * std::sin(i));
 
+      // We only have triangles, so use 2 for the quadrilateral
       writeTri({p1, p2, p4});
       writeTri({p2, p3, p4});
     }
+  }
+}
+
+void Viewer::initCircleData(float* buffer, double radius, double theta) {
+  for(size_t i = 0; i < 40; ++i) {
+    buffer[i * 3] = radius * std::cos(i * 2 * theta);
+    buffer[i * 3 + 1] = radius * std::sin(i * 2 * theta);
+    buffer[i * 3 + 2] = 0.0;
   }
 }
