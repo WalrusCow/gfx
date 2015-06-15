@@ -54,10 +54,11 @@ void Viewer::initializeGL() {
 
   float circleData[120];
 
-  double radius = width() < height() ?
-    (float)width() * 0.25 : (float)height() * 0.25;
+  auto w = width();
+  auto h = height();
+  double radius = w < h ?  (float)w * 0.25 : (float)h * 0.25;
 
-  for(size_t i=0; i<40; ++i) {
+  for(size_t i = 0; i < 40; ++i) {
     circleData[i*3] = radius * cos(i*2*M_PI/40);
     circleData[i*3 + 1] = radius * sin(i*2*M_PI/40);
     circleData[i*3 + 2] = 0.0;
