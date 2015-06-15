@@ -2,6 +2,9 @@
 #pragma once
 
 #include <memory>
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 #include <QGLWidget>
 #include <QGLShaderProgram>
@@ -14,6 +17,10 @@
 
 class Viewer : public QGLWidget {
 
+  // Because we hate each other
+  const int PUPPET_TRANSLATE_ID = -1;
+  const int PUPPET_ROTATE_ID = -2;
+
   Q_OBJECT
 
  public:
@@ -25,24 +32,56 @@ class Viewer : public QGLWidget {
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
 
-  // If you want to render a new frame, call do not call paintGL(),
-  // instead, call update() to ensure that the view gets a paint
-  // event.
+  struct OpStackEntry {
+    OpStackEntry(std::set<int> ids, QMatrix4x4 matrix)
+        : ids(std::move(ids)), matrix(std::move(matrix)) {}
+    OpStackEntry(){}
+
+    std::set<int> ids;
+    QMatrix4x4 matrix;
+  };
+
+  enum class Mode { POSITION, JOINTS };
+  Mode currentMode = Mode::POSITION;
+  void setMode(Mode mode);
+  int lastMouseX;
+  int lastMouseY;
+
+  // Ids we have currently picked
+  std::set<int> pickedIds;
+
+  // TODO
+  int find_pick_id(int x, int y){return 0;}
+
+  // Push a matrix for when walking (or can we use normal stack?)
+  // Let's see... Each node will simply push, do, pop. So that should be ok..
+  void doOp(std::set<int> ids, QMatrix4x4 matrix);
+  void redoOp();
+  // Pop a matrix for when walking (or can we use normal stack?)
+  void undoOp();
+
+  // Also we want a stack of the list (could use a vector here)
+  // TODO: Make private
+  std::vector<OpStackEntry> opStack;
+  // Map ids to matrices
+  std::unordered_map<int, QMatrix4x4> opMap;
+  // Where in the stack we are
+  int opStackPosition = -1;
+
+  QMatrix4x4 getTransforms(int id);
+
+  // TODO: This must be w.r.t. world coordinates
+  QMatrix4x4 puppetPosition;
+  // TODO: How to handle this properly???
+  // Undo then redo?
+  QMatrix4x4 puppetRotation;
 
  protected:
-  // Events we implement
-
-  // Called when GL is first initialized
   virtual void initializeGL();
-  // Called when our window needs to be redrawn
   virtual void paintGL();
-  // Called when the window is resized (formerly on_configure_event)
   virtual void resizeGL(int width, int height);
-  // Called when a mouse button is pressed
   virtual void mousePressEvent ( QMouseEvent * event );
-  // Called when a mouse button is released
   virtual void mouseReleaseEvent ( QMouseEvent * event );
-  // Called when the mouse moves
   virtual void mouseMoveEvent ( QMouseEvent * event );
 
   // Draw a circle for the trackball, with OpenGL commands.

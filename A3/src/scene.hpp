@@ -31,6 +31,7 @@ class SceneNode {
   }
 
   void add_child(SceneNode* child) {
+    child->setParent(this);
     children.push_back(std::unique_ptr<SceneNode>(child));
   }
 
@@ -46,6 +47,8 @@ class SceneNode {
   void scale(const QVector3D& amount);
   void translate(const QVector3D& amount);
 
+  void setParent(SceneNode* parent) { this->parent = parent; }
+
   // Returns true if and only if this node is a JointNode
   virtual bool is_joint() const;
 
@@ -53,6 +56,7 @@ class SceneNode {
   // Useful for picking
   int m_id;
   std::string m_name;
+  SceneNode* parent = nullptr;
 
   // Transformations
   QMatrix4x4 m_trans;

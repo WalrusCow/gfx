@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 
+#include <QtGlobal>
 #include <QtWidgets>
 #include <QtOpenGL>
 
@@ -116,16 +117,124 @@ void Viewer::resizeGL(int width, int height) {
   glViewport(0, 0, width, height);
 }
 
+void Viewer::doOp(std::set<int> ids, QMatrix4x4 matrix) {
+  opStackPosition += 1;
+
+  if (opStackPosition + 1 < opStack.size()) {
+    // Clear next entries
+    opStack.resize(opStackPosition + 1);
+  }
+
+  // Modify the op map to include latest change
+  for (int id : ids) {
+    opMap[id] = opMap[id] * matrix;
+  }
+
+  // Push to end
+  opStack.emplace_back(std::move(ids), std::move(matrix));
+}
+
+void Viewer::redoOp() {
+  if (opStackPosition + 1 == opStack.size()) {
+    // TODO: Cannot
+  }
+  opStackPosition += 1;
+}
+
+
+void Viewer::undoOp() {
+  // Undo
+  if (opStackPosition < 0) {
+    // TODO: Cannot. Throw error?
+  }
+
+  auto& entry = opStack[opStackPosition];
+  // Undo in map
+  auto m = entry.matrix.inverted();
+  for (int i : entry.ids) {
+    opMap[i] = opMap[i] * m;
+  }
+
+  // Don't actually remove from the stack - just decrease counter
+  opStackPosition -= 1;
+}
+
+QMatrix4x4 Viewer::getTransforms(int id) {
+  // Retrieve all transforms for the given id
+  return opMap[id];
+}
+
 void Viewer::mousePressEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: button " << event->button() << " pressed\n";
+  //std::cerr << "Stub: button " << event->button() << " pressed\n";
+  // Push new matrix on to stack - but only if no mouse buttons are held down
+  // at the moment (?)
+  auto buttonsDown = qApp->mouseButtons();
+  std::cerr << buttonsDown << std::endl;
+
+  // If there are additional buttons held other than the one that was down
+  if ((buttonsDown & (~ event->button())) != Qt::NoButton) {
+    // .. Then we are pressing a second button
+  }
+  else {
+    // New blank transform matrix on top of stack
+    doOp(pickedIds, QMatrix4x4());
+  }
+
+  // TODO: get time (for click?)
+  lastMouseX = event->x();
+  lastMouseY = event->y();
 }
 
 void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: button " << event->button() << " released\n";
+  if (currentMode == Viewer::Mode::POSITION) {
+    // Nothing to do
+    return;
+  }
+
+  if (qApp->mouseButtons() != Qt::NoButton) {
+    // Still dragging around.. do nothing
+    return;
+  }
+
+  // We are in joints mode: we can pick parts
+  if (event->x() == lastMouseX && event->y() == lastMouseY) {
+    // We were probably just a click
+    auto id = find_pick_id(event->x(), event->y());
+    if (pickedIds.find(id) != pickedIds.end()) {
+      // Not in the set: Add to set
+      pickedIds.insert(id);
+    }
+  }
 }
 
-void Viewer::mouseMoveEvent ( QMouseEvent * event ) {
-  std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
+void Viewer::mouseMoveEvent (QMouseEvent* event) {
+  //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
+  // So, while moving... update the top of the stack.
+  int dx = event->x() - lastMouseX;
+  int dy = event->y() - lastMouseY;
+
+  if (currentMode == Viewer::Mode::POSITION) {
+    // Position mode
+    // TODO: How to dooooo...
+    // We also need to be able to undo thissssss...
+    // fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuck...
+    QMatrix4x4 op;// = getPuppetOp();
+    opMap[PUPPET_TRANSLATE_ID] *= op;
+  }
+  else if (pickedIds.size() > 0) {
+    // Joints mode
+    // Only do anything if we have picked at least one item
+
+    // Also we need to update the map and shit
+    QMatrix4x4 op;//= doGradualOp();
+    for (int id : pickedIds) {
+      opMap[id] *= op;
+    }
+
+  }
+
+  lastMouseX = event->x();
+  lastMouseY = event->y();
 }
 
 QMatrix4x4 Viewer::getCameraMatrix() {
@@ -185,4 +294,14 @@ void Viewer::draw_trackball_circle() {
 
   // Draw buffer
   glDrawArrays(GL_LINE_LOOP, 0, 40);
+}
+
+void Viewer::setMode(Viewer::Mode mode) {
+  if (mode == currentMode) {
+    return;
+  }
+  // lol, clear
+  // TODO: How to handle dragging events? That is unclear
+  pickedIds.clear();
+  currentMode = mode;
 }
