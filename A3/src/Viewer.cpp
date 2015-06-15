@@ -12,10 +12,10 @@
 #endif
 
 Viewer::Viewer(const QGLFormat& format,
-               std::unique_ptr<SceneNode> rootNode,
+               std::unique_ptr<SceneNode> sceneRoot,
                QWidget *parent)
                : QGLWidget(format, parent),
-               sceneRoot(std::move(rootNode)),
+               sceneRoot(std::move(sceneRoot)),
                mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
                mVertexArrayObject(this) {
 }
@@ -99,7 +99,8 @@ void Viewer::paintGL() {
 
   // Set up lighting
 
-  // Draw stuff
+  // Draw scene recursively
+  sceneRoot->walk_gl(this);
 
   draw_trackball_circle();
 }

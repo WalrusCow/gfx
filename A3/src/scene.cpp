@@ -5,7 +5,7 @@ SceneNode::SceneNode(const std::string& name) : m_name(name) {}
 
 SceneNode::~SceneNode() {}
 
-void SceneNode::walk_gl(bool picking) const {
+void SceneNode::walk_gl(const Viewer* viewer, bool picking) const {
   // Fill me in
 }
 
@@ -34,7 +34,7 @@ JointNode::JointNode(const std::string& name) : SceneNode(name) {
 JointNode::~JointNode() {
 }
 
-void JointNode::walk_gl(bool picking) const {
+void JointNode::walk_gl(const Viewer* viewer, bool picking) const {
   // Fill me in
 }
 
@@ -61,6 +61,6 @@ GeometryNode::GeometryNode(const std::string& name, Primitive* primitive)
 GeometryNode::~GeometryNode() {
 }
 
-void GeometryNode::walk_gl(bool picking) const {
+void GeometryNode::walk_gl(const Viewer* viewer, bool picking) const {
   // Fill me in
 }

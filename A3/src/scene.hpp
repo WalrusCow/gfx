@@ -1,18 +1,21 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <QVector3D>
 #include <QMatrix4x4>
 
 #include "primitive.hpp"
 #include "material.hpp"
 
+class Viewer;
+
 class SceneNode {
  public:
   SceneNode(const std::string& name);
   virtual ~SceneNode();
 
-  virtual void walk_gl(bool picking = false) const;
+  virtual void walk_gl(const Viewer* viewer, bool picking = false) const;
 
   const QMatrix4x4& get_transform() const { return m_trans; }
   const QMatrix4x4& get_inverse() const { return m_invtrans; }
@@ -28,11 +31,13 @@ class SceneNode {
   }
 
   void add_child(SceneNode* child) {
-    m_children.push_back(child);
+    children.push_back(std::unique_ptr<SceneNode>(child));
   }
 
   void remove_child(SceneNode* child) {
-    m_children.remove(child);
+    children.remove_if([child] (const std::unique_ptr<SceneNode>& elem) {
+      return elem.get() == child;
+    });
   }
 
   // Callbacks to be implemented.
@@ -54,8 +59,7 @@ class SceneNode {
   QMatrix4x4 m_invtrans;
 
   // Hierarchy
-  typedef std::list<SceneNode*> ChildList;
-  ChildList m_children;
+  std::list<std::unique_ptr<SceneNode>> children;
 };
 
 class JointNode : public SceneNode {
@@ -63,7 +67,7 @@ class JointNode : public SceneNode {
   JointNode(const std::string& name);
   virtual ~JointNode();
 
-  virtual void walk_gl(bool bicking = false) const;
+  void walk_gl(const Viewer* viewer, bool picking = false) const override;
 
   virtual bool is_joint() const;
 
@@ -83,7 +87,7 @@ class GeometryNode : public SceneNode {
   GeometryNode(const std::string& name, Primitive* primitive);
   virtual ~GeometryNode();
 
-  virtual void walk_gl(bool picking = false) const;
+  void walk_gl(const Viewer* viewer, bool picking = false) const override;
 
   const Material* get_material() const;
   Material* get_material();

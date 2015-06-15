@@ -18,7 +18,7 @@ class Viewer : public QGLWidget {
 
  public:
   Viewer(const QGLFormat& format,
-         std::unique_ptr<SceneNode> rootNode,
+         std::unique_ptr<SceneNode> sceneRoot,
          QWidget *parent = 0);
   virtual ~Viewer();
 
