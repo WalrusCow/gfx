@@ -10,18 +10,29 @@ void SceneNode::walk_gl(const Viewer* viewer, bool picking) const {
 }
 
 void SceneNode::rotate(char axis, double angle) {
-  std::cerr << "Stub: Rotate " << m_name << " around " << axis << " by " << angle << std::endl;
-  // Fill me in
+  QMatrix4x4 xform;
+  if (axis == 'x') {
+    xform.rotate(angle, 1, 0, 0);
+  }
+  else if (axis == 'y') {
+    xform.rotate(angle, 0, 1, 0);
+  }
+  else if (axis == 'z') {
+    xform.rotate(angle, 0, 0, 1);
+  }
+  set_transform(m_trans * xform);
 }
 
 void SceneNode::scale(const QVector3D& amount) {
-  //std::cerr << "Stub: Scale " << m_name << " by " << amount << std::endl;
-  // Fill me in
+  QMatrix4x4 xform;
+  xform.scale(amount);
+  set_transform(m_trans * xform);
 }
 
 void SceneNode::translate(const QVector3D& amount) {
-  //std::cerr << "Stub: Translate " << m_name << " by " << amount << std::endl;
-  // Fill me in
+  QMatrix4x4 xform;
+  xform.translate(amount);
+  set_transform(m_trans * xform);
 }
 
 bool SceneNode::is_joint() const {
