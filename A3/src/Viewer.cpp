@@ -18,7 +18,9 @@ Viewer::Viewer(const QGLFormat& format,
                : QGLWidget(format, parent),
                sceneRoot(std::move(sceneRoot)),
                mCircleBufferObject(QOpenGLBuffer::VertexBuffer),
+               mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
                mVertexArrayObject(this) {
+                 xform.translate(0,0,16);
 }
 
 Viewer::~Viewer() {
@@ -42,7 +44,7 @@ void Viewer::initializeGL() {
 
   glShadeModel(GL_SMOOTH);
   glClearColor( 0.4, 0.4, 0.4, 0.0 );
-  glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_DEPTH_TEST);
 
   if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
@@ -71,19 +73,32 @@ void Viewer::initializeGL() {
     circleData[i*3 + 2] = 0.0;
   }
 
+  //double theta = M_PI / 10;
+  // (3 * pi) / theta
+  // Note that we go around circumference (2pi) and then half vertical (pi)
+  int numTri =  2* 2*M_PI/theta * M_PI/theta;
+  // Nine floats per triangle
+  float sphereData[numTri*9];
+  initSphereData(sphereData, theta);
 
   mVertexArrayObject.create();
   mVertexArrayObject.bind();
 
   mCircleBufferObject.create();
   mCircleBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
-
   if (!mCircleBufferObject.bind()) {
-    std::cerr << "could not bind vertex buffer to the context." << std::endl;
+    std::cerr << "Could not bind circle vertex buffer." << std::endl;
     return;
   }
 
-  mCircleBufferObject.allocate(circleData, 40 * 3 * sizeof(float));
+  mSphereBufferObject.allocate(circleData, sizeof(circleData));
+  mSphereBufferObject.create();
+  mSphereBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  if (!mSphereBufferObject.bind()) {
+    std::cerr << "Could not bind sphere vertex buffer." << std::endl;
+    return;
+  }
+  mSphereBufferObject.allocate(sphereData, sizeof(sphereData));
 
   mProgram.bind();
 
@@ -92,18 +107,6 @@ void Viewer::initializeGL() {
 
   mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
   mColorLocation = mProgram.uniformLocation("frag_color");
-}
-
-void Viewer::paintGL() {
-  // Clear framebuffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // Set up lighting
-
-  // Draw scene recursively
-  sceneRoot->walk_gl(this);
-
-  draw_trackball_circle();
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -120,7 +123,7 @@ void Viewer::resizeGL(int width, int height) {
 void Viewer::doOp(std::set<int> ids, QMatrix4x4 matrix) {
   opStackPosition += 1;
 
-  if (opStackPosition + 1 < opStack.size()) {
+  if (opStackPosition + 1 < (int) opStack.size()) {
     // Clear next entries
     opStack.resize(opStackPosition + 1);
   }
@@ -135,7 +138,7 @@ void Viewer::doOp(std::set<int> ids, QMatrix4x4 matrix) {
 }
 
 void Viewer::redoOp() {
-  if (opStackPosition + 1 == opStack.size()) {
+  if (opStackPosition + 1 == (int) opStack.size()) {
     // TODO: Cannot
   }
   opStackPosition += 1;
@@ -165,27 +168,45 @@ QMatrix4x4 Viewer::getTransforms(int id) {
 }
 
 void Viewer::mousePressEvent ( QMouseEvent * event ) {
-  //std::cerr << "Stub: button " << event->button() << " pressed\n";
-  // Push new matrix on to stack - but only if no mouse buttons are held down
-  // at the moment (?)
   auto buttonsDown = qApp->mouseButtons();
-  std::cerr << buttonsDown << std::endl;
 
-  // If there are additional buttons held other than the one that was down
-  if ((buttonsDown & (~ event->button())) != Qt::NoButton) {
-    // .. Then we are pressing a second button
-  }
-  else {
-    // New blank transform matrix on top of stack
-    doOp(pickedIds, QMatrix4x4());
-  }
-
-  // TODO: get time (for click?)
   lastMouseX = event->x();
   lastMouseY = event->y();
+
+  if (currentMode == Mode::POSITION) {
+    // TODO: I think we can do nothing, since we don't have to keep stack
+    return;
+  }
+
+  auto clickedButton = event->button();
+  // If there are additional buttons held other than the one that was down
+  if ((buttonsDown & ~clickedButton) != Qt::NoButton) {
+    // Then we are pressing a second button: nothing to do (else we would get
+    // bizarre behaviour)
+    return;
+  }
+
+  if (event->button() == Qt::LeftButton) {
+    // We can pick now
+    auto id = find_pick_id(event->x(), event->y());
+    if (pickedIds.find(id) != pickedIds.end()) {
+      // Not in the set: Add to set
+      pickedIds.insert(id);
+    }
+    return;
+  }
+  else if (pickedIds.size() > 0) {
+    // We have picked at least one thing or are in position mode
+    // begin the operation of dragging etc
+    doOp(pickedIds, QMatrix4x4());
+  }
 }
 
 void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
+  (void)event;
+  // Nothing to do (already pushed on stack)
+  return;
+
   if (currentMode == Viewer::Mode::POSITION) {
     // Nothing to do
     return;
@@ -195,42 +216,32 @@ void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
     // Still dragging around.. do nothing
     return;
   }
-
-  // We are in joints mode: we can pick parts
-  if (event->x() == lastMouseX && event->y() == lastMouseY) {
-    // We were probably just a click
-    auto id = find_pick_id(event->x(), event->y());
-    if (pickedIds.find(id) != pickedIds.end()) {
-      // Not in the set: Add to set
-      pickedIds.insert(id);
-    }
-  }
 }
 
 void Viewer::mouseMoveEvent (QMouseEvent* event) {
   //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
   // So, while moving... update the top of the stack.
   int dx = event->x() - lastMouseX;
-  int dy = event->y() - lastMouseY;
+  std::cerr<<dx<<std::endl;
+  //int dy = event->y() - lastMouseY;
+  xform.rotate(M_PI / 100 * dx, 1, 0, 0);
+  update();
 
   if (currentMode == Viewer::Mode::POSITION) {
     // Position mode
-    // TODO: How to dooooo...
-    // We also need to be able to undo thissssss...
-    // fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuck...
     QMatrix4x4 op;// = getPuppetOp();
-    opMap[PUPPET_TRANSLATE_ID] *= op;
+    //opMap[PUPPET_TRANSLATE_ID] *= op;
   }
   else if (pickedIds.size() > 0) {
     // Joints mode
     // Only do anything if we have picked at least one item
 
-    // Also we need to update the map and shit
-    QMatrix4x4 op;//= doGradualOp();
+    QMatrix4x4 op;//= doGradualOp(dx, dy);
     for (int id : pickedIds) {
       opMap[id] *= op;
     }
-
+    // And update the stack as well
+    opStack[opStackPosition].matrix *= op;
   }
 
   lastMouseX = event->x();
@@ -269,6 +280,30 @@ void Viewer::set_colour(const QColor& col) {
   mProgram.setUniformValue(mColorLocation, col.red(), col.green(), col.blue());
 }
 
+void Viewer::paintGL() {
+  // Clear framebuffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Set up lighting
+
+  // Draw scene recursively
+  sceneRoot->walk_gl(this);
+
+  set_colour(QColor(1.0, 0.0, 0.0));
+
+  auto m = getCameraMatrix();
+  //QMatrix4x4 xform;
+  //xform.translate(0, 0, 16);
+  mSphereBufferObject.bind();
+
+  mProgram.setUniformValue(mMvpMatrixLocation, m * xform);
+
+  int numTri =  2* 2*M_PI/theta * M_PI/theta;
+  glDrawArrays(GL_TRIANGLES, 0, numTri * 9);
+
+  //draw_trackball_circle();
+}
+
 void Viewer::draw_trackball_circle() {
   int current_width = width();
   int current_height = height();
@@ -300,8 +335,37 @@ void Viewer::setMode(Viewer::Mode mode) {
   if (mode == currentMode) {
     return;
   }
+
   // lol, clear
   // TODO: How to handle dragging events? That is unclear
   pickedIds.clear();
   currentMode = mode;
+}
+
+void Viewer::initSphereData(float* arr, double theta) {
+  int tri = 0;
+  // Three vertices, each with (x, y, z)
+  int triNums = 3 * 3;
+
+  // Helper
+  auto writeTri = [&] (const std::vector<QVector3D> pts) {
+    for (int pt = 0; pt < 3; ++pt) {
+      for (int i = 0; i < 3; ++i) {
+        arr[triNums * tri + 3 * pt + i] = pts[pt][i];
+      }
+    }
+    tri += 1;
+  };
+
+  for (double i = 0; i < 2 * M_PI; i += theta) {
+    for (double j = -M_PI / 2; j < M_PI / 2; j += theta) {
+      auto x1 = std::cos(i); auto x2 = std::cos(i + theta);
+      auto y1 = std::sin(j); auto y2 = std::sin(j + theta);
+      auto z1 = std::sin(i); auto z2 = std::sin(i + theta);
+      QVector3D p1(x1, y1, z1); QVector3D p2(x2, y1, z2);
+      QVector3D p4(x1, y2, z1); QVector3D p3(x2, y2, z2);
+      writeTri({p1, p2, p4});
+      writeTri({p4, p2, p3});
+    }
+  }
 }

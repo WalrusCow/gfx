@@ -1,6 +1,7 @@
 // William McDonald 20418145 wmcdonal
 #pragma once
 
+#include <cmath>
 #include <memory>
 #include <set>
 #include <unordered_map>
@@ -16,10 +17,6 @@
 #include "scene.hpp"
 
 class Viewer : public QGLWidget {
-
-  // Because we hate each other
-  const int PUPPET_TRANSLATE_ID = -1;
-  const int PUPPET_ROTATE_ID = -2;
 
   Q_OBJECT
 
@@ -51,7 +48,7 @@ class Viewer : public QGLWidget {
   std::set<int> pickedIds;
 
   // TODO
-  int find_pick_id(int x, int y){return 0;}
+  int find_pick_id(int x, int y){(void)x;(void)y;return 0;}
 
   // Push a matrix for when walking (or can we use normal stack?)
   // Let's see... Each node will simply push, do, pop. So that should be ok..
@@ -76,6 +73,9 @@ class Viewer : public QGLWidget {
   // Undo then redo?
   QMatrix4x4 puppetRotation;
 
+  // TODO: remove
+  QMatrix4x4 xform;
+
  protected:
   virtual void initializeGL();
   virtual void paintGL();
@@ -89,6 +89,8 @@ class Viewer : public QGLWidget {
   void draw_trackball_circle();
 
  private:
+  const double theta = M_PI / 40;
+
   std::unique_ptr<SceneNode> sceneRoot;
 
   QMatrix4x4 getCameraMatrix();
@@ -96,8 +98,10 @@ class Viewer : public QGLWidget {
   void rotateWorld(float angle, float x, float y, float z);
   void scaleWorld(float x, float y, float z);
   void set_colour(const QColor& col);
+  void initSphereData(float* arr, double theta);
 
   QOpenGLBuffer mCircleBufferObject;
+  QOpenGLBuffer mSphereBufferObject;
   QOpenGLVertexArrayObject mVertexArrayObject;
 
   int mMvpMatrixLocation;
