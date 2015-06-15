@@ -44,6 +44,12 @@ class AppWindow : public QMainWindow {
   QMenu* modeMenu;
   std::list<QAction*> modeMenuActions;
 
+  QMenu* editMenu;
+  std::list<QAction*> editMenuActions;
+
+  QMenu* optionsMenu;
+  std::list<QAction*> optionsMenuActions;
+
   std::unordered_map<int, QAction*> shortcutActions;
 
   Viewer* viewer;

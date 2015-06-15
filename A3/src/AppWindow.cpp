@@ -35,10 +35,72 @@ void AppWindow::keyPressEvent(QKeyEvent* event) {
 }
 
 void AppWindow::createActions() {
+  newMenuAction("Reset Position", nullptr, "Reset puppet position",
+      quitMenuActions, Qt::Key_I, [this] () {
+    // TODO: Reset puppet position
+  });
+
+  newMenuAction("Reset Orientation", nullptr, "Reset puppet orientation",
+      quitMenuActions, Qt::Key_O, [this] () {
+    // TODO: Reset puppet orientation
+  });
+
+  newMenuAction("Reset Joints", nullptr, "Reset joints and undo/redo stack",
+      quitMenuActions, Qt::Key_N, [this] () {
+    // TODO: Reset joints
+  });
+
+  newMenuAction("Reset All", nullptr, "Reset joints and puppet",
+      quitMenuActions, Qt::Key_A, [this] () {
+    // TODO: Reset all
+  });
+
   newMenuAction("&Quit", nullptr, "Exit the program",
       quitMenuActions, Qt::Key_Q, [this] () {
     close();
   })->setShortcuts(QKeySequence::Quit);
+
+  QActionGroup* modeGroup = new QActionGroup(this);
+  newMenuAction("&Position/Orientation", modeGroup, "Move or rotate the puppet",
+      modeMenuActions, Qt::Key_P, [this] () {
+    // TODO: Enable position/orientation mode
+  });
+  modeGroup->actions().first()->setChecked(true);
+
+  newMenuAction("&Joints", modeGroup, "Select and rotate joints",
+      modeMenuActions, Qt::Key_J, [this] () {
+      // TODO: Enable Joint mode
+  });
+
+  newMenuAction("&Undo", nullptr, "Undo last action",
+      editMenuActions, Qt::Key_U, [this] () {
+    // TODO: Undo
+  });
+
+  newMenuAction("&Redo", nullptr, "Redo last action",
+      editMenuActions, Qt::Key_R, [this] () {
+    // TODO: redo
+  });
+
+  newMenuAction("&Circle", nullptr, "Draw circle for trackball",
+      optionsMenuActions, Qt::Key_C, [this] () {
+    // TODO
+  })->setCheckable(true);
+
+  newMenuAction("&Z-Buffer", nullptr, "Draw puppet with Z-buffer",
+      optionsMenuActions, Qt::Key_Z, [this] () {
+    // TODO
+  })->setCheckable(true);
+
+  newMenuAction("&Backface Cull", nullptr, "Remove backfacing polygons",
+      optionsMenuActions, Qt::Key_B, [this] () {
+    // TODO
+  })->setCheckable(true);
+
+  newMenuAction("&Frontface Cull", nullptr, "Remove frontfacing polygons",
+      optionsMenuActions, Qt::Key_F, [this] () {
+    // TODO
+  })->setCheckable(true);
 }
 
 void AppWindow::createMenu() {
@@ -50,6 +112,16 @@ void AppWindow::createMenu() {
   modeMenu = menuBar()->addMenu(tr("&Mode"));
   for (auto& action : modeMenuActions) {
     modeMenu->addAction(action);
+  }
+
+  editMenu = menuBar()->addMenu(tr("&Edit"));
+  for (auto& action : editMenuActions) {
+    editMenu->addAction(action);
+  }
+
+  optionsMenu = menuBar()->addMenu(tr("&Options"));
+  for (auto& action : optionsMenuActions) {
+    optionsMenu->addAction(action);
   }
 }
 
