@@ -122,6 +122,13 @@ head = makeDrawableNode('Head', green, headScale)
 head:translate(0, headScale[2], 0)
 headJoint:add_child(head)
 
+noseScale = {0.2, 0.2, 0.2}
+nose = gr.sphere('NoseDraw')
+nose:set_material(red)
+nose:scale(unpack(noseScale))
+nose:translate(0, headScale[2]/2, headScale[3]-noseScale[2]/2)
+head:add_child(nose)
+
 rootNode:translate(0, 0, -20.0)
 
 return rootNode
