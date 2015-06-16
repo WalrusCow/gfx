@@ -46,42 +46,6 @@ void Viewer::initializeGL() {
   glClearColor(0.4, 0.4, 0.4, 0.0);
   glEnable(GL_DEPTH_TEST);
 
-
-  /************************************************/
-  float ambientLight[] = { 0.2, 0.2, 0.2, 1.0 };
-  float specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
-  float specularity[] = { 1.0, 1.0, 1.0, 1.0 };
-  float shininess[] = { 60.0 };
-  float lightPosition[] = { 0.0, 50.0, 50.0, 1.0 };
-
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_NORMALIZE);
-
-  // Enable lighting with one light source
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-
-  glEnable(GL_DEPTH_TEST);
-
-  // Objects have their color affected by the lighting
-  glShadeModel(GL_SMOOTH);
-
-  // Properties of the objects' materials
-  glMaterialfv(GL_FRONT, GL_SPECULAR, specularity);   // Reflectance
-  glMaterialfv(GL_FRONT, GL_SHININESS, shininess);    // Shininess
-
-  // Enable ambient light usage
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
-
-  glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-
-  // Position of the light source
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-  /************************************************/
-  /************************************************/
-  /************************************************/
-
   if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
     return;
@@ -116,7 +80,9 @@ void Viewer::initializeGL() {
 
   // Nine floats per triangle
   float sphereData[numTriangles * 9];
-  initSphereData(sphereData, theta);
+  // Three vertices per triangle, and each has a normal (3 floats)
+  float sphereNormals[numTriangles * 3 * 3];
+  initSphereData(sphereData, sphereNormals, theta);
 
   mSphereBufferObject.create();
   mSphereBufferObject.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -126,11 +92,28 @@ void Viewer::initializeGL() {
   }
   mSphereBufferObject.allocate(sphereData, sizeof(sphereData));
 
+  // Sphere normal buffer
+  mSphereNormalBuffer.create();
+  mSphereNormalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  if (!mSphereNormalBuffer.bind()) {
+    std::cerr << "Could not bind sphere normal buffer." << std::endl;
+    return;
+  }
+  mSphereNormalBuffer.allocate(sphereNormals, sizeof(sphereNormals));
+
   mProgram.bind();
   mProgram.enableAttributeArray("vert");
+  mProgram.enableAttributeArray("norm");
 
-  mMvpMatrixLocation = mProgram.uniformLocation("mvpMatrix");
-  mColorLocation = mProgram.uniformLocation("frag_color");
+  mvpMatrixLoc = mProgram.uniformLocation("mvpMatrix");
+  mvMatrixLoc = mProgram.uniformLocation("mvMatrix");
+  colourLoc = mProgram.uniformLocation("frag_colour");
+  normMatrixLoc = mProgram.uniformLocation("normMatrix");
+  lightPositionLoc = mProgram.uniformLocation("lightPosition");
+  ambientColourLoc = mProgram.uniformLocation("ambientColour");
+  diffuseColourLoc = mProgram.uniformLocation("diffuseColour");
+  specularColourLoc = mProgram.uniformLocation("specularColour");
+  shininessLoc = mProgram.uniformLocation("shininess");
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -293,20 +276,8 @@ QMatrix4x4 Viewer::getCameraMatrix() {
   return mPerspMatrix * vMatrix * mTransformMatrix;
 }
 
-void Viewer::translateWorld(float x, float y, float z) {
-  mTransformMatrix.translate(x, y, z);
-}
-
-void Viewer::rotateWorld(float angle, float x, float y, float z) {
-  mTransformMatrix.rotate(angle, x, y, z);
-}
-
-void Viewer::scaleWorld(float x, float y, float z) {
-  mTransformMatrix.scale(x, y, z);
-}
-
 void Viewer::set_colour(const QColor& col) {
-  mProgram.setUniformValue(mColorLocation, col.red(), col.green(), col.blue());
+  mProgram.setUniformValue(colourLoc, col.red(), col.green(), col.blue());
 }
 
 void Viewer::paintGL() {
@@ -344,7 +315,7 @@ void Viewer::draw_trackball_circle() {
   // Bind buffer object
   mCircleBufferObject.bind();
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-  mProgram.setUniformValue(mMvpMatrixLocation, orthoMatrix * transformMatrix);
+  mProgram.setUniformValue(mvpMatrixLoc, orthoMatrix * transformMatrix);
 
   // Draw buffer
   glDrawArrays(GL_LINE_LOOP, 0, 40);
@@ -362,15 +333,23 @@ void Viewer::setMode(Viewer::Mode mode) {
 }
 
 // Use quadrilaterals to model a sphere
-void Viewer::initSphereData(float* vertexBuffer, double theta) {
+void Viewer::initSphereData(float* vertexBuffer, float* normBuffer, double theta) {
   int tri = 0; // How many triangles we drew
   int triSize = 3 * 3; // Three vertices, each with (x, y, z)
 
   // Helper to write a triangle determined by 3 points
-  auto writeTri = [&] (const std::vector<QVector3D> pts) {
-    for (int pt = 0; pt < 3; ++pt) {
+  auto writeTri = [&] (const std::vector<QVector3D>& pts) {
+    // Write three points
+    for (int j = 0; j < 3; ++j) {
+      // Point we are writing
+      auto& pt = pts[j];
+      auto normal = pts[j].normalized();//QVector3D::crossProduct(pt, pts[(j + 1) % 3]);
+
+      // .. and each point has (x, y ,z)
       for (int i = 0; i < 3; ++i) {
-        vertexBuffer[triSize * tri + 3 * pt + i] = pts[pt][i];
+        auto idx = (triSize*tri) + (3*j) + i;
+        vertexBuffer[idx] = pt[i];
+        normBuffer[idx] = normal[i];
       }
     }
     tri += 1;
@@ -418,13 +397,30 @@ QMatrix4x4 Viewer::getWalkMatrix() {
   return walkStack.back();
 }
 
-void Viewer::drawSphere(const QMatrix4x4& transform, const QColor& colour) {
-  set_colour(colour);
+void printVector(const QVector3D& v) {
+  std::cerr << "{"<<v[0]<<','<<v[1]<<','<<v[2]<<'}'<<std::endl;
+}
 
-  auto m = getCameraMatrix();
+void Viewer::drawSphere(const QMatrix4x4& transform, const Material& material) {
+  set_colour(material.getColour());
+
+  auto vp = getCameraMatrix();
   mSphereBufferObject.bind();
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+  mSphereNormalBuffer.bind();
+  mProgram.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
 
-  mProgram.setUniformValue(mMvpMatrixLocation, m * transform);
+  auto mvMatrix = mTransformMatrix * transform;
+  mProgram.setUniformValue(mvpMatrixLoc, vp * transform);
+  mProgram.setUniformValue(mvMatrixLoc, mvMatrix);
+  mProgram.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
+  mProgram.setUniformValue(ambientColourLoc, QVector3D(0.125, 0.125, 0.125));
+  mProgram.setUniformValue(diffuseColourLoc, QVector3D(0.5, 0.5, 0.5));
+  mProgram.setUniformValue(specularColourLoc, QVector3D(1.0, 1.0, 1.0));
+  mProgram.setUniformValue(shininessLoc, 100.0f);
+
+  // Light position shouldn't change: always on the eye
+  mProgram.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
+
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 }

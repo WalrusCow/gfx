@@ -1,10 +1,28 @@
 #version 330
 
-uniform vec3 frag_color;
+uniform vec3 frag_colour;
 
-out vec4 finalColor;
+uniform vec3 ambientColour;
+uniform vec3 diffuseColour;
+uniform vec3 specularColour;
+uniform float shininess;
+
+in vec3 vertNorm;
+in vec3 lightDirection;
+in vec3 viewerDirection;
+
+out vec4 finalColour;
 
 void main()
 {
-    finalColor = vec4(frag_color, 1.0);
+    vec3 normal = normalize(vertNorm);
+    vec3 lightDirection = normalize(lightDirection);
+    vec3 viewerDirection = normalize(viewerDirection);
+
+    vec3 diffuseIllumination = max(0.0, dot(lightDirection, normal)) * diffuseColour;
+    vec3 specularIllumination = pow(
+      max(0.0, dot(-reflect(lightDirection, normal), viewerDirection)),
+      shininess) * specularColour;
+    vec3 newColour = frag_colour * (ambientColour + diffuseIllumination) + specularIllumination;
+    finalColour = vec4(newColour, 1);
 }

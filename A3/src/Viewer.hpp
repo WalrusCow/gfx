@@ -15,6 +15,7 @@
 #include <QOpenGLVertexArrayObject>
 
 #include "scene.hpp"
+#include "material.hpp"
 
 class Viewer : public QGLWidget {
 
@@ -40,7 +41,7 @@ class Viewer : public QGLWidget {
   QMatrix4x4 getTransforms(int id);
 
   // Draw a sphere with given transform and colour
-  void drawSphere(const QMatrix4x4& transform, const QColor& colour);
+  void drawSphere(const QMatrix4x4& transform, const Material& material);
 
   void pushWalkMatrix(const QMatrix4x4& matrix);
   void popWalkMatrix();
@@ -107,21 +108,20 @@ class Viewer : public QGLWidget {
   QMatrix4x4 mPerspMatrix;
   QMatrix4x4 mTransformMatrix;
 
-  // Functions for getting/modifying camera
+  // Get camera matrix
   QMatrix4x4 getCameraMatrix();
-  void translateWorld(float x, float y, float z);
-  void rotateWorld(float angle, float x, float y, float z);
-  void scaleWorld(float x, float y, float z);
 
   // OpenGL required members
   QOpenGLBuffer mCircleBufferObject;
   QOpenGLBuffer mSphereBufferObject;
+  QOpenGLBuffer mSphereNormalBuffer;
   QOpenGLVertexArrayObject mVao;
   QGLShaderProgram mProgram;
-  int mMvpMatrixLocation;
-  int mColorLocation;
+  int mvpMatrixLoc, mvMatrixLoc, normMatrixLoc, lightPositionLoc;
+  int ambientColourLoc, diffuseColourLoc, specularColourLoc, shininessLoc;
+  int colourLoc;
 
   // Initialize openGL buffers
-  void initSphereData(float* vertexBuffer, double theta);
+  void initSphereData(float* vertexBuffer, float* normBuffer, double theta);
   void initCircleData(float* buffer, double radius, double theta);
 };
