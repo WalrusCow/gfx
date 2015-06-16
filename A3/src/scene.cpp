@@ -26,19 +26,19 @@ void SceneNode::rotate(char axis, double angle) {
   else if (axis == 'z') {
     xform.rotate(angle, 0, 0, 1);
   }
-  set_transform(xform * m_trans);
+  set_transform(m_trans * xform);
 }
 
 void SceneNode::scale(const QVector3D& amount) {
   QMatrix4x4 xform;
   xform.scale(amount);
-  set_transform(xform * m_trans);
+  set_transform(m_trans * xform);
 }
 
 void SceneNode::translate(const QVector3D& amount) {
   QMatrix4x4 xform;
   xform.translate(amount);
-  set_transform(xform * m_trans);
+  set_transform(m_trans * xform);
 }
 
 bool SceneNode::is_joint() const {
