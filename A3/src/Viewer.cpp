@@ -27,17 +27,67 @@ Viewer::Viewer(const QGLFormat& format,
   walkStack.push_back(QMatrix4x4());
 }
 
-Viewer::~Viewer() {
-  // Nothing to do here right now.
+Viewer::~Viewer() {}
+
+void Viewer::resetPuppetOrientation() {
+  puppetRotation.setToIdentity();
+  update();
 }
 
-QSize Viewer::minimumSizeHint() const {
-  return QSize(50, 50);
+void Viewer::resetPuppetPosition() {
+  puppetPosition.setToIdentity();
+  update();
 }
 
-QSize Viewer::sizeHint() const {
-  return QSize(300, 300);
+void Viewer::resetJoints() {
+  opStack.resize(0);
+  opStackPosition = 0;
+  opMap.clear();
+  update();
 }
+
+void Viewer::toggleShowCircle() {
+  showCircle = !showCircle;
+  update();
+}
+
+void Viewer::toggleZBuffer() {
+  zBuffer = !zBuffer;
+  if (zBuffer) {
+    glEnable(GL_DEPTH_TEST);
+  } else {
+    glDisable(GL_DEPTH_TEST);
+  }
+  update();
+}
+
+void Viewer::toggleFrontfaceCull() {
+  frontfaceCull = !frontfaceCull;
+  updateFaceCulling();
+}
+
+void Viewer::toggleBackfaceCull() {
+  backfaceCull = !backfaceCull;
+  updateFaceCulling();
+}
+
+void Viewer::updateFaceCulling() {
+  glEnable(GL_CULL_FACE);
+  if (frontfaceCull && backfaceCull)
+    glCullFace(GL_FRONT_AND_BACK);
+  else if (frontfaceCull)
+    glCullFace(GL_FRONT);
+  else if (backfaceCull)
+    glCullFace(GL_BACK);
+  else
+    glDisable(GL_CULL_FACE);
+  update();
+}
+
+
+QSize Viewer::minimumSizeHint() const { return QSize(50, 50); }
+
+QSize Viewer::sizeHint() const { return QSize(300, 300); }
 
 void Viewer::initializeGL() {
   QGLFormat glFormat = QGLWidget::format();
@@ -437,14 +487,12 @@ void Viewer::drawSphere(const QMatrix4x4& transform) {
 
 void Viewer::setDiffuseColour(const QColor& c) {
   // Set colour to be white (it's multiplied by the actual colour)
-  setColour(QColor(255, 255, 255));
   mProgram.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
 void Viewer::setColour(const QColor& col) {
-  // It's only zero so we don't even care...
-  // TODO: Remove this function
-  mProgram.setUniformValue(colourLoc, col.redF(), col.greenF(), col.blueF());
+  setDiffuseColour(col);
+  setSpecularColour(col);
 }
 
 void Viewer::setSpecularColour(const QColor& c) {
@@ -453,61 +501,6 @@ void Viewer::setSpecularColour(const QColor& c) {
 
 void Viewer::setShininess(const double shininess) {
   mProgram.setUniformValue(shininessLoc, (float) shininess);
-}
-
-void Viewer::toggleZBuffer() {
-  zBuffer = !zBuffer;
-  if (zBuffer) {
-    glEnable(GL_DEPTH_TEST);
-  } else {
-    glDisable(GL_DEPTH_TEST);
-  }
-  update();
-}
-
-void Viewer::toggleFrontfaceCull() {
-  frontfaceCull = !frontfaceCull;
-  updateFaceCulling();
-}
-
-void Viewer::toggleBackfaceCull() {
-  backfaceCull = !backfaceCull;
-  updateFaceCulling();
-}
-
-void Viewer::updateFaceCulling() {
-  glEnable(GL_CULL_FACE);
-  if (frontfaceCull && backfaceCull)
-    glCullFace(GL_FRONT_AND_BACK);
-  else if (frontfaceCull)
-    glCullFace(GL_FRONT);
-  else if (backfaceCull)
-    glCullFace(GL_BACK);
-  else
-    glDisable(GL_CULL_FACE);
-  update();
-}
-
-void Viewer::resetPuppetOrientation() {
-  puppetRotation.setToIdentity();
-  update();
-}
-
-void Viewer::resetPuppetPosition() {
-  puppetPosition.setToIdentity();
-  update();
-}
-
-void Viewer::resetJoints() {
-  opStack.resize(0);
-  opStackPosition = 0;
-  opMap.clear();
-  update();
-}
-
-void Viewer::toggleShowCircle() {
-  showCircle = !showCircle;
-  update();
 }
 
 void Viewer::trackballRotate(const QVector2D& startCoords,

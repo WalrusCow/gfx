@@ -24,6 +24,6 @@ void main()
       max(0.0, dot(-reflect(lightDirection, normal), viewerDirection)),
       shininess) * specularColour;
     // Assume ka = 1
-    vec3 newColour =  frag_colour * (ambientLight + diffuseIllumination + specularIllumination);
+    vec3 newColour = (ambientLight + diffuseIllumination + specularIllumination);
     finalColour = vec4(newColour, 1);
 }
