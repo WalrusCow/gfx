@@ -26,7 +26,7 @@ void SceneNode::rotate(char axis, double angle) {
   else if (axis == 'z') {
     xform.rotate(angle, 0, 0, 1);
   }
-  set_transform(m_trans * xform);
+  set_transform(xform * m_trans);
 }
 
 void SceneNode::scale(const QVector3D& amount) {
