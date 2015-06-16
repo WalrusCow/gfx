@@ -87,7 +87,7 @@ void Viewer::updateFaceCulling() {
 
 QSize Viewer::minimumSizeHint() const { return QSize(50, 50); }
 
-QSize Viewer::sizeHint() const { return QSize(300, 300); }
+QSize Viewer::sizeHint() const { return QSize(500, 500); }
 
 void Viewer::initializeGL() {
   QGLFormat glFormat = QGLWidget::format();
@@ -513,6 +513,9 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
   // Convert into coordinates centered at trackball center
   auto start = (startCoords - trackballCenter);
   auto end = (endCoords - trackballCenter);
+  // Y coordinates are upside down
+  start[1] *= -1;
+  end[1] *= -1;
 
   end *= 2.0 / diam;
   start *= 2.0 / diam;
@@ -536,7 +539,6 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
 
   // Vector to rotate about. Length of vector is angle of rotation in radians.
   auto rotationVector = QVector3D::crossProduct(startVector, endVector);
-  rotationVector[0] = -rotationVector[0];
   auto angleDeg = rotationVector.length() / (2 * M_PI) * 360;
   rotationVector.normalize();
   // Qt rotates on the right. We want the left.
