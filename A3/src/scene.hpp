@@ -64,6 +64,9 @@ class SceneNode {
 
   // Hierarchy
   std::list<std::unique_ptr<SceneNode>> children;
+
+ private:
+  static int nextId;
 };
 
 class JointNode : public SceneNode {

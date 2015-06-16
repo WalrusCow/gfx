@@ -48,18 +48,18 @@ class Viewer : public QGLWidget {
   QMatrix4x4 getTransforms(int id);
 
   // Draw a sphere with given transform and colour
-  void drawSphere(const QMatrix4x4& transform);
+  void drawSphere(const QMatrix4x4& transform, bool picking=false);
 
   void pushWalkMatrix(const QMatrix4x4& matrix);
   void popWalkMatrix();
   QMatrix4x4 getWalkMatrix();
 
-  void setColour(const QColor& colour);
   // These are the reflectance of the object.
   // It is assumed that ka = 1
   void setDiffuseColour(const QColor& colour);
   void setSpecularColour(const QColor& colour);
   void setShininess(const double shininess);
+  void setFlatColour(const QColor& colour);
 
  protected:
   void initializeGL() override;
@@ -133,10 +133,13 @@ class Viewer : public QGLWidget {
   QOpenGLBuffer mSphereBufferObject;
   QOpenGLBuffer mSphereNormalBuffer;
   QOpenGLVertexArrayObject mVao;
-  QGLShaderProgram mProgram;
+
+  QGLShaderProgram sphereShaders;
+  QGLShaderProgram flatShaders;
+
   int mvpMatrixLoc, mvMatrixLoc, normMatrixLoc, lightPositionLoc;
   int ambientLightLoc, diffuseColourLoc, specularColourLoc, shininessLoc;
-  int colourLoc;
+  int flatColourLoc;
 
   // Initialize openGL buffers
   void initSphereData(float* vertexBuffer, float* normBuffer, double theta);

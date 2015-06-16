@@ -11,5 +11,5 @@ Primitive::~Primitive() {}
 Sphere::~Sphere() {}
 
 void Sphere::draw(Viewer* viewer, bool picking) const {
-  viewer->drawSphere(viewer->getWalkMatrix());
+  viewer->drawSphere(viewer->getWalkMatrix(), picking);
 }

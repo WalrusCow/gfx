@@ -3,7 +3,12 @@
 
 #include "Viewer.hpp"
 
-SceneNode::SceneNode(const std::string& name) : m_name(name) {}
+int SceneNode::nextId = 0;
+
+SceneNode::SceneNode(const std::string& name) : m_name(name) {
+  m_id = nextId;
+  nextId += 1;
+}
 
 SceneNode::~SceneNode() {}
 
@@ -85,6 +90,10 @@ void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
   }
   else {
     // Use unique colour
+    int r = m_id & 0x000000ff;
+    int g = m_id & 0x0000ff00 >> 8;
+    int b = m_id & 0x00ff0000 >> 16;
+    viewer->setFlatColour({r, g, b});
   }
   m_primitive->draw(viewer, picking);
 

@@ -100,17 +100,30 @@ void Viewer::initializeGL() {
   glClearColor(0.4, 0.4, 0.4, 0.0);
   glFrontFace(GL_CW);
 
-  if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
+  if (!flatShaders.addShaderFromSourceFile(QGLShader::Vertex, "flat.vert")) {
+    std::cerr << "Cannot load flat vertex shader." << std::endl;
+    return;
+  }
+  if (!flatShaders.addShaderFromSourceFile(QGLShader::Fragment, "flat.frag")) {
+    std::cerr << "Cannot load flat fragment shader." << std::endl;
+    return;
+  }
+  if (!flatShaders.link()) {
+    std::cerr << "Cannot link flat shaders." << std::endl;
+    return;
+  }
+
+  if (!sphereShaders.addShaderFromSourceFile(QGLShader::Vertex, "sphere.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
     return;
   }
 
-  if (!mProgram.addShaderFromSourceFile(QGLShader::Fragment, "shader.frag")) {
+  if (!sphereShaders.addShaderFromSourceFile(QGLShader::Fragment, "sphere.frag")) {
     std::cerr << "Cannot load fragment shader." << std::endl;
     return;
   }
 
-  if (!mProgram.link()) {
+  if (!sphereShaders.link()) {
     std::cerr << "Cannot link shaders." << std::endl;
     return;
   }
@@ -155,22 +168,23 @@ void Viewer::initializeGL() {
   }
   mSphereNormalBuffer.allocate(sphereNormals, sizeof(sphereNormals));
 
-  mProgram.bind();
-  mProgram.enableAttributeArray("vert");
-  mProgram.enableAttributeArray("norm");
+  sphereShaders.bind();
+  sphereShaders.enableAttributeArray("vert");
+  sphereShaders.enableAttributeArray("norm");
 
-  mvpMatrixLoc = mProgram.uniformLocation("mvpMatrix");
-  mvMatrixLoc = mProgram.uniformLocation("mvMatrix");
-  colourLoc = mProgram.uniformLocation("frag_colour");
-  normMatrixLoc = mProgram.uniformLocation("normMatrix");
-  lightPositionLoc = mProgram.uniformLocation("lightPosition");
-  ambientLightLoc = mProgram.uniformLocation("ambientLight");
-  diffuseColourLoc = mProgram.uniformLocation("diffuseColour");
-  specularColourLoc = mProgram.uniformLocation("specularColour");
-  shininessLoc = mProgram.uniformLocation("shininess");
+  mvpMatrixLoc = sphereShaders.uniformLocation("mvpMatrix");
+  mvMatrixLoc = sphereShaders.uniformLocation("mvMatrix");
+  normMatrixLoc = sphereShaders.uniformLocation("normMatrix");
+  lightPositionLoc = sphereShaders.uniformLocation("lightPosition");
+  ambientLightLoc = sphereShaders.uniformLocation("ambientLight");
+  diffuseColourLoc = sphereShaders.uniformLocation("diffuseColour");
+  specularColourLoc = sphereShaders.uniformLocation("specularColour");
+  shininessLoc = sphereShaders.uniformLocation("shininess");
 
   // Constant ambient light
-  mProgram.setUniformValue(ambientLightLoc, QVector3D(0.1, 0.1, 0.1));
+  sphereShaders.setUniformValue(ambientLightLoc, QVector3D(0.1, 0.1, 0.1));
+
+  flatColourLoc = flatShaders.uniformLocation("colour");
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -364,11 +378,8 @@ void Viewer::draw_trackball_circle() {
   auto w = width();
   auto h = height();
 
-  // Set up for orthogonal drawing to draw a circle on screen.
-  // You'll want to make the rest of the function conditional on
-  // whether or not we want to draw the circle this time around.
-
-  setColour(QColor(0.0, 0.0, 0.0));
+  setDiffuseColour(QColor(0.0, 0.0, 0.0));
+  setSpecularColour(QColor(0.0, 0.0, 0.0));
 
   // Set orthographic Matrix
   QMatrix4x4 orthoMatrix;
@@ -380,8 +391,8 @@ void Viewer::draw_trackball_circle() {
 
   // Bind buffer object
   mCircleBufferObject.bind();
-  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-  mProgram.setUniformValue(mvpMatrixLoc, orthoMatrix * transformMatrix);
+  sphereShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+  sphereShaders.setUniformValue(mvpMatrixLoc, orthoMatrix * transformMatrix);
 
   // Draw buffer
   glDrawArrays(GL_LINE_LOOP, 0, 40);
@@ -463,44 +474,52 @@ QMatrix4x4 Viewer::getWalkMatrix() {
   return walkStack.back();
 }
 
-void Viewer::drawSphere(const QMatrix4x4& transform) {
-
+void Viewer::drawSphere(const QMatrix4x4& transform, bool picking) {
   auto r = sceneRoot->get_transform() * puppetRotation * sceneRoot->get_inverse();
   auto modelMatrix = puppetPosition * r * transform;
 
   auto vp = getCameraMatrix();
-  mSphereBufferObject.bind();
-  mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-  mSphereNormalBuffer.bind();
-  mProgram.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
+  if (picking) {
+    flatShaders.bind();
+    mSphereBufferObject.bind();
+    flatShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+    flatShaders.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
+  }
+  else {
+    auto mvMatrix = mTransformMatrix * modelMatrix;
+    sphereShaders.bind();
 
-  auto mvMatrix = mTransformMatrix * modelMatrix;
-  mProgram.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
-  mProgram.setUniformValue(mvMatrixLoc, mvMatrix);
-  mProgram.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
+    mSphereBufferObject.bind();
+    sphereShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+    mSphereNormalBuffer.bind();
+    sphereShaders.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
 
-  // Light position shouldn't change: always on the eye
-  mProgram.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
+    sphereShaders.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
+    sphereShaders.setUniformValue(mvMatrixLoc, mvMatrix);
+    sphereShaders.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
+
+    // Light position shouldn't change: always on the eye
+    sphereShaders.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
+  }
 
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 }
 
 void Viewer::setDiffuseColour(const QColor& c) {
   // Set colour to be white (it's multiplied by the actual colour)
-  mProgram.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
-}
-
-void Viewer::setColour(const QColor& col) {
-  setDiffuseColour(col);
-  setSpecularColour(col);
+  sphereShaders.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
 void Viewer::setSpecularColour(const QColor& c) {
-  mProgram.setUniformValue(specularColourLoc, c.redF(), c.greenF(), c.blueF());
+  sphereShaders.setUniformValue(specularColourLoc, c.redF(), c.greenF(), c.blueF());
+}
+
+void Viewer::setFlatColour(const QColor& c) {
+  flatShaders.setUniformValue(flatColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
 void Viewer::setShininess(const double shininess) {
-  mProgram.setUniformValue(shininessLoc, (float) shininess);
+  sphereShaders.setUniformValue(shininessLoc, (float) shininess);
 }
 
 void Viewer::trackballRotate(const QVector2D& startCoords,
