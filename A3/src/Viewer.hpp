@@ -77,6 +77,7 @@ class Viewer : public QGLWidget {
   bool zBuffer = false;
   bool backfaceCull = false;
   bool frontfaceCull = false;
+  bool showCircle = false;
 
   // For dragging
   int lastMouseX;

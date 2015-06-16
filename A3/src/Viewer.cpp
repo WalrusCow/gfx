@@ -12,6 +12,10 @@
 #define GL_MULTISAMPLE 0x809D
 #endif
 
+namespace {
+const double TRANSLATE_FACTOR = 0.1;
+}
+
 Viewer::Viewer(const QGLFormat& format,
                std::unique_ptr<SceneNode> sceneRoot,
                QWidget *parent)
@@ -241,16 +245,23 @@ void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
 }
 
 void Viewer::mouseMoveEvent (QMouseEvent* event) {
-  //std::cerr << "Stub: Motion at " << event->x() << ", " << event->y() << std::endl;
   // So, while moving... update the top of the stack.
-  //int dx = event->x() - lastMouseX;
+  int dx = event->x() - lastMouseX;
   // Y coordinates on screen are upside down
-  //int dy = lastMouseY - event->y();
+  int dy = lastMouseY - event->y();
+
+  auto buttons = event->buttons();
 
   if (currentMode == Viewer::Mode::POSITION) {
     // Position mode
-    QMatrix4x4 op;// = getPuppetOp();
-    //opMap[PUPPET_TRANSLATE_ID] *= op;
+    // Left mouse button drags puppet
+    if (buttons & Qt::LeftButton) {
+      puppetPosition.translate(TRANSLATE_FACTOR * dx, TRANSLATE_FACTOR * dy, 0);
+    }
+    if (buttons & Qt::MiddleButton) {
+      puppetPosition.translate(0, 0, TRANSLATE_FACTOR * -dy);
+    }
+    update();
   }
   else if (pickedIds.size() > 0) {
     // Joints mode
@@ -288,7 +299,9 @@ void Viewer::paintGL() {
   // Draw scene recursively
   sceneRoot->walk_gl(this);
 
-  draw_trackball_circle();
+  if (showCircle) {
+    draw_trackball_circle();
+  }
 }
 
 void Viewer::draw_trackball_circle() {
@@ -396,14 +409,16 @@ QMatrix4x4 Viewer::getWalkMatrix() {
 
 void Viewer::drawSphere(const QMatrix4x4& transform) {
 
+  auto modelMatrix = puppetPosition * puppetRotation * transform;
+
   auto vp = getCameraMatrix();
   mSphereBufferObject.bind();
   mProgram.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
   mSphereNormalBuffer.bind();
   mProgram.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
 
-  auto mvMatrix = mTransformMatrix * transform;
-  mProgram.setUniformValue(mvpMatrixLoc, vp * transform);
+  auto mvMatrix = mTransformMatrix * modelMatrix;
+  mProgram.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
   mProgram.setUniformValue(mvMatrixLoc, mvMatrix);
   mProgram.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
 
@@ -420,6 +435,8 @@ void Viewer::setDiffuseColour(const QColor& c) {
 }
 
 void Viewer::setColour(const QColor& col) {
+  // It's only zero so we don't even care...
+  // TODO: Remove this function
   mProgram.setUniformValue(colourLoc, col.redF(), col.greenF(), col.blueF());
 }
 
@@ -464,13 +481,24 @@ void Viewer::updateFaceCulling() {
   update();
 }
 
-
 void Viewer::resetPuppetOrientation() {
+  puppetRotation.setToIdentity();
+  update();
 }
+
 void Viewer::resetPuppetPosition() {
+  puppetPosition.setToIdentity();
+  update();
 }
+
 void Viewer::resetJoints() {
+  opStack.resize(0);
+  opStackPosition = 0;
+  opMap.clear();
+  update();
 }
 
 void Viewer::toggleShowCircle() {
+  showCircle = !showCircle;
+  update();
 }
