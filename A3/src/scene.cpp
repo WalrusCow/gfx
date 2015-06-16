@@ -8,7 +8,6 @@ SceneNode::SceneNode(const std::string& name) : m_name(name) {}
 SceneNode::~SceneNode() {}
 
 void SceneNode::walk_gl(Viewer* viewer, bool picking) const {
-  std::cerr << "Walk gl " << m_name << std::endl;
   viewer->pushWalkMatrix(m_trans);
   for (auto& child : children) {
     child->walk_gl(viewer, picking);

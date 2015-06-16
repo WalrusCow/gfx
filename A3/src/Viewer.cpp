@@ -46,6 +46,42 @@ void Viewer::initializeGL() {
   glClearColor(0.4, 0.4, 0.4, 0.0);
   glEnable(GL_DEPTH_TEST);
 
+
+  /************************************************/
+  float ambientLight[] = { 0.2, 0.2, 0.2, 1.0 };
+  float specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
+  float specularity[] = { 1.0, 1.0, 1.0, 1.0 };
+  float shininess[] = { 60.0 };
+  float lightPosition[] = { 0.0, 50.0, 50.0, 1.0 };
+
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_NORMALIZE);
+
+  // Enable lighting with one light source
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+
+  glEnable(GL_DEPTH_TEST);
+
+  // Objects have their color affected by the lighting
+  glShadeModel(GL_SMOOTH);
+
+  // Properties of the objects' materials
+  glMaterialfv(GL_FRONT, GL_SPECULAR, specularity);   // Reflectance
+  glMaterialfv(GL_FRONT, GL_SHININESS, shininess);    // Shininess
+
+  // Enable ambient light usage
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+
+  // Position of the light source
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  /************************************************/
+  /************************************************/
+  /************************************************/
+
   if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
     return;
@@ -383,7 +419,6 @@ QMatrix4x4 Viewer::getWalkMatrix() {
 }
 
 void Viewer::drawSphere(const QMatrix4x4& transform, const QColor& colour) {
-  std::cerr << "Drawing sphere" << std::endl;
   set_colour(colour);
 
   auto m = getCameraMatrix();
