@@ -35,7 +35,6 @@ void vCalcRotVec(float fNewX, float fNewY,
                  float fOldX, float fOldY,
                  float fDiameter,
                  float *fVecX, float *fVecY, float *fVecZ) {
-   long  nXOrigin, nYOrigin;
    float fNewVecX, fNewVecY, fNewVecZ,        /* Vector corresponding to new mouse location */
          fOldVecX, fOldVecY, fOldVecZ,        /* Vector corresponding to old mouse location */
          fLength;

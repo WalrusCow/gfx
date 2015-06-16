@@ -142,5 +142,10 @@ class Viewer : public QGLWidget {
   void initSphereData(float* vertexBuffer, float* normBuffer, double theta);
   void initCircleData(float* buffer, double radius, double theta);
 
+  // Rotate matrix mat by moving from start to end along trackball
+  void trackballRotate(const QVector2D& startCoords,
+                       const QVector2D& endCoords,
+                       QMatrix4x4* mat);
+
   void updateFaceCulling();
 };

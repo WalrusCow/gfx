@@ -193,7 +193,7 @@ QMatrix4x4 Viewer::getTransforms(int id) {
   return opMap[id];
 }
 
-void Viewer::mousePressEvent ( QMouseEvent * event ) {
+void Viewer::mousePressEvent (QMouseEvent* event) {
   auto buttonsDown = qApp->mouseButtons();
 
   lastMouseX = event->x();
@@ -228,7 +228,7 @@ void Viewer::mousePressEvent ( QMouseEvent * event ) {
   }
 }
 
-void Viewer::mouseReleaseEvent ( QMouseEvent * event ) {
+void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   (void)event;
   // Nothing to do (already pushed on stack)
   return;
@@ -260,6 +260,12 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     }
     if (buttons & Qt::MiddleButton) {
       puppetPosition.translate(0, 0, TRANSLATE_FACTOR * -dy);
+    }
+    if (buttons & Qt::RightButton) {
+      // Rotate in some horrible way.
+      QVector2D lastMouse(lastMouseX, lastMouseY);
+      QVector2D newMouse(event->x(), event->y());
+      trackballRotate(lastMouse, newMouse, &puppetRotation);
     }
     update();
   }
@@ -409,7 +415,7 @@ QMatrix4x4 Viewer::getWalkMatrix() {
 
 void Viewer::drawSphere(const QMatrix4x4& transform) {
 
-  auto modelMatrix = puppetPosition * puppetRotation * transform;
+  auto modelMatrix = puppetPosition * sceneRoot->get_transform() * puppetRotation * sceneRoot->get_inverse() * transform;
 
   auto vp = getCameraMatrix();
   mSphereBufferObject.bind();
@@ -501,4 +507,43 @@ void Viewer::resetJoints() {
 void Viewer::toggleShowCircle() {
   showCircle = !showCircle;
   update();
+}
+
+void Viewer::trackballRotate(const QVector2D& startCoords,
+                             const QVector2D& endCoords,
+                             QMatrix4x4* mat) {
+  // TODO: We could get these from a common location
+  QVector2D trackballCenter(width() / 2.0, height() / 2.0);
+  auto diam = std::min(width(), height()) / 2.0;
+
+  // Convert into coordinates centered at trackball center
+  auto start = (startCoords - trackballCenter);
+  auto end = (endCoords - trackballCenter);
+
+  end *= 2.0 / diam;
+  start *= 2.0 / diam;
+
+  // Vectors from center of "trackball" to points
+  QVector3D endVector(end[0], end[1], 1 - end[0]*end[0] - end[1]*end[1]);
+  QVector3D startVector(start[0], start[1], 1 - start[0]*start[0] - start[1]*start[1]);
+
+  // Cheat because vector would be const
+  for (auto vp : {&endVector, &startVector}) {
+    auto& v = *vp;
+    if (v[2] < 0) {
+      // Mouse outside trackball: rotation about Z
+      v /= std::sqrt(1 - v[2]);
+      v[2] = 0;
+    }
+    else {
+      v[2] = std::sqrt(v[2]);
+    }
+  }
+
+  // Vector to rotate about. Length of vector is angle of rotation in radians.
+  auto rotationVector = QVector3D::crossProduct(startVector, endVector);
+  rotationVector[0] = -rotationVector[0];
+  auto angleDeg = rotationVector.length() / (2 * M_PI) * 360;
+  rotationVector.normalize();
+  mat->rotate(angleDeg, rotationVector);
 }
