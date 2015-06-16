@@ -359,7 +359,7 @@ void Viewer::initSphereData(float* vertexBuffer, float* normBuffer, double theta
     for (int j = 0; j < 3; ++j) {
       // Point we are writing
       auto& pt = pts[j];
-      auto normal = pts[j].normalized();//QVector3D::crossProduct(pt, pts[(j + 1) % 3]);
+      auto normal = pts[j].normalized();
 
       // .. and each point has (x, y ,z)
       for (int i = 0; i < 3; ++i) {
@@ -415,7 +415,8 @@ QMatrix4x4 Viewer::getWalkMatrix() {
 
 void Viewer::drawSphere(const QMatrix4x4& transform) {
 
-  auto modelMatrix = puppetPosition * sceneRoot->get_transform() * puppetRotation * sceneRoot->get_inverse() * transform;
+  auto r = sceneRoot->get_transform() * puppetRotation * sceneRoot->get_inverse();
+  auto modelMatrix = puppetPosition * r * transform;
 
   auto vp = getCameraMatrix();
   mSphereBufferObject.bind();
@@ -545,5 +546,8 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
   rotationVector[0] = -rotationVector[0];
   auto angleDeg = rotationVector.length() / (2 * M_PI) * 360;
   rotationVector.normalize();
-  mat->rotate(angleDeg, rotationVector);
+  // Qt rotates on the right. We want the left.
+  QMatrix4x4 rotMat;
+  rotMat.rotate(angleDeg, rotationVector);
+  *mat = rotMat * *mat;
 }
