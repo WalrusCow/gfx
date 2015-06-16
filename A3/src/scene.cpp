@@ -80,9 +80,8 @@ GeometryNode::~GeometryNode() {
 }
 
 void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
-  std::cerr << "Walk gl geom " << m_name << std::endl;
   viewer->pushWalkMatrix(m_trans);
-  m_primitive->walk_gl(viewer, picking);
+  m_primitive->draw(viewer, m_material, picking);
   for (auto& child : children) {
     child->walk_gl(viewer, picking);
   }

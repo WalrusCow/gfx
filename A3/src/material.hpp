@@ -6,6 +6,7 @@ class Material {
  public:
   virtual ~Material();
   virtual void apply_gl() const = 0;
+  virtual QColor getColour() const = 0;
 
  protected:
   Material() {}
@@ -17,6 +18,8 @@ class PhongMaterial : public Material {
   virtual ~PhongMaterial();
 
   virtual void apply_gl() const;
+
+  QColor getColour() const override { return m_kd; }
 
  private:
   QColor m_kd;
