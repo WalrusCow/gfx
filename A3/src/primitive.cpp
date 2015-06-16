@@ -10,6 +10,6 @@ Primitive::~Primitive() {}
 
 Sphere::~Sphere() {}
 
-void Sphere::draw(Viewer* viewer, Material* material, bool picking) const {
-  viewer->drawSphere(viewer->getWalkMatrix(), *material);
+void Sphere::draw(Viewer* viewer, bool picking) const {
+  viewer->drawSphere(viewer->getWalkMatrix());
 }

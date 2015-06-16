@@ -110,10 +110,13 @@ void Viewer::initializeGL() {
   colourLoc = mProgram.uniformLocation("frag_colour");
   normMatrixLoc = mProgram.uniformLocation("normMatrix");
   lightPositionLoc = mProgram.uniformLocation("lightPosition");
-  ambientColourLoc = mProgram.uniformLocation("ambientColour");
+  ambientLightLoc = mProgram.uniformLocation("ambientLight");
   diffuseColourLoc = mProgram.uniformLocation("diffuseColour");
   specularColourLoc = mProgram.uniformLocation("specularColour");
   shininessLoc = mProgram.uniformLocation("shininess");
+
+  // Constant ambient light
+  mProgram.setUniformValue(ambientLightLoc, QVector3D(0.1, 0.1, 0.1));
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -276,10 +279,6 @@ QMatrix4x4 Viewer::getCameraMatrix() {
   return mPerspMatrix * vMatrix * mTransformMatrix;
 }
 
-void Viewer::set_colour(const QColor& col) {
-  mProgram.setUniformValue(colourLoc, col.red(), col.green(), col.blue());
-}
-
 void Viewer::paintGL() {
   // Clear framebuffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -288,8 +287,6 @@ void Viewer::paintGL() {
 
   // Draw scene recursively
   sceneRoot->walk_gl(this);
-
-  set_colour(QColor(1.0, 0.0, 0.0));
 
   draw_trackball_circle();
 }
@@ -302,7 +299,7 @@ void Viewer::draw_trackball_circle() {
   // You'll want to make the rest of the function conditional on
   // whether or not we want to draw the circle this time around.
 
-  set_colour(QColor(0.0, 0.0, 0.0));
+  setColour(QColor(0.0, 0.0, 0.0));
 
   // Set orthographic Matrix
   QMatrix4x4 orthoMatrix;
@@ -397,12 +394,7 @@ QMatrix4x4 Viewer::getWalkMatrix() {
   return walkStack.back();
 }
 
-void printVector(const QVector3D& v) {
-  std::cerr << "{"<<v[0]<<','<<v[1]<<','<<v[2]<<'}'<<std::endl;
-}
-
-void Viewer::drawSphere(const QMatrix4x4& transform, const Material& material) {
-  set_colour(material.getColour());
+void Viewer::drawSphere(const QMatrix4x4& transform) {
 
   auto vp = getCameraMatrix();
   mSphereBufferObject.bind();
@@ -414,13 +406,27 @@ void Viewer::drawSphere(const QMatrix4x4& transform, const Material& material) {
   mProgram.setUniformValue(mvpMatrixLoc, vp * transform);
   mProgram.setUniformValue(mvMatrixLoc, mvMatrix);
   mProgram.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
-  mProgram.setUniformValue(ambientColourLoc, QVector3D(0.125, 0.125, 0.125));
-  mProgram.setUniformValue(diffuseColourLoc, QVector3D(0.5, 0.5, 0.5));
-  mProgram.setUniformValue(specularColourLoc, QVector3D(1.0, 1.0, 1.0));
-  mProgram.setUniformValue(shininessLoc, 100.0f);
 
   // Light position shouldn't change: always on the eye
   mProgram.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
 
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
+}
+
+void Viewer::setDiffuseColour(const QColor& c) {
+  // Set colour to be white (it's multiplied by the actual colour)
+  setColour(QColor(255, 255, 255));
+  mProgram.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
+}
+
+void Viewer::setColour(const QColor& col) {
+  mProgram.setUniformValue(colourLoc, col.redF(), col.greenF(), col.blueF());
+}
+
+void Viewer::setSpecularColour(const QColor& c) {
+  mProgram.setUniformValue(specularColourLoc, c.redF(), c.greenF(), c.blueF());
+}
+
+void Viewer::setShininess(const double shininess) {
+  mProgram.setUniformValue(shininessLoc, (float) shininess);
 }

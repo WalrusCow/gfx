@@ -11,7 +11,7 @@ rootNode = gr.node('root')
 
 -- Useful constants
 noRotation = {0.0, 0.0, 0.0}
-red = gr.material({1.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 10)
+red = gr.material({1.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 100)
 blue = gr.material({0.0, 0.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 green = gr.material({0.0, 1.0, 0.0}, {0.1, 0.1, 0.1}, 10)
 white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)

@@ -2,11 +2,12 @@
 
 #include <QColor>
 
+class Viewer;
+
 class Material {
  public:
-  virtual ~Material();
-  virtual void apply_gl() const = 0;
-  virtual QColor getColour() const = 0;
+  virtual ~Material() {};
+  virtual void apply(Viewer* viewer) const = 0;
 
  protected:
   Material() {}
@@ -15,11 +16,8 @@ class Material {
 class PhongMaterial : public Material {
  public:
   PhongMaterial(const QColor& kd, const QColor& ks, double shininess);
-  virtual ~PhongMaterial();
 
-  virtual void apply_gl() const;
-
-  QColor getColour() const override { return m_kd; }
+  void apply(Viewer* viewer) const override;
 
  private:
   QColor m_kd;

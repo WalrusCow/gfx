@@ -2,7 +2,7 @@
 
 uniform vec3 frag_colour;
 
-uniform vec3 ambientColour;
+uniform vec3 ambientLight;
 uniform vec3 diffuseColour;
 uniform vec3 specularColour;
 uniform float shininess;
@@ -23,6 +23,7 @@ void main()
     vec3 specularIllumination = pow(
       max(0.0, dot(-reflect(lightDirection, normal), viewerDirection)),
       shininess) * specularColour;
-    vec3 newColour = frag_colour * (ambientColour + diffuseIllumination) + specularIllumination;
+    // Assume ka = 1
+    vec3 newColour =  frag_colour * (ambientLight + diffuseIllumination + specularIllumination);
     finalColour = vec4(newColour, 1);
 }

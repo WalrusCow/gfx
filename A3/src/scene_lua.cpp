@@ -175,9 +175,11 @@ int gr_material_cmd(lua_State* L) {
   }
   double shininess = luaL_checknumber(L, 3);
 
-  data->material = new PhongMaterial(QColor(kd[0], kd[1], kd[2]),
-                                     QColor(ks[0], ks[1], ks[2]),
-                                     shininess);
+  // Constructor only works with ints
+  QColor kdColour; kdColour.setRgbF(kd[0], kd[1], kd[2]);
+  QColor ksColour; ksColour.setRgbF(ks[0], ks[1], ks[2]);
+
+  data->material = new PhongMaterial(kdColour, ksColour, shininess);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);

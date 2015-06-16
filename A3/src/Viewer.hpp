@@ -41,11 +41,18 @@ class Viewer : public QGLWidget {
   QMatrix4x4 getTransforms(int id);
 
   // Draw a sphere with given transform and colour
-  void drawSphere(const QMatrix4x4& transform, const Material& material);
+  void drawSphere(const QMatrix4x4& transform);
 
   void pushWalkMatrix(const QMatrix4x4& matrix);
   void popWalkMatrix();
   QMatrix4x4 getWalkMatrix();
+
+  void setColour(const QColor& colour);
+  // These are the reflectance of the object.
+  // It is assumed that ka = 1
+  void setDiffuseColour(const QColor& colour);
+  void setSpecularColour(const QColor& colour);
+  void setShininess(const double shininess);
 
  protected:
   void initializeGL() override;
@@ -101,8 +108,6 @@ class Viewer : public QGLWidget {
 
   // Draw circle for trackball
   void draw_trackball_circle();
-  // Set colour for OpenGL drawing
-  void set_colour(const QColor& col);
 
   // For camera transform
   QMatrix4x4 mPerspMatrix;
@@ -118,7 +123,7 @@ class Viewer : public QGLWidget {
   QOpenGLVertexArrayObject mVao;
   QGLShaderProgram mProgram;
   int mvpMatrixLoc, mvMatrixLoc, normMatrixLoc, lightPositionLoc;
-  int ambientColourLoc, diffuseColourLoc, specularColourLoc, shininessLoc;
+  int ambientLightLoc, diffuseColourLoc, specularColourLoc, shininessLoc;
   int colourLoc;
 
   // Initialize openGL buffers

@@ -80,7 +80,14 @@ GeometryNode::~GeometryNode() {
 
 void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
   viewer->pushWalkMatrix(m_trans);
-  m_primitive->draw(viewer, m_material, picking);
+  if (!picking) {
+    m_material->apply(viewer);
+  }
+  else {
+    // Use unique colour
+  }
+  m_primitive->draw(viewer, picking);
+
   for (auto& child : children) {
     child->walk_gl(viewer, picking);
   }
