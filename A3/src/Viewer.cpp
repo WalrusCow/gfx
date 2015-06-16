@@ -44,7 +44,7 @@ void Viewer::initializeGL() {
 
   glShadeModel(GL_SMOOTH);
   glClearColor(0.4, 0.4, 0.4, 0.0);
-  glEnable(GL_DEPTH_TEST);
+  glFrontFace(GL_CW);
 
   if (!mProgram.addShaderFromSourceFile(QGLShader::Vertex, "shader.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
@@ -429,4 +429,48 @@ void Viewer::setSpecularColour(const QColor& c) {
 
 void Viewer::setShininess(const double shininess) {
   mProgram.setUniformValue(shininessLoc, (float) shininess);
+}
+
+void Viewer::toggleZBuffer() {
+  zBuffer = !zBuffer;
+  if (zBuffer) {
+    glEnable(GL_DEPTH_TEST);
+  } else {
+    glDisable(GL_DEPTH_TEST);
+  }
+  update();
+}
+
+void Viewer::toggleFrontfaceCull() {
+  frontfaceCull = !frontfaceCull;
+  updateFaceCulling();
+}
+
+void Viewer::toggleBackfaceCull() {
+  backfaceCull = !backfaceCull;
+  updateFaceCulling();
+}
+
+void Viewer::updateFaceCulling() {
+  glEnable(GL_CULL_FACE);
+  if (frontfaceCull && backfaceCull)
+    glCullFace(GL_FRONT_AND_BACK);
+  else if (frontfaceCull)
+    glCullFace(GL_FRONT);
+  else if (backfaceCull)
+    glCullFace(GL_BACK);
+  else
+    glDisable(GL_CULL_FACE);
+  update();
+}
+
+
+void Viewer::resetPuppetOrientation() {
+}
+void Viewer::resetPuppetPosition() {
+}
+void Viewer::resetJoints() {
+}
+
+void Viewer::toggleShowCircle() {
 }

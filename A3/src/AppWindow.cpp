@@ -37,22 +37,24 @@ void AppWindow::keyPressEvent(QKeyEvent* event) {
 void AppWindow::createActions() {
   newMenuAction("Reset Position", nullptr, "Reset puppet position",
       quitMenuActions, Qt::Key_I, [this] () {
-    // TODO: Reset puppet position
+    viewer->resetPuppetPosition();
   });
 
   newMenuAction("Reset Orientation", nullptr, "Reset puppet orientation",
       quitMenuActions, Qt::Key_O, [this] () {
-    // TODO: Reset puppet orientation
+    viewer->resetPuppetOrientation();
   });
 
   newMenuAction("Reset Joints", nullptr, "Reset joints and undo/redo stack",
       quitMenuActions, Qt::Key_N, [this] () {
-    // TODO: Reset joints
+    viewer->resetJoints();
   });
 
   newMenuAction("Reset All", nullptr, "Reset joints and puppet",
       quitMenuActions, Qt::Key_A, [this] () {
-    // TODO: Reset all
+    viewer->resetJoints();
+    viewer->resetPuppetOrientation();
+    viewer->resetPuppetPosition();
   });
 
   newMenuAction("&Quit", nullptr, "Exit the program",
@@ -63,43 +65,47 @@ void AppWindow::createActions() {
   QActionGroup* modeGroup = new QActionGroup(this);
   newMenuAction("&Position/Orientation", modeGroup, "Move or rotate the puppet",
       modeMenuActions, Qt::Key_P, [this] () {
-    // TODO: Enable position/orientation mode
+    viewer->setMode(Viewer::Mode::POSITION);
   });
   modeGroup->actions().first()->setChecked(true);
 
   newMenuAction("&Joints", modeGroup, "Select and rotate joints",
       modeMenuActions, Qt::Key_J, [this] () {
-      // TODO: Enable Joint mode
+    viewer->setMode(Viewer::Mode::JOINTS);
   });
 
   newMenuAction("&Undo", nullptr, "Undo last action",
       editMenuActions, Qt::Key_U, [this] () {
-    // TODO: Undo
+    if (!viewer->undoOp()) {
+      // Failed: notify UI
+    }
   });
 
   newMenuAction("&Redo", nullptr, "Redo last action",
       editMenuActions, Qt::Key_R, [this] () {
-    // TODO: redo
+    if (!viewer->redoOp()) {
+      // Failed: notify UI
+    }
   });
 
   newMenuAction("&Circle", nullptr, "Draw circle for trackball",
       optionsMenuActions, Qt::Key_C, [this] () {
-    // TODO
+    viewer->toggleShowCircle();
   })->setCheckable(true);
 
   newMenuAction("&Z-Buffer", nullptr, "Draw puppet with Z-buffer",
       optionsMenuActions, Qt::Key_Z, [this] () {
-    // TODO
+    viewer->toggleZBuffer();
   })->setCheckable(true);
 
   newMenuAction("&Backface Cull", nullptr, "Remove backfacing polygons",
       optionsMenuActions, Qt::Key_B, [this] () {
-    // TODO
+    viewer->toggleBackfaceCull();
   })->setCheckable(true);
 
   newMenuAction("&Frontface Cull", nullptr, "Remove frontfacing polygons",
       optionsMenuActions, Qt::Key_F, [this] () {
-    // TODO
+    viewer->toggleFrontfaceCull();
   })->setCheckable(true);
 }
 

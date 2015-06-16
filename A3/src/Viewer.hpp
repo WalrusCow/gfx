@@ -32,6 +32,13 @@ class Viewer : public QGLWidget {
 
   enum class Mode { POSITION, JOINTS };
   void setMode(Mode mode);
+  void resetPuppetPosition();
+  void resetPuppetOrientation();
+  void resetJoints();
+  void toggleShowCircle();
+  void toggleZBuffer();
+  void toggleFrontfaceCull();
+  void toggleBackfaceCull();
 
   bool redoOp();
   // Pop a matrix for when walking (or can we use normal stack?)
@@ -66,6 +73,10 @@ class Viewer : public QGLWidget {
   // TODO: Names
   const double theta = M_PI / 40;
   const int numTriangles = 2 * (2 * M_PI)/theta * M_PI/theta;
+
+  bool zBuffer = false;
+  bool backfaceCull = false;
+  bool frontfaceCull = false;
 
   // For dragging
   int lastMouseX;
@@ -129,4 +140,6 @@ class Viewer : public QGLWidget {
   // Initialize openGL buffers
   void initSphereData(float* vertexBuffer, float* normBuffer, double theta);
   void initCircleData(float* buffer, double radius, double theta);
+
+  void updateFaceCulling();
 };
