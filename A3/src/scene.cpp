@@ -12,6 +12,15 @@ SceneNode::SceneNode(const std::string& name) : m_name(name) {
 
 SceneNode::~SceneNode() {}
 
+void SceneNode::buildJointMap(std::unordered_map<int, JointNode*>* map) {
+  for (auto& child : children) {
+    if (child->is_joint()) {
+      map->insert({child->id, dynamic_cast<JointNode*>(child.get())});
+    }
+    child->buildJointMap(map);
+  }
+}
+
 void SceneNode::walk_gl(Viewer* viewer, bool picking) const {
   viewer->pushWalkMatrix(m_trans);
   for (auto& child : children) {
@@ -84,10 +93,6 @@ void JointNode::walk_gl(Viewer* viewer, bool picking) const {
   xRotation = std::max(xJoint.min, std::min(xJoint.max, xRotation));
   yRotation = std::max(yJoint.min, std::min(yJoint.max, yRotation));
 
-  if (xRotation > 0) {
-    std::cerr << m_name << " rotate X " << xRotation << std::endl;
-  }
-
   QMatrix4x4 xRotMat;
   xRotMat.rotate(xRotation, {1, 0, 0});
 
@@ -140,7 +145,6 @@ void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
       g = (id*4 & 0x0000ff00) >> 8;
       b = (id*4 & 0x00ff0000) >> 16;
     }
-    std::cerr <<m_name<< " unique color "<<r<<','<<g<<','<<b<<" from id " << id<<std::endl;
     viewer->setDiffuseColour({r, g, b});
   }
   m_primitive->draw(viewer, picking);

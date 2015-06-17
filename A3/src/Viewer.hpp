@@ -80,6 +80,7 @@ class Viewer : public QGLWidget {
   // For dragging
   int lastMouseX;
   int lastMouseY;
+  std::unordered_map<int, JointNode*> jointMap;
 
   // For walking
   std::list<QMatrix4x4> walkStack;
@@ -95,9 +96,6 @@ class Viewer : public QGLWidget {
   // What mode are we in for operations?
   Mode currentMode = Mode::POSITION;
 
-  // Add an operation affecting some set of ids to the undo/redo stack
-  void addOp(std::set<int> ids);
-
   struct Op {
     Op(double x, double y) : xAngle(x), yAngle(y) {}
     Op() : xAngle(0), yAngle(0) {}
@@ -106,19 +104,16 @@ class Viewer : public QGLWidget {
     double xAngle, yAngle;
   };
 
-  struct OpStackEntry {
-    OpStackEntry(std::set<int> ids, const Op& op)
-        : ids(std::move(ids)), op(op) {}
-    OpStackEntry(){}
-
-    std::set<int> ids;
-    Op op;
-  };
+  typedef std::unordered_map<int, Op> OpStackEntry;
   std::vector<OpStackEntry> opStack;
   // Where in the stack we are
   int opStackPosition = -1;
   // Track each object's net transformations
   std::unordered_map<int, Op> opMap;
+  void updateFromStackTop();
+
+  // Add an operation affecting some set of ids to the undo/redo stack
+  void addOp(OpStackEntry stackEntry);
 
   // Puppet position and rotation matrices (no need for undo/redo)
   QMatrix4x4 puppetPosition;

@@ -2,6 +2,7 @@
 
 #include <list>
 #include <memory>
+#include <unordered_map>
 #include <QVector3D>
 #include <QMatrix4x4>
 
@@ -9,6 +10,7 @@
 #include "material.hpp"
 
 class Viewer;
+class JointNode;
 
 class SceneNode {
  public:
@@ -51,6 +53,7 @@ class SceneNode {
   void translate(const QVector3D& amount);
 
   void setParent(SceneNode* parent) { this->parent = parent; }
+  void buildJointMap(std::unordered_map<int, JointNode*>* map);
 
   // Returns true if and only if this node is a JointNode
   virtual bool is_joint() const;
@@ -89,7 +92,6 @@ class JointNode : public SceneNode {
     double min, init, max;
   };
 
- protected:
   JointRange xJoint, yJoint;
 };
 

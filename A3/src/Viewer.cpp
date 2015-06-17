@@ -91,6 +91,12 @@ QSize Viewer::minimumSizeHint() const { return QSize(50, 50); }
 QSize Viewer::sizeHint() const { return QSize(500, 500); }
 
 void Viewer::initializeGL() {
+  sceneRoot->buildJointMap(&jointMap);
+  for (auto& p : jointMap) {
+    auto id = p.first;
+    opMap.insert({id, Op()});
+  }
+
   QGLFormat glFormat = QGLWidget::format();
   if (!glFormat.sampleBuffers()) {
     std::cerr << "Could not enable sample buffers." << std::endl;
@@ -186,13 +192,15 @@ void Viewer::resizeGL(int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-void Viewer::addOp(std::set<int> ids) {
+void Viewer::addOp(OpStackEntry stackEntry) {
   // Resize to current size
   opStack.resize(opStackPosition + 1);
 
-  opStack.emplace_back(std::move(ids), Op());
+  opStack.emplace_back(std::move(stackEntry));
   // Next position please
   opStackPosition += 1;
+  // Update op map
+  updateFromStackTop();
 }
 
 bool Viewer::redoOp() {
@@ -202,15 +210,7 @@ bool Viewer::redoOp() {
   }
 
   opStackPosition += 1;
-
-  // Redo in map
-  auto& entry = opStack[opStackPosition];
-  auto xAngle = entry.op.xAngle;
-  auto yAngle = entry.op.yAngle;
-  for (int i : entry.ids) {
-    opMap[i].xAngle += xAngle;
-    opMap[i].yAngle += yAngle;
-  }
+  updateFromStackTop();
   update();
   return true;
 }
@@ -222,20 +222,32 @@ bool Viewer::undoOp() {
     return false;
   }
 
-  // Undo in map
-  auto& entry = opStack[opStackPosition];
-  auto xAngle = entry.op.xAngle;
-  auto yAngle = entry.op.yAngle;
-  for (int i : entry.ids) {
-    opMap[i].xAngle -= xAngle;
-    opMap[i].yAngle -= yAngle;
-  }
-
   // Don't actually remove from the stack - just decrease counter
   // That way we can increase counter to redo
   opStackPosition -= 1;
+  updateFromStackTop();
   update();
   return true;
+}
+
+void Viewer::updateFromStackTop() {
+  if (opStackPosition < 0) {
+    // Reset everything
+    for (auto& p : opMap) {
+      p.second.xAngle = 0;
+      p.second.yAngle = 0;
+    }
+    return;
+  }
+
+  auto& entry = opStack[opStackPosition];
+  for (auto& p : entry) {
+    auto xAngle = p.second.xAngle;
+    auto yAngle = p.second.yAngle;
+    auto id = p.first;
+    opMap[id].xAngle = xAngle;
+    opMap[id].yAngle = yAngle;
+  }
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {
@@ -260,10 +272,8 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
   if (clickedButton == Qt::LeftButton) {
     // We can pick now: Only holding left button
     auto id = findPickId(event->x(), event->y());
-    std::cerr << "Found id " << id << std::endl;
     id = sceneRoot->getJointForId(id);
 
-    std::cerr << "Found joint id " << id << std::endl;
     if (id > 0 && pickedIds.find(id) == pickedIds.end()) {
       // Not in the set: Add to set
       pickedIds.insert(id);
@@ -271,14 +281,20 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
     else {
       pickedIds.erase(id);
     }
-    for (auto i : pickedIds) {
-      std::cerr<<i<<',';
-    }
-    std::cerr << std::endl;
     update();
   }
   else if (pickedIds.size() > 0) {
-    addOp(pickedIds);
+    OpStackEntry stackEntry;
+    for (auto& p : opMap) {
+      auto id = p.first;
+      // Store current state initially
+      Op op;
+      if (opMap.find(id) != opMap.end()) {
+        op = opMap[id];
+      }
+      stackEntry.insert({id, op});
+    }
+    addOp(std::move(stackEntry));
   }
 }
 
@@ -332,15 +348,21 @@ void Viewer::mouseMoveEvent(QMouseEvent* event) {
     // Right button is for y-axis rotation (head turning)
     auto yAngle = (buttons & Qt::RightButton) ? dx * ROTATE_FACTOR : 0;
 
+    auto& stackEntry = opStack[opStackPosition];
     for (int id : pickedIds) {
-      // If we don't have any ops yet for this one
-      if (opMap.find(id) == opMap.end()) opMap[id] = Op();
-      opMap[id].xAngle += xAngle;
-      opMap[id].yAngle += yAngle;
+      // X: Enforce limits
+      auto& xJoint = jointMap[id]->xJoint;
+      auto newAngle = stackEntry[id].xAngle + xAngle;
+      newAngle = std::min(xJoint.max, std::max(xJoint.min, newAngle));
+      stackEntry[id].xAngle = newAngle;
+
+      // Y: Enforce limits
+      auto& yJoint = jointMap[id]->yJoint;
+      newAngle = stackEntry[id].yAngle + yAngle;
+      newAngle = std::min(yJoint.max, std::max(yJoint.min, newAngle));
+      stackEntry[id].yAngle = newAngle;
     }
-    // Update the top of the stack
-    opStack[opStackPosition].op.xAngle += xAngle;
-    opStack[opStackPosition].op.yAngle += yAngle;
+    updateFromStackTop();
     update();
   }
 
