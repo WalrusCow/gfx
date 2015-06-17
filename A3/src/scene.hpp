@@ -41,6 +41,9 @@ class SceneNode {
     });
   }
 
+  int getJointForId(int id);
+  int getJointId() const;
+
   // Callbacks to be implemented.
   // These will be called from Lua.
   void rotate(char axis, double angle);
@@ -53,9 +56,9 @@ class SceneNode {
   virtual bool is_joint() const;
 
   SceneNode* parent = nullptr;
+  int id;
 
  protected:
-  int m_id;
   // Useful for picking
   std::string m_name;
 

@@ -258,6 +258,10 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
   if (clickedButton == Qt::LeftButton) {
     // We can pick now: Only holding left button
     auto id = findPickId(event->x(), event->y());
+
+    id = sceneRoot->getJointForId(id);
+    // Now to use the jointId for everything
+
     std::cerr << "Found id " << id << std::endl;
     if (id > 0 && pickedIds.find(id) == pickedIds.end()) {
       // Not in the set: Add to set

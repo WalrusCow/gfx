@@ -6,7 +6,7 @@
 int SceneNode::nextId = 1;
 
 SceneNode::SceneNode(const std::string& name) : m_name(name) {
-  m_id = nextId;
+  id = nextId;
   nextId += 1;
 }
 
@@ -50,6 +50,28 @@ bool SceneNode::is_joint() const {
   return false;
 }
 
+int SceneNode::getJointForId(int id) {
+  if (id == this->id && parent && parent->parent && parent-parent->is_joint()) {
+    return parent->parent->id;
+  }
+  else {
+    for (auto& child : children) {
+      int i = child->getJointForId(id);
+      if (i > 0) {
+        return i;
+      }
+    }
+  }
+  return 0;
+}
+
+int SceneNode::getJointId() const {
+  if (parent && parent->parent && parent-parent->is_joint()) {
+    return parent->parent->id;
+  }
+  return 0;
+}
+
 JointNode::JointNode(const std::string& name) : SceneNode(name) {
 }
 
@@ -86,7 +108,7 @@ GeometryNode::~GeometryNode() {
 void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
   viewer->pushWalkMatrix(m_trans);
   if (!picking) {
-    m_material->apply(viewer, m_id);
+    m_material->apply(viewer, getJointId());
   }
   else {
     // Geometry nodes are under a containing node which is under
@@ -95,11 +117,11 @@ void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
     r = g = b = 0;
     if (parent && parent->parent && parent->parent->is_joint()) {
       // Use unique colour
-      r = m_id & 0x000000ff;
-      g = (m_id & 0x0000ff00) >> 8;
-      b = (m_id & 0x00ff0000) >> 16;
+      r = id & 0x000000ff;
+      g = (id & 0x0000ff00) >> 8;
+      b = (id & 0x00ff0000) >> 16;
     }
-    std::cerr <<m_name<< " unique color "<<r<<','<<g<<','<<b<<" from id " << m_id<<std::endl;
+    std::cerr <<m_name<< " unique color "<<r<<','<<g<<','<<b<<" from id " << id<<std::endl;
     viewer->setDiffuseColour({r, g, b});
   }
   m_primitive->draw(viewer, picking);
