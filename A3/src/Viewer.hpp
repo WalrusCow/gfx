@@ -49,6 +49,9 @@ class Viewer : public QGLWidget {
 
   void pushWalkMatrix(const QMatrix4x4& matrix);
   void popWalkMatrix();
+  double getXRotationAngle(int id);
+  double getYRotationAngle(int id);
+
   QMatrix4x4 getWalkMatrix();
 
   // These are the reflectance of the object.

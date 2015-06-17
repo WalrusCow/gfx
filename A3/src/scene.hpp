@@ -90,7 +90,7 @@ class JointNode : public SceneNode {
   };
 
  protected:
-  JointRange m_joint_x, m_joint_y;
+  JointRange xJoint, yJoint;
 };
 
 class GeometryNode : public SceneNode {

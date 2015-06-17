@@ -79,7 +79,26 @@ JointNode::~JointNode() {
 }
 
 void JointNode::walk_gl(Viewer* viewer, bool picking) const {
-  SceneNode::walk_gl(viewer, picking);
+  auto xRotation = viewer->getXRotationAngle(id);
+  auto yRotation = viewer->getYRotationAngle(id);
+  xRotation = std::max(xJoint.min, std::min(xJoint.max, xRotation));
+  yRotation = std::max(yJoint.min, std::min(yJoint.max, yRotation));
+
+  if (xRotation > 0) {
+    std::cerr << m_name << " rotate X " << xRotation << std::endl;
+  }
+
+  QMatrix4x4 xRotMat;
+  xRotMat.rotate(xRotation, {1, 0, 0});
+
+  QMatrix4x4 yRotMat;
+  yRotMat.rotate(yRotation, {0, 1, 0});
+
+  viewer->pushWalkMatrix(m_trans * xRotMat * yRotMat);
+  for (auto& child : children) {
+    child->walk_gl(viewer, picking);
+  }
+  viewer->popWalkMatrix();
 }
 
 bool JointNode::is_joint() const {
@@ -87,15 +106,15 @@ bool JointNode::is_joint() const {
 }
 
 void JointNode::set_joint_x(double min, double init, double max) {
-  m_joint_x.min = min;
-  m_joint_x.init = init;
-  m_joint_x.max = max;
+  xJoint.min = min;
+  xJoint.init = init;
+  xJoint.max = max;
 }
 
 void JointNode::set_joint_y(double min, double init, double max) {
-  m_joint_y.min = min;
-  m_joint_y.init = init;
-  m_joint_y.max = max;
+  yJoint.min = min;
+  yJoint.init = init;
+  yJoint.max = max;
 }
 
 GeometryNode::GeometryNode(const std::string& name, Primitive* primitive)

@@ -85,7 +85,6 @@ void Viewer::updateFaceCulling() {
   update();
 }
 
-
 QSize Viewer::minimumSizeHint() const { return QSize(50, 50); }
 
 QSize Viewer::sizeHint() const { return QSize(500, 500); }
@@ -327,9 +326,9 @@ void Viewer::mouseMoveEvent(QMouseEvent* event) {
   // Take action if we are holdin' it down and have picked something
   else if ((buttons & (Qt::MiddleButton|Qt::RightButton)) && pickedIds.size()) {
     // Middle button is for x-axis rotation (most limbs)
-    auto xAngle = (buttons & Qt::MiddleButton) ? dx * ROTATE_FACTOR : 0;
+    auto xAngle = (buttons & Qt::MiddleButton) ? dy * ROTATE_FACTOR : 0;
     // Right button is for y-axis rotation (head turning)
-    auto yAngle = (buttons & Qt::RightButton) ? dy * ROTATE_FACTOR : 0;
+    auto yAngle = (buttons & Qt::RightButton) ? dx * ROTATE_FACTOR : 0;
 
     for (int id : pickedIds) {
       // If we don't have any ops yet for this one
@@ -340,6 +339,7 @@ void Viewer::mouseMoveEvent(QMouseEvent* event) {
     // Update the top of the stack
     opStack[opStackPosition].op.xAngle += xAngle;
     opStack[opStackPosition].op.yAngle += yAngle;
+    update();
   }
 
   // Store mouse location again
@@ -569,4 +569,18 @@ int Viewer::findPickId(int x, int y) {
   glReadPixels(x, height()-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
   glEnable(GL_DITHER);
   return data[0] + (data[1] * 256) + (data[2] * 256*256);
+}
+
+double Viewer::getXRotationAngle(int id) {
+  if (opMap.find(id) == opMap.end()) {
+    return 0;
+  }
+  return opMap[id].xAngle;
+}
+
+double Viewer::getYRotationAngle(int id) {
+  if (opMap.find(id) == opMap.end()) {
+    return 0;
+  }
+  return opMap[id].yAngle;
 }
