@@ -44,9 +44,6 @@ class Viewer : public QGLWidget {
   // Pop a matrix for when walking (or can we use normal stack?)
   bool undoOp();
 
-  // Get the net transforms for the object with given id
-  QMatrix4x4 getTransforms(int id);
-
   // Draw a sphere with given transform and colour
   void drawSphere(const QMatrix4x4& transform, bool picking=false);
 
@@ -86,7 +83,6 @@ class Viewer : public QGLWidget {
   std::list<QMatrix4x4> walkStack;
 
   // Ids we have currently picked
-  // TODO: Picking
   std::set<int> pickedIds;
   int findPickId(int x, int y);
 
@@ -97,21 +93,29 @@ class Viewer : public QGLWidget {
   Mode currentMode = Mode::POSITION;
 
   // Add an operation affecting some set of ids to the undo/redo stack
-  void doOp(std::set<int> ids, QMatrix4x4 matrix);
+  void addOp(std::set<int> ids);
+
+  struct Op {
+    Op(double x, double y) : xAngle(x), yAngle(y) {}
+    Op() : xAngle(0), yAngle(0) {}
+    Op(const Op& other) : xAngle(other.xAngle), yAngle(other.yAngle) {}
+    // Track x and y angles separately
+    double xAngle, yAngle;
+  };
 
   struct OpStackEntry {
-    OpStackEntry(std::set<int> ids, QMatrix4x4 matrix)
-        : ids(std::move(ids)), matrix(std::move(matrix)) {}
+    OpStackEntry(std::set<int> ids, const Op& op)
+        : ids(std::move(ids)), op(op) {}
     OpStackEntry(){}
 
     std::set<int> ids;
-    QMatrix4x4 matrix;
+    Op op;
   };
   std::vector<OpStackEntry> opStack;
   // Where in the stack we are
   int opStackPosition = -1;
   // Track each object's net transformations
-  std::unordered_map<int, QMatrix4x4> opMap;
+  std::unordered_map<int, Op> opMap;
 
   // Puppet position and rotation matrices (no need for undo/redo)
   QMatrix4x4 puppetPosition;

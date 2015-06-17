@@ -14,6 +14,7 @@
 
 namespace {
 const double TRANSLATE_FACTOR = 0.1;
+const double ROTATE_FACTOR = 2;
 }
 
 Viewer::Viewer(const QGLFormat& format,
@@ -25,8 +26,6 @@ Viewer::Viewer(const QGLFormat& format,
                mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
                mVao(this) {
   walkStack.push_back(QMatrix4x4());
-  pickedIds.insert(17);
-  doOp(pickedIds, QMatrix4x4());
 }
 
 Viewer::~Viewer() {}
@@ -187,21 +186,13 @@ void Viewer::resizeGL(int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-void Viewer::doOp(std::set<int> ids, QMatrix4x4 matrix) {
+void Viewer::addOp(std::set<int> ids) {
+  // Resize to current size
+  opStack.resize(opStackPosition + 1);
+
+  opStack.emplace_back(std::move(ids), Op());
+  // Next position please
   opStackPosition += 1;
-
-  if (opStackPosition + 1 < (int) opStack.size()) {
-    // Clear next entries
-    opStack.resize(opStackPosition + 1);
-  }
-
-  // Modify the op map to include latest change
-  for (int id : ids) {
-    opMap[id] = opMap[id] * matrix;
-  }
-
-  // Push to end
-  opStack.emplace_back(std::move(ids), std::move(matrix));
 }
 
 bool Viewer::redoOp() {
@@ -214,9 +205,11 @@ bool Viewer::redoOp() {
 
   // Redo in map
   auto& entry = opStack[opStackPosition];
-  auto m = entry.matrix;
+  auto xAngle = entry.op.xAngle;
+  auto yAngle = entry.op.yAngle;
   for (int i : entry.ids) {
-    opMap[i] = opMap[i] * m;
+    opMap[i].xAngle += xAngle;
+    opMap[i].yAngle += yAngle;
   }
   return true;
 }
@@ -230,9 +223,11 @@ bool Viewer::undoOp() {
 
   // Undo in map
   auto& entry = opStack[opStackPosition];
-  auto m = entry.matrix.inverted();
+  auto xAngle = entry.op.xAngle;
+  auto yAngle = entry.op.yAngle;
   for (int i : entry.ids) {
-    opMap[i] = opMap[i] * m;
+    opMap[i].xAngle -= xAngle;
+    opMap[i].yAngle -= yAngle;
   }
 
   // Don't actually remove from the stack - just decrease counter
@@ -241,35 +236,30 @@ bool Viewer::undoOp() {
   return true;
 }
 
-QMatrix4x4 Viewer::getTransforms(int id) {
-  // Retrieve all transforms for the given id
-  return opMap[id];
-}
-
 void Viewer::mousePressEvent(QMouseEvent* event) {
-  auto buttonsDown = qApp->mouseButtons();
 
   lastMouseX = event->x();
   lastMouseY = event->y();
 
   if (currentMode == Mode::POSITION) {
-    // TODO: I think we can do nothing, since we don't have to keep stack
+    // We can do nothing, since we don't have to keep stack
     return;
   }
 
+  auto buttonsDown = qApp->mouseButtons();
   auto clickedButton = event->button();
-  // If there are additional buttons held other than the one that was down
-  if ((buttonsDown & ~clickedButton) != Qt::NoButton) {
-    // Then we are pressing a second button: nothing to do (else we would get
-    // bizarre behaviour)
+  bool holdingOther = (buttonsDown & ~clickedButton);
+
+  if (clickedButton == Qt::LeftButton && holdingOther) {
+    // Do not allow picking while holding other buttons
     return;
   }
 
-  if (event->button() == Qt::LeftButton) {
-    // We can pick now
+  if (clickedButton == Qt::LeftButton) {
+    // We can pick now: Only holding left button
     auto id = findPickId(event->x(), event->y());
     std::cerr << "Found id " << id << std::endl;
-    if (id !=0 && pickedIds.find(id) == pickedIds.end()) {
+    if (id > 0 && pickedIds.find(id) == pickedIds.end()) {
       // Not in the set: Add to set
       pickedIds.insert(id);
     }
@@ -281,12 +271,9 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
     }
     std::cerr << std::endl;
     update();
-    return;
   }
   else if (pickedIds.size() > 0) {
-    // We have picked at least one thing or are in position mode
-    // begin the operation of dragging etc
-    doOp(pickedIds, QMatrix4x4());
+    addOp(pickedIds);
   }
 }
 
@@ -306,7 +293,7 @@ void Viewer::mouseReleaseEvent (QMouseEvent* event) {
   }
 }
 
-void Viewer::mouseMoveEvent (QMouseEvent* event) {
+void Viewer::mouseMoveEvent(QMouseEvent* event) {
   // So, while moving... update the top of the stack.
   int dx = event->x() - lastMouseX;
   // Y coordinates on screen are upside down
@@ -320,34 +307,38 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     if (buttons & Qt::LeftButton) {
       puppetPosition.translate(TRANSLATE_FACTOR * dx, TRANSLATE_FACTOR * dy, 0);
     }
+    // Middle button translates puppet in Z
     if (buttons & Qt::MiddleButton) {
       puppetPosition.translate(0, 0, TRANSLATE_FACTOR * -dy);
     }
+    // Right button rotates puppet according to some horrible trackball stuff
     if (buttons & Qt::RightButton) {
-      // Rotate in some horrible way.
       QVector2D lastMouse(lastMouseX, lastMouseY);
       QVector2D newMouse(event->x(), event->y());
       trackballRotate(lastMouse, newMouse, &puppetRotation);
     }
     update();
   }
-  else if (pickedIds.size() > 0) {
-    std::cerr << pickedIds.size()<<std::endl;
-    // Joints mode
-    // Only do anything if we have picked at least one item
+  // Joints mode
+  // Take action if we are holdin' it down and have picked something
+  else if ((buttons & (Qt::MiddleButton|Qt::RightButton)) && pickedIds.size()) {
+    // Middle button is for x-axis rotation (most limbs)
+    auto xAngle = (buttons & Qt::MiddleButton) ? dx * ROTATE_FACTOR : 0;
+    // Right button is for y-axis rotation (head turning)
+    auto yAngle = (buttons & Qt::RightButton) ? dy * ROTATE_FACTOR : 0;
 
-    QMatrix4x4 op;
-    op.rotate(dx * M_PI/40, {1,0,0});//= doGradualOp(dx, dy);
     for (int id : pickedIds) {
-      if (opMap.find(id) == opMap.end())
-        opMap[id] = op;
-      else
-        opMap[id] = opMap[id] * op;
+      // If we don't have any ops yet for this one
+      if (opMap.find(id) == opMap.end()) opMap[id] = Op();
+      opMap[id].xAngle += xAngle;
+      opMap[id].yAngle += yAngle;
     }
-    // And update the stack as well
-    opStack[opStackPosition].matrix *= op;
+    // Update the top of the stack
+    opStack[opStackPosition].op.xAngle += xAngle;
+    opStack[opStackPosition].op.yAngle += yAngle;
   }
 
+  // Store mouse location again
   lastMouseX = event->x();
   lastMouseY = event->y();
 }
