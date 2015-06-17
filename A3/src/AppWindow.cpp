@@ -21,6 +21,7 @@ AppWindow::AppWindow(std::unique_ptr<SceneNode> rootNode) {
 
   createActions();
   createMenu();
+  statusBar()->showMessage(tr(""), 1);
 }
 
 void AppWindow::keyPressEvent(QKeyEvent* event) {
@@ -77,14 +78,14 @@ void AppWindow::createActions() {
   newMenuAction("&Undo", nullptr, "Undo last action",
       editMenuActions, Qt::Key_U, [this] () {
     if (!viewer->undoOp()) {
-      // Failed: notify UI
+      statusBar()->showMessage(tr("Nothing to undo!"), 1000);
     }
   });
 
   newMenuAction("&Redo", nullptr, "Redo last action",
       editMenuActions, Qt::Key_R, [this] () {
     if (!viewer->redoOp()) {
-      // Failed: notify UI
+      statusBar()->showMessage(tr("Nothing to redo!"), 1000);
     }
   });
 

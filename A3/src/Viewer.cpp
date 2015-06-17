@@ -211,6 +211,7 @@ bool Viewer::redoOp() {
     opMap[i].xAngle += xAngle;
     opMap[i].yAngle += yAngle;
   }
+  update();
   return true;
 }
 
@@ -233,6 +234,7 @@ bool Viewer::undoOp() {
   // Don't actually remove from the stack - just decrease counter
   // That way we can increase counter to redo
   opStackPosition -= 1;
+  update();
   return true;
 }
 

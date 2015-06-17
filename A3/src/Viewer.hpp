@@ -41,7 +41,6 @@ class Viewer : public QGLWidget {
   void toggleBackfaceCull();
 
   bool redoOp();
-  // Pop a matrix for when walking (or can we use normal stack?)
   bool undoOp();
 
   // Draw a sphere with given transform and colour
