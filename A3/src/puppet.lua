@@ -103,7 +103,7 @@ rightLeg:translate(torsoScale[1] * 0.8, -torsoScale[2] * 0.70, 0)
 torso:add_child(leftLeg)
 torso:add_child(rightLeg)
 
-neckRot = {0.0, 0.0, 90}
+neckRot = {0.0, 0.0, 45}
 neckJoint = gr.joint('NeckJoint', neckRot, noRotation)
 neckJoint:translate(0, shouldersScale[2], 0)
 shoulders:add_child(neckJoint)
@@ -112,8 +112,8 @@ neckScale = {0.4, 0.6, 0.4}
 neck = makeDrawableNode('Neck', blue, neckScale);
 neckJoint:add_child(neck)
 
-headTilt = {-80, 0, 75}
-headRot = {-90, 0, 90}
+headTilt = {-45, 0, 75}
+headRot = {-85, 0, 85}
 headJoint = gr.joint('HeadJoint', headTilt, headRot)
 headJoint:translate(0, neckScale[2], 0)
 neck:add_child(headJoint)
