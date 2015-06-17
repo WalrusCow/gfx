@@ -14,6 +14,7 @@ noRotation = {0.0, 0.0, 0.0}
 red = gr.material({1.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 100)
 blue = gr.material({0.0, 0.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 green = gr.material({0.0, 1.0, 0.0}, {0.1, 0.1, 0.1}, 10)
+cyan = gr.material({0.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 
 function makeArm(name)
@@ -78,7 +79,7 @@ function makeDrawableNode(name, material, scale)
 end
 
 torsoScale = {1.0, 3.0, 1.0}
-torso = makeDrawableNode('Torso', red, torsoScale)
+torso = makeDrawableNode('Torso', cyan, torsoScale)
 rootNode:add_child(torso)
 
 shouldersScale = {1.6, 0.6, 0.6}
@@ -106,16 +107,14 @@ neckJoint:translate(0, shouldersScale[2], 0)
 shoulders:add_child(neckJoint)
 
 neckScale = {0.4, 0.6, 0.4}
-neck = gr.sphere('NeckDraw')
-neck:set_material(blue)
-neck:scale(unpack(neckScale))
+neck = makeDrawableNode('Neck', blue, neckScale);
 neckJoint:add_child(neck)
 
 headTilt = {-90, 0, 90}
 headRot = {-90, 0, 90}
 headJoint = gr.joint('HeadJoint', headTilt, headRot)
 headJoint:translate(0, neckScale[2], 0)
-neckJoint:add_child(headJoint)
+neck:add_child(headJoint)
 
 headScale = {1, 1, 1}
 head = makeDrawableNode('Head', green, headScale)

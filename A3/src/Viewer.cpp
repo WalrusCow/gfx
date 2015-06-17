@@ -280,13 +280,18 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
     // We can pick now
     auto id = findPickId(event->x(), event->y());
     std::cerr << "Found id " << id << std::endl;
-    if (id > 0 && pickedIds.find(id) != pickedIds.end()) {
+    if (id !=0 && pickedIds.find(id) == pickedIds.end()) {
       // Not in the set: Add to set
       pickedIds.insert(id);
     }
     else {
       pickedIds.erase(id);
     }
+    for (auto i : pickedIds) {
+      std::cerr<<i<<',';
+    }
+    std::cerr << std::endl;
+    update();
     return;
   }
   else if (pickedIds.size() > 0) {
@@ -337,7 +342,7 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     }
     update();
   }
-  else if (pickedIds.size() > 0) {
+  else if (0&&pickedIds.size() > 0) {
     // Joints mode
     // Only do anything if we have picked at least one item
 
@@ -365,13 +370,14 @@ QMatrix4x4 Viewer::getCameraMatrix() {
 }
 
 void Viewer::paintGL() {
-  // Clear framebuffer
+  //glClearColor(0.0, 0.0, 0.0, 0.0);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  //sceneRoot->walk_gl(this, true);
+  //return;
+  glClearColor(0.4, 0.4, 0.4, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Set up lighting
-
-  // Draw scene recursively
-  glClearColor(0.4, 0.4, 0.4, 0.0);
   sceneRoot->walk_gl(this);
 
   if (showCircle) {
@@ -512,10 +518,10 @@ void Viewer::drawSphere(const QMatrix4x4& transform, bool picking) {
 
 void Viewer::setDiffuseColour(const QColor& c, int id) {
   // Set colour to be white (it's multiplied by the actual colour)
-  if (pickedIds.find(id) != pickedIds.end()) {
+  if (pickedIds.find(id) != pickedIds.end())
     sphereShaders.setUniformValue(diffuseColourLoc, 1, 1, 1);
-  }
-  sphereShaders.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
+  else
+    sphereShaders.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
 void Viewer::setSpecularColour(const QColor& c) {
@@ -575,13 +581,18 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
 }
 
 int Viewer::findPickId(int x, int y) {
-  glClearColor(0, 0, 0, 0);
   // Clear framebuffer
+  glDisable(GL_DITHER);
+  glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   sceneRoot->walk_gl(this, true);
+
   glFlush(); glFinish();
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
   unsigned char data[4];
   glReadPixels(x, height()-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glEnable(GL_DITHER);
   return data[0] + (data[1] * 256) + (data[2] * 256*256);
 }
