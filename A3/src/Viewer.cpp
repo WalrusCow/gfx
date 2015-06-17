@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <QtGlobal>
+#include <QOpenGLFramebufferObject>
 #include <QtWidgets>
 #include <QtOpenGL>
 
@@ -257,6 +258,7 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
   if (clickedButton == Qt::LeftButton) {
     // We can pick now: Only holding left button
     auto id = findPickId(event->x(), event->y());
+    std::cerr << "Found id " << id << std::endl;
     id = sceneRoot->getJointForId(id);
 
     std::cerr << "Found joint id " << id << std::endl;
@@ -553,8 +555,11 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
 }
 
 int Viewer::findPickId(int x, int y) {
-  // Clear framebuffer
   glDisable(GL_DITHER);
+  glEnable(GL_DEPTH_TEST);
+  QOpenGLFramebufferObject obj(width(), height());
+  obj.setAttachment(QOpenGLFramebufferObject::Depth);
+  obj.bind();
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -565,8 +570,10 @@ int Viewer::findPickId(int x, int y) {
 
   unsigned char data[4];
   glReadPixels(x, height()-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  if (!zBuffer) glDisable(GL_DEPTH_TEST);
   glEnable(GL_DITHER);
-  return data[0] + (data[1] * 256) + (data[2] * 256*256);
+  obj.release();
+  return (data[0] + (data[1] * 256) + (data[2] * 256*256))/4;
 }
 
 double Viewer::getXRotationAngle(int id) {
