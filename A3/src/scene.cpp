@@ -51,7 +51,7 @@ bool SceneNode::is_joint() const {
 }
 
 int SceneNode::getJointForId(int id) {
-  if (id == this->id && parent && parent->parent && parent-parent->is_joint()) {
+  if (id == this->id && parent && parent->parent && parent->parent->is_joint()) {
     return parent->parent->id;
   }
   else {

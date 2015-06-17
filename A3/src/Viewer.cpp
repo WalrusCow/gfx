@@ -42,7 +42,7 @@ void Viewer::resetPuppetPosition() {
 
 void Viewer::resetJoints() {
   opStack.resize(0);
-  opStackPosition = 0;
+  opStackPosition = -1;
   opMap.clear();
   update();
 }
@@ -257,11 +257,9 @@ void Viewer::mousePressEvent(QMouseEvent* event) {
   if (clickedButton == Qt::LeftButton) {
     // We can pick now: Only holding left button
     auto id = findPickId(event->x(), event->y());
-
     id = sceneRoot->getJointForId(id);
-    // Now to use the jointId for everything
 
-    std::cerr << "Found id " << id << std::endl;
+    std::cerr << "Found joint id " << id << std::endl;
     if (id > 0 && pickedIds.find(id) == pickedIds.end()) {
       // Not in the set: Add to set
       pickedIds.insert(id);
@@ -326,7 +324,7 @@ void Viewer::mouseMoveEvent(QMouseEvent* event) {
   // Take action if we are holdin' it down and have picked something
   else if ((buttons & (Qt::MiddleButton|Qt::RightButton)) && pickedIds.size()) {
     // Middle button is for x-axis rotation (most limbs)
-    auto xAngle = (buttons & Qt::MiddleButton) ? dy * ROTATE_FACTOR : 0;
+    auto xAngle = (buttons & Qt::MiddleButton) ? -dy * ROTATE_FACTOR : 0;
     // Right button is for y-axis rotation (head turning)
     auto yAngle = (buttons & Qt::RightButton) ? dx * ROTATE_FACTOR : 0;
 

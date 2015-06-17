@@ -19,11 +19,11 @@ white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 
 function makeArm(name)
   armScale = {0.3, 1.3, 0.3}
-  handScale = {0.35, 0.35, 0.35}
+  handScale = {0.35, 0.55, 0.35}
 
-  shoulderRot = {-180, 0.0, 180}
-  elbowRot = {0.0, 0.0, 180}
-  wristRot = {0.0, 0.0, 180}
+  shoulderRot = {-180, 0, 45}
+  elbowRot = {-155, 0, 0}
+  wristRot = {-85, 0, 90}
 
   return makeLimb(name .. 'Arm', blue,
                   shoulderRot, elbowRot, wristRot,
@@ -32,11 +32,11 @@ end
 
 function makeLeg(name)
   legScale = {0.3, 1.5, 0.3}
-  footScale = {0.3, 0.3, 0.6}
+  footScale = {0.3, 0.3, 0.7}
 
-  hipRot = {0.0, 0.0, 180}
-  kneeRot = {0.0, 0.0, 180}
-  ankleRot = {0.0, 0.0, 180}
+  hipRot = {-90, 0, 45}
+  kneeRot = {0, 0, 155}
+  ankleRot = {-25, 0, 75}
 
   return makeLimb(name .. 'Leg', green,
                   hipRot, kneeRot, ankleRot,
@@ -52,17 +52,19 @@ function makeLimb(name, colour,
   startJoint:add_child(startLimb)
 
   midJoint = gr.joint(name .. 'MidJoint', midRot, noRotation)
-  midJoint:translate(0, startScale[2] * -2, 0)
+  midJoint:translate(0, -startScale[2], 0)
   startLimb:add_child(midJoint)
 
   midLimb = makeDrawableNode(name .. 'MidLimb', colour, midScale)
+  midLimb:translate(0, -midScale[2], 0);
   midJoint:add_child(midLimb)
 
   endJoint = gr.joint(name .. 'EndJoint', endRot, noRotation)
-  endJoint:translate(0, -midScale[2] -endScale[2], 0)
+  endJoint:translate(0, -midScale[2], 0)
   midLimb:add_child(endJoint)
 
   endLimb = makeDrawableNode(name .. 'EndLimb', colour, endScale)
+  endLimb:translate(0, -endScale[2], 0)
   endJoint:add_child(endLimb)
 
   return startJoint
@@ -110,7 +112,7 @@ neckScale = {0.4, 0.6, 0.4}
 neck = makeDrawableNode('Neck', blue, neckScale);
 neckJoint:add_child(neck)
 
-headTilt = {-90, 0, 90}
+headTilt = {-80, 0, 75}
 headRot = {-90, 0, 90}
 headJoint = gr.joint('HeadJoint', headTilt, headRot)
 headJoint:translate(0, neckScale[2], 0)
