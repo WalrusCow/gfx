@@ -52,11 +52,12 @@ class SceneNode {
   // Returns true if and only if this node is a JointNode
   virtual bool is_joint() const;
 
+  SceneNode* parent = nullptr;
+
  protected:
   int m_id;
   // Useful for picking
   std::string m_name;
-  SceneNode* parent = nullptr;
 
   // Transformations
   QMatrix4x4 m_trans;

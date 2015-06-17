@@ -84,6 +84,7 @@ class Viewer : public QGLWidget {
 
   // Ids we have currently picked
   std::set<int> pickedIds;
+  // Find which id was clicked on the screen
   int findPickId(int x, int y);
 
   // What scene we are drawing

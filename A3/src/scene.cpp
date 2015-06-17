@@ -89,10 +89,16 @@ void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
     m_material->apply(viewer, m_id);
   }
   else {
-    // Use unique colour
-    int r = m_id & 0x000000ff;
-    int g = (m_id & 0x0000ff00) >> 8;
-    int b = (m_id & 0x00ff0000) >> 16;
+    // Geometry nodes are under a containing node which is under
+    // a joint node (or not)
+    int r, g, b;
+    r = g = b = 0;
+    if (parent && parent->parent && parent->parent->is_joint()) {
+      // Use unique colour
+      r = m_id & 0x000000ff;
+      g = (m_id & 0x0000ff00) >> 8;
+      b = (m_id & 0x00ff0000) >> 16;
+    }
     std::cerr <<m_name<< " unique color "<<r<<','<<g<<','<<b<<" from id " << m_id<<std::endl;
     viewer->setDiffuseColour({r, g, b});
   }
