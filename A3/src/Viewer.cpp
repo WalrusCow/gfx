@@ -25,6 +25,8 @@ Viewer::Viewer(const QGLFormat& format,
                mSphereBufferObject(QOpenGLBuffer::VertexBuffer),
                mVao(this) {
   walkStack.push_back(QMatrix4x4());
+  pickedIds.insert(17);
+  doOp(pickedIds, QMatrix4x4());
 }
 
 Viewer::~Viewer() {}
@@ -100,19 +102,6 @@ void Viewer::initializeGL() {
   glClearColor(0.4, 0.4, 0.4, 0.0);
   glFrontFace(GL_CW);
 
-  if (!flatShaders.addShaderFromSourceFile(QGLShader::Vertex, "flat.vert")) {
-    std::cerr << "Cannot load flat vertex shader." << std::endl;
-    return;
-  }
-  if (!flatShaders.addShaderFromSourceFile(QGLShader::Fragment, "flat.frag")) {
-    std::cerr << "Cannot load flat fragment shader." << std::endl;
-    return;
-  }
-  if (!flatShaders.link()) {
-    std::cerr << "Cannot link flat shaders." << std::endl;
-    return;
-  }
-
   if (!sphereShaders.addShaderFromSourceFile(QGLShader::Vertex, "sphere.vert")) {
     std::cerr << "Cannot load vertex shader." << std::endl;
     return;
@@ -171,6 +160,7 @@ void Viewer::initializeGL() {
   sphereShaders.bind();
   sphereShaders.enableAttributeArray("vert");
   sphereShaders.enableAttributeArray("norm");
+  sphereShaders.enableAttributeArray("flatFlag");
 
   mvpMatrixLoc = sphereShaders.uniformLocation("mvpMatrix");
   mvMatrixLoc = sphereShaders.uniformLocation("mvMatrix");
@@ -180,11 +170,10 @@ void Viewer::initializeGL() {
   diffuseColourLoc = sphereShaders.uniformLocation("diffuseColour");
   specularColourLoc = sphereShaders.uniformLocation("specularColour");
   shininessLoc = sphereShaders.uniformLocation("shininess");
+  flatLoc = sphereShaders.uniformLocation("flatFlag");
 
   // Constant ambient light
   sphereShaders.setUniformValue(ambientLightLoc, QVector3D(0.1, 0.1, 0.1));
-
-  flatColourLoc = flatShaders.uniformLocation("colour");
 }
 
 void Viewer::resizeGL(int width, int height) {
@@ -342,13 +331,18 @@ void Viewer::mouseMoveEvent (QMouseEvent* event) {
     }
     update();
   }
-  else if (0&&pickedIds.size() > 0) {
+  else if (pickedIds.size() > 0) {
+    std::cerr << pickedIds.size()<<std::endl;
     // Joints mode
     // Only do anything if we have picked at least one item
 
-    QMatrix4x4 op;//= doGradualOp(dx, dy);
+    QMatrix4x4 op;
+    op.rotate(dx * M_PI/40, {1,0,0});//= doGradualOp(dx, dy);
     for (int id : pickedIds) {
-      opMap[id] *= op;
+      if (opMap.find(id) == opMap.end())
+        opMap[id] = op;
+      else
+        opMap[id] = opMap[id] * op;
     }
     // And update the stack as well
     opStack[opStackPosition].matrix *= op;
@@ -370,11 +364,6 @@ QMatrix4x4 Viewer::getCameraMatrix() {
 }
 
 void Viewer::paintGL() {
-  //glClearColor(0.0, 0.0, 0.0, 0.0);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  //sceneRoot->walk_gl(this, true);
-  //return;
   glClearColor(0.4, 0.4, 0.4, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -404,6 +393,7 @@ void Viewer::draw_trackball_circle() {
   mCircleBufferObject.bind();
   sphereShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
   sphereShaders.setUniformValue(mvpMatrixLoc, orthoMatrix * transformMatrix);
+  sphereShaders.setUniformValue(flatLoc, true);
 
   // Draw buffer
   glDrawArrays(GL_LINE_LOOP, 0, 40);
@@ -416,7 +406,7 @@ void Viewer::setMode(Viewer::Mode mode) {
 
   // lol, clear
   // TODO: How to handle dragging events? That is unclear
-  pickedIds.clear();
+  //pickedIds.clear();
   currentMode = mode;
 }
 
@@ -490,28 +480,21 @@ void Viewer::drawSphere(const QMatrix4x4& transform, bool picking) {
   auto modelMatrix = puppetPosition * r * transform;
 
   auto vp = getCameraMatrix();
-  if (picking) {
-    flatShaders.bind();
-    mSphereBufferObject.bind();
-    flatShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-    flatShaders.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
-  }
-  else {
-    auto mvMatrix = mTransformMatrix * modelMatrix;
-    sphereShaders.bind();
+  auto mvMatrix = mTransformMatrix * modelMatrix;
 
-    mSphereBufferObject.bind();
-    sphereShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
-    mSphereNormalBuffer.bind();
-    sphereShaders.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
+  mSphereBufferObject.bind();
+  sphereShaders.setAttributeBuffer("vert", GL_FLOAT, 0, 3);
+  mSphereNormalBuffer.bind();
+  sphereShaders.setAttributeBuffer("norm", GL_FLOAT, 0, 3);
 
-    sphereShaders.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
-    sphereShaders.setUniformValue(mvMatrixLoc, mvMatrix);
-    sphereShaders.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
+  sphereShaders.setUniformValue(mvpMatrixLoc, vp * modelMatrix);
+  sphereShaders.setUniformValue(mvMatrixLoc, mvMatrix);
+  sphereShaders.setUniformValue(normMatrixLoc, mvMatrix.normalMatrix());
+  // Whether or not we are picking (to do lighting or not)
+  sphereShaders.setUniformValue(flatLoc, picking);
 
-    // Light position shouldn't change: always on the eye
-    sphereShaders.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
-  }
+  // Light position shouldn't change: always on the eye
+  sphereShaders.setUniformValue(lightPositionLoc, mTransformMatrix * QVector3D());
 
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 }
@@ -526,10 +509,6 @@ void Viewer::setDiffuseColour(const QColor& c, int id) {
 
 void Viewer::setSpecularColour(const QColor& c) {
   sphereShaders.setUniformValue(specularColourLoc, c.redF(), c.greenF(), c.blueF());
-}
-
-void Viewer::setFlatColour(const QColor& c) {
-  flatShaders.setUniformValue(flatColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
 void Viewer::setShininess(const double shininess) {

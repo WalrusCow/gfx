@@ -94,7 +94,7 @@ void GeometryNode::walk_gl(Viewer* viewer, bool picking) const {
     int g = (m_id & 0x0000ff00) >> 8;
     int b = (m_id & 0x00ff0000) >> 16;
     std::cerr <<m_name<< " unique color "<<r<<','<<g<<','<<b<<" from id " << m_id<<std::endl;
-    viewer->setFlatColour({r, g, b});
+    viewer->setDiffuseColour({r, g, b});
   }
   m_primitive->draw(viewer, picking);
 

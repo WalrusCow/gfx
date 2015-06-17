@@ -59,7 +59,6 @@ class Viewer : public QGLWidget {
   void setDiffuseColour(const QColor& colour, int id=-1);
   void setSpecularColour(const QColor& colour);
   void setShininess(const double shininess);
-  void setFlatColour(const QColor& colour);
 
  protected:
   void initializeGL() override;
@@ -135,11 +134,10 @@ class Viewer : public QGLWidget {
   QOpenGLVertexArrayObject mVao;
 
   QGLShaderProgram sphereShaders;
-  QGLShaderProgram flatShaders;
 
   int mvpMatrixLoc, mvMatrixLoc, normMatrixLoc, lightPositionLoc;
   int ambientLightLoc, diffuseColourLoc, specularColourLoc, shininessLoc;
-  int flatColourLoc;
+  int flatLoc;
 
   // Initialize openGL buffers
   void initSphereData(float* vertexBuffer, float* normBuffer, double theta);
