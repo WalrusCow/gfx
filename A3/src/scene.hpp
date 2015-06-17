@@ -53,8 +53,8 @@ class SceneNode {
   virtual bool is_joint() const;
 
  protected:
-  // Useful for picking
   int m_id;
+  // Useful for picking
   std::string m_name;
   SceneNode* parent = nullptr;
 

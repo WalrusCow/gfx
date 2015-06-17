@@ -257,7 +257,7 @@ QMatrix4x4 Viewer::getTransforms(int id) {
   return opMap[id];
 }
 
-void Viewer::mousePressEvent (QMouseEvent* event) {
+void Viewer::mousePressEvent(QMouseEvent* event) {
   auto buttonsDown = qApp->mouseButtons();
 
   lastMouseX = event->x();
@@ -278,10 +278,14 @@ void Viewer::mousePressEvent (QMouseEvent* event) {
 
   if (event->button() == Qt::LeftButton) {
     // We can pick now
-    auto id = find_pick_id(event->x(), event->y());
-    if (pickedIds.find(id) != pickedIds.end()) {
+    auto id = findPickId(event->x(), event->y());
+    std::cerr << "Found id " << id << std::endl;
+    if (id > 0 && pickedIds.find(id) != pickedIds.end()) {
       // Not in the set: Add to set
       pickedIds.insert(id);
+    }
+    else {
+      pickedIds.erase(id);
     }
     return;
   }
@@ -367,6 +371,7 @@ void Viewer::paintGL() {
   // Set up lighting
 
   // Draw scene recursively
+  glClearColor(0.4, 0.4, 0.4, 0.0);
   sceneRoot->walk_gl(this);
 
   if (showCircle) {
@@ -505,8 +510,11 @@ void Viewer::drawSphere(const QMatrix4x4& transform, bool picking) {
   glDrawArrays(GL_TRIANGLES, 0, numTriangles * 9);
 }
 
-void Viewer::setDiffuseColour(const QColor& c) {
+void Viewer::setDiffuseColour(const QColor& c, int id) {
   // Set colour to be white (it's multiplied by the actual colour)
+  if (pickedIds.find(id) != pickedIds.end()) {
+    sphereShaders.setUniformValue(diffuseColourLoc, 1, 1, 1);
+  }
   sphereShaders.setUniformValue(diffuseColourLoc, c.redF(), c.greenF(), c.blueF());
 }
 
@@ -564,4 +572,16 @@ void Viewer::trackballRotate(const QVector2D& startCoords,
   QMatrix4x4 rotMat;
   rotMat.rotate(angleDeg, rotationVector);
   *mat = rotMat * *mat;
+}
+
+int Viewer::findPickId(int x, int y) {
+  glClearColor(0, 0, 0, 0);
+  // Clear framebuffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  sceneRoot->walk_gl(this, true);
+  glFlush(); glFinish();
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  unsigned char data[4];
+  glReadPixels(x, height()-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  return data[0] + (data[1] * 256) + (data[2] * 256*256);
 }

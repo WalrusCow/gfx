@@ -56,7 +56,7 @@ class Viewer : public QGLWidget {
 
   // These are the reflectance of the object.
   // It is assumed that ka = 1
-  void setDiffuseColour(const QColor& colour);
+  void setDiffuseColour(const QColor& colour, int id=-1);
   void setSpecularColour(const QColor& colour);
   void setShininess(const double shininess);
   void setFlatColour(const QColor& colour);
@@ -89,7 +89,7 @@ class Viewer : public QGLWidget {
   // Ids we have currently picked
   // TODO: Picking
   std::set<int> pickedIds;
-  int find_pick_id(int x, int y){(void)x;(void)y;return 0;}
+  int findPickId(int x, int y);
 
   // What scene we are drawing
   std::unique_ptr<SceneNode> sceneRoot;
