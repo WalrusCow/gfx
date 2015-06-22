@@ -12,9 +12,7 @@ void a4_render(// What to render
                const Vector3D& up, double fov,
                // Lighting parameters
                const Colour& ambient,
-               const std::list<Light*>& lights
-               )
-{
+               const std::list<Light*>& lights) {
   // Fill in raytracing code here.
 
   std::cerr << "Stub: a4_render(" << root << ",\n     "
@@ -22,12 +20,12 @@ void a4_render(// What to render
             << eye << ", " << view << ", " << up << ", " << fov << ",\n     "
             << ambient << ",\n     {";
 
-  for (std::list<Light*>::const_iterator I = lights.begin(); I != lights.end(); ++I) {
+  for (auto I = lights.begin(); I != lights.end(); ++I) {
     if (I != lights.begin()) std::cerr << ", ";
     std::cerr << **I;
   }
   std::cerr << "});" << std::endl;
-  
+
   // For now, just make a sample image.
 
   Image img(width, height, 3);
@@ -44,5 +42,5 @@ void a4_render(// What to render
     }
   }
   img.savePng(filename);
-  
+
 }

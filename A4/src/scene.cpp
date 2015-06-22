@@ -1,23 +1,26 @@
 #include "scene.hpp"
+
 #include <iostream>
 
-SceneNode::SceneNode(const std::string& name) : m_name(name) { }
+#include "xform.hpp"
 
-SceneNode::~SceneNode() { }
+SceneNode::SceneNode(const std::string& name) : m_name(name) {}
 
 void SceneNode::rotate(char axis, double angle) {
-  std::cerr << "Stub: Rotate " << m_name << " around " << axis << " by " << angle << std::endl;
-  // Fill me in
+  if (axis == 'x')
+    set_transform(m_trans * xRotationMatrix(angle));
+  else if (axis == 'y')
+    set_transform(m_trans * yRotationMatrix(angle));
+  else if (axis == 'z')
+    set_transform(m_trans * zRotationMatrix(angle));
 }
 
 void SceneNode::scale(const Vector3D& amount) {
-  std::cerr << "Stub: Scale " << m_name << " by " << amount << std::endl;
-  // Fill me in
+  set_transform(m_trans * scaleMatrix(amount[0], amount[1], amount[2]));
 }
 
 void SceneNode::translate(const Vector3D& amount) {
-  std::cerr << "Stub: Translate " << m_name << " by " << amount << std::endl;
-  // Fill me in
+  set_transform(m_trans * translationMatrix(amount[0], amount[1], amount[2]));
 }
 
 bool SceneNode::is_joint() const {
@@ -32,15 +35,15 @@ bool JointNode::is_joint() const {
 }
 
 void JointNode::set_joint_x(double min, double init, double max) {
-  m_joint_x.min = min;
-  m_joint_x.init = init;
-  m_joint_x.max = max;
+  jointX.min = min;
+  jointX.init = init;
+  jointX.max = max;
 }
 
 void JointNode::set_joint_y(double min, double init, double max) {
-  m_joint_y.min = min;
-  m_joint_y.init = init;
-  m_joint_y.max = max;
+  jointY.min = min;
+  jointY.init = init;
+  jointY.max = max;
 }
 
 GeometryNode::GeometryNode(const std::string& name, Primitive* primitive)

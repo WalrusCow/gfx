@@ -1,14 +1,15 @@
 #pragma once
 
 #include <list>
+
 #include "algebra.hpp"
-#include "primitive.hpp"
 #include "material.hpp"
+#include "primitive.hpp"
 
 class SceneNode {
  public:
   SceneNode(const std::string& name);
-  virtual ~SceneNode();
+  virtual ~SceneNode() = default;
 
   const Matrix4x4& get_transform() const { return m_trans; }
   const Matrix4x4& get_inverse() const { return m_invtrans; }
@@ -41,9 +42,6 @@ class SceneNode {
   virtual bool is_joint() const;
 
  protected:
-
-  // Useful for picking
-  int m_id;
   std::string m_name;
 
   // Transformations
@@ -69,20 +67,17 @@ class JointNode : public SceneNode {
   };
 
  protected:
-
-  JointRange m_joint_x, m_joint_y;
+  JointRange jointX, jointY;
 };
 
 class GeometryNode : public SceneNode {
  public:
-  GeometryNode(const std::string& name,
-               Primitive* primitive);
+  GeometryNode(const std::string& name, Primitive* primitive);
 
   const Material* get_material() const;
   Material* get_material();
 
-  void set_material(Material* material)
-  {
+  void set_material(Material* material) {
     m_material = material;
   }
 
