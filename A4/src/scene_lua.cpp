@@ -46,6 +46,8 @@
 #include "a4.hpp"
 #include "mesh.hpp"
 
+#include "ViewConfig.hpp"
+
 // Uncomment the following line to enable debugging messages
 // #define GRLUA_ENABLE_DEBUG
 
@@ -358,10 +360,9 @@ int gr_render_cmd(lua_State* L)
     lua_pop(L, 1);
   }
 
-  a4_render(root->node, filename, width, height,
-            eye, view, up, fov,
-            ambient, lights);
-  
+  ViewConfig viewConfig = ViewConfig(eye, view, up, fov);
+  a4_render(root->node, filename, width, height, viewConfig, ambient, lights);
+
   return 0;
 }
 

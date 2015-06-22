@@ -1,10 +1,11 @@
-#ifndef CS488_A4_HPP
-#define CS488_A4_HPP
+#pragma once
 
 #include <string>
 #include "algebra.hpp"
 #include "scene.hpp"
 #include "light.hpp"
+
+class ViewConfig;
 
 void a4_render(// What to render
                SceneNode* root,
@@ -13,11 +14,7 @@ void a4_render(// What to render
                // Image size
                int width, int height,
                // Viewing parameters
-               const Point3D& eye, const Vector3D& view,
-               const Vector3D& up, double fov,
+               const ViewConfig& viewConfig,
                // Lighting parameters
                const Colour& ambient,
-               const std::list<Light*>& lights
-               );
-
-#endif
+               const std::list<Light*>& lights);

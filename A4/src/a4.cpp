@@ -1,5 +1,10 @@
 #include "a4.hpp"
+
+#include <cmath>
+
 #include "image.hpp"
+#include "PixelTransformer.hpp"
+#include "ViewConfig.hpp"
 
 void a4_render(// What to render
                SceneNode* root,
@@ -8,17 +13,21 @@ void a4_render(// What to render
                // Image size
                int width, int height,
                // Viewing parameters
-               const Point3D& eye, const Vector3D& view,
-               const Vector3D& up, double fov,
+               const ViewConfig& viewConfig,
                // Lighting parameters
                const Colour& ambient,
                const std::list<Light*>& lights) {
-  // Fill in raytracing code here.
 
-  std::cerr << "Stub: a4_render(" << root << ",\n     "
-            << filename << ", " << width << ", " << height << ",\n     "
-            << eye << ", " << view << ", " << up << ", " << fov << ",\n     "
-            << ambient << ",\n     {";
+  PixelTransformer pixelTransformer(width, height, viewConfig);
+
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      // Get world coordinates of pixel (x, y)
+      auto worldPx = pixelTransformer.transform(x, y);
+      std::cerr << worldPx << std::endl;
+      //auto r = Ray(x, y, eye, view, up, fov)
+    }
+  }
 
   for (auto I = lights.begin(); I != lights.end(); ++I) {
     if (I != lights.begin()) std::cerr << ", ";

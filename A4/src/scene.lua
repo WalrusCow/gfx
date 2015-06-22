@@ -8,7 +8,7 @@ s1:set_material(red)
 
 whiteLight = gr.light({-10, -10, -10}, {1, 1, 1}, {1, 1, 1})
 
-gr.render(root, 'ez.png', 32, 32, -- size and name
-          {-3, -0, -0}, {1, 0 ,0}, -- view position, direction
-          {0, 1, 0}, 50, -- lights
+gr.render(root, 'ez.png', 10, 10, -- size and name
+          {0, 0, 0}, {1, 0 ,0}, -- view position, direction
+          {0, 1, 0}, 45, -- up and fov
           {0.3, 0.3, 0.3}, {whiteLight}) -- lighting
