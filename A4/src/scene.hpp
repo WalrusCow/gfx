@@ -5,6 +5,8 @@
 #include "algebra.hpp"
 #include "material.hpp"
 #include "primitive.hpp"
+#include "HitRecord.hpp"
+#include "Ray.hpp"
 
 class SceneNode {
  public:
@@ -13,6 +15,8 @@ class SceneNode {
 
   const Matrix4x4& get_transform() const { return m_trans; }
   const Matrix4x4& get_inverse() const { return m_invtrans; }
+
+  bool intersects(const Ray& ray, const HitRecord& hitRecord) { return false; }
 
   void set_transform(const Matrix4x4& m) {
     m_trans = m;

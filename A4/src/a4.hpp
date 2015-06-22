@@ -3,8 +3,9 @@
 #include <string>
 #include "algebra.hpp"
 #include "scene.hpp"
-#include "light.hpp"
 
+class Light;
+class Ray;
 class ViewConfig;
 
 void a4_render(// What to render
@@ -18,3 +19,10 @@ void a4_render(// What to render
                // Lighting parameters
                const Colour& ambient,
                const std::list<Light*>& lights);
+
+Colour rayColour(const Ray& ray,
+    const std::list<Light*>& lights,
+    int x, int y, int w, int h,
+    SceneNode* scene);
+
+Colour backgroundColour(int, int, int, int);
