@@ -4,7 +4,7 @@
 //
 // algebra.hpp/algebra.cpp
 //
-// Classes and functions for manipulating points, vectors, matrices, 
+// Classes and functions for manipulating points, vectors, matrices,
 // and colours.  You probably won't need to modify anything in these
 // two files.
 //
@@ -28,7 +28,7 @@ double Vector3D::normalize()
         z = z / x;
         denom = 1.0 / (x * sqrt(1.0 + y*y + z*z));
       }
-    } else { /* z > x > y */ 
+    } else { /* z > x > y */
       if(1.0 + z > 1.0) {
         y = y / z;
         x = x / z;
@@ -98,17 +98,17 @@ static void submultrow(Matrix4x4& a, size_t dest, size_t src, double fac)
  */
 Matrix4x4 Matrix4x4::invert() const
 {
-  /* The algorithm is plain old Gauss-Jordan elimination 
+  /* The algorithm is plain old Gauss-Jordan elimination
      with partial pivoting. */
 
   Matrix4x4 a(*this);
   Matrix4x4 ret;
 
-  /* Loop over cols of a from left to right, 
+  /* Loop over cols of a from left to right,
      eliminating above and below diag */
 
   /* Find largest pivot in column j among rows j..3 */
-  for(size_t j = 0; j < 4; ++j) { 
+  for(size_t j = 0; j < 4; ++j) {
     size_t i1 = j; /* Row with largest pivot candidate */
     for(size_t i = j + 1; i < 4; ++i) {
       if(fabs(a[i][j]) > fabs(a[i1][j])) {
@@ -129,7 +129,7 @@ Matrix4x4 Matrix4x4::invert() const
     dividerow(ret, j, a[j][j]);
     dividerow(a, j, a[j][j]);
 
-    /* Eliminate off-diagonal elems in col j of a, doing identical 
+    /* Eliminate off-diagonal elems in col j of a, doing identical
        ops to b */
     for(size_t i = 0; i < 4; ++i) {
       if(i != j) {

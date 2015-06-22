@@ -1,5 +1,4 @@
-#ifndef CS488_MATERIAL_HPP
-#define CS488_MATERIAL_HPP
+#pragma once
 
 #include "algebra.hpp"
 
@@ -9,9 +8,7 @@ public:
   virtual void apply_gl() const = 0;
 
 protected:
-  Material()
-  {
-  }
+  Material() {}
 };
 
 class PhongMaterial : public Material {
@@ -27,6 +24,3 @@ private:
 
   double m_shininess;
 };
-
-
-#endif

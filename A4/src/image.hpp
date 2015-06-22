@@ -1,5 +1,4 @@
-#ifndef CS488_IMAGE_HPP
-#define CS488_IMAGE_HPP
+#pragma once
 
 #include <string>
 
@@ -39,14 +38,12 @@ public:
 
   bool savePng(const std::string& filename); ///< Save this image into
                                              ///  the given PNG file
-  
+
   const double* data() const;
   double* data();
-  
+
 private:
   int m_width, m_height;
   int m_elements;
   double* m_data;
 };
-
-#endif
