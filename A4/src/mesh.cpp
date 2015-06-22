@@ -1,9 +1,19 @@
 #include "mesh.hpp"
+
 #include <iostream>
+
+#include "HitRecord.hpp"
+#include "Ray.hpp"
 
 Mesh::Mesh(const std::vector<Point3D>& verts,
            const std::vector< std::vector<int> >& faces)
     : m_verts(verts), m_faces(faces) {
+}
+
+bool Mesh::intersects(const Ray& ray,
+                HitRecord* hitRecord,
+                const Matrix4x4& inverseTransform) {
+  return false;
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {

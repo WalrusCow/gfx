@@ -5,35 +5,38 @@
 #include "algebra.hpp"
 #include "material.hpp"
 #include "primitive.hpp"
-#include "HitRecord.hpp"
-#include "Ray.hpp"
 
 class SceneNode {
  public:
   SceneNode(const std::string& name);
   virtual ~SceneNode() = default;
 
-  const Matrix4x4& get_transform() const { return m_trans; }
-  const Matrix4x4& get_inverse() const { return m_invtrans; }
+  const Matrix4x4& get_transform() const { return trans; }
+  const Matrix4x4& get_inverse() const { return inverseTrans; }
 
-  bool intersects(const Ray& ray, const HitRecord& hitRecord) { return false; }
+  bool intersects(const Ray& ray, HitRecord* hitRecord) {
+    return intersects(ray, hitRecord, Matrix4x4());
+  }
+
+  virtual bool intersects(
+      const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform);
 
   void set_transform(const Matrix4x4& m) {
-    m_trans = m;
-    m_invtrans = m.invert();
+    trans = m;
+    inverseTrans = m.invert();
   }
 
   void set_transform(const Matrix4x4& m, const Matrix4x4& i) {
-    m_trans = m;
-    m_invtrans = i;
+    trans = m;
+    inverseTrans = i;
   }
 
   void add_child(SceneNode* child) {
-    m_children.push_back(child);
+    children.push_back(child);
   }
 
   void remove_child(SceneNode* child) {
-    m_children.remove(child);
+    children.remove(child);
   }
 
   // Callbacks to be implemented.
@@ -42,26 +45,21 @@ class SceneNode {
   void scale(const Vector3D& amount);
   void translate(const Vector3D& amount);
 
-  // Returns true if and only if this node is a JointNode
-  virtual bool is_joint() const;
-
  protected:
   std::string m_name;
 
   // Transformations
-  Matrix4x4 m_trans;
-  Matrix4x4 m_invtrans;
+  Matrix4x4 trans;
+  Matrix4x4 inverseTrans;
 
   // Hierarchy
   typedef std::list<SceneNode*> ChildList;
-  ChildList m_children;
+  ChildList children;
 };
 
 class JointNode : public SceneNode {
  public:
   JointNode(const std::string& name);
-
-  virtual bool is_joint() const;
 
   void set_joint_x(double min, double init, double max);
   void set_joint_y(double min, double init, double max);
@@ -81,11 +79,15 @@ class GeometryNode : public SceneNode {
   const Material* get_material() const;
   Material* get_material();
 
+  bool intersects(const Ray& ray,
+                  HitRecord* hitRecord,
+                  const Matrix4x4& inverseTransform) override;
+
   void set_material(Material* material) {
-    m_material = material;
+    this->material = material;
   }
 
  protected:
-  Material* m_material;
-  Primitive* m_primitive;
+  Material* material;
+  Primitive* primitive;
 };

@@ -485,3 +485,8 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c)
 {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 }
+
+inline bool izZero(double d) {
+  static const double EPSILON = 1e-5;
+  return d < EPSILON;
+}

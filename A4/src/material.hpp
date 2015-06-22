@@ -18,7 +18,6 @@ public:
 
   virtual void apply_gl() const;
 
-private:
   Colour m_kd;
   Colour m_ks;
 

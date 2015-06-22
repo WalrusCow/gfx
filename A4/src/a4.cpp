@@ -1,9 +1,11 @@
 #include "a4.hpp"
 
 #include <cmath>
+#include <cstdlib>
 
 #include "image.hpp"
 #include "light.hpp"
+#include "material.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"
 #include "Ray.hpp"
@@ -15,11 +17,13 @@ Colour rayColour(const Ray& ray,
                  int width, int height,
                  SceneNode* root) {
   HitRecord hitRecord;
-  if (!root->intersects(ray, hitRecord)) {
+  if (!root->intersects(ray, &hitRecord)) {
     // No intersection - use background colour
     return backgroundColour(x, y, width, height);
   }
-  return Colour(0,0,0);
+
+  // TODO: Compute phong shading or something
+  return static_cast<const PhongMaterial*>(hitRecord.material)->m_kd;
 }
 
 Colour backgroundColour(int x, int y, int width, int height) {
@@ -45,6 +49,10 @@ void a4_render(// What to render
                const Colour& ambient,
                const std::list<Light*>& lights) {
 
+  //HitRecord h;
+  //std::cerr << root->intersects(Ray({-10, 0, 0}, {-8, 0, 0}), &h) << std::endl;
+  //std::exit(1);
+
   Image img(width, height, 3);
 
   PixelTransformer pixelTransformer(width, height, viewConfig);
@@ -58,13 +66,14 @@ void a4_render(// What to render
 
       // Now check the intersection with every object lmao
       auto pixelColour = rayColour(ray, lights, x, y, width,height,root);
+      std::cerr << x<<','<<y<<std::endl;
       img(x, y, 0) = pixelColour.R();
       img(x, y, 1) = pixelColour.G();
       img(x, y, 2) = pixelColour.B();
     }
   }
+  std::cerr << "done" << std::endl;
 
   // For now, just make a sample image.
   img.savePng(filename);
-
 }
