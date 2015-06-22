@@ -44,7 +44,7 @@ bool Sphere::intersects(
 
   if (numRoots == 0) {
     // No intersection
-    std::cerr << "No intersection" << std::endl;
+    //std::cerr << "No intersection" << std::endl;
     return false;
   }
 
@@ -56,11 +56,11 @@ bool Sphere::intersects(
   }
   if (t < 0) {
     // No *valid* intersections
-    std::cerr << "No valid intersection" << std::endl;
+    //std::cerr << "No valid intersection" << std::endl;
     return false;
   }
 
-  std::cerr << "t is " << t << std::endl;
+  //std::cerr << "t is " << t << std::endl;
   // Since this is a unit sphere, the norm at p is a vector to p
   auto localPoint = p1 + t * dir;
   Vector3D localNorm(localPoint[0], localPoint[1], localPoint[2]);
@@ -68,15 +68,15 @@ bool Sphere::intersects(
   // t is unchanged by this
   // Remember to use the *original* intersection point
   auto point = ray.at(t);
-  std::cerr << "Point is " << point << std::endl;
+  //std::cerr << "Point is " << point << std::endl;
 
   // To get the appropriate normal vector, we must also transpose
   // the inverse transform
   auto norm = inverseTransform.transpose() * localNorm;
-  std::cerr << "Norm is " << norm << std::endl;
+  //std::cerr << "Norm is " << norm << std::endl;
 
   // We will return whether or not this intersection was
   // better than whatever was already stored there
-  std::cerr << "Trying to update hit record" << std::endl;
+  //std::cerr << "Trying to update hit record" << std::endl;
   return hitRecord->update(norm, point, t);
 }

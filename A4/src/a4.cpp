@@ -28,13 +28,14 @@ Colour rayColour(const Ray& ray,
 
 Colour backgroundColour(int x, int y, int width, int height) {
   // Let's try a simple gradient between two colours
-  const Colour top(1.0, 0.0, 0.0);
-  const Colour bottom(0.0, 0.0, 0.0);
+  const Colour top(0.6, 1, 0.9);
+  const Colour bottom(1.0, 0.596, 0.9215);
 
   // What percent we are
   double yp = y / (double) height;
 
-  return top + yp * (bottom + (-1 * top));
+  // Upside down, because png starts top left, I guess
+  return bottom + yp * (top + (-1 * bottom));
 }
 
 void a4_render(// What to render
@@ -49,10 +50,6 @@ void a4_render(// What to render
                const Colour& ambient,
                const std::list<Light*>& lights) {
 
-  //HitRecord h;
-  //std::cerr << root->intersects(Ray({-10, 0, 0}, {-8, 0, 0}), &h) << std::endl;
-  //std::exit(1);
-
   Image img(width, height, 3);
 
   PixelTransformer pixelTransformer(width, height, viewConfig);
@@ -66,13 +63,11 @@ void a4_render(// What to render
 
       // Now check the intersection with every object lmao
       auto pixelColour = rayColour(ray, lights, x, y, width,height,root);
-      std::cerr << x<<','<<y<<std::endl;
-      img(x, y, 0) = pixelColour.R();
-      img(x, y, 1) = pixelColour.G();
-      img(x, y, 2) = pixelColour.B();
+      img(x, height-1-y, 0) = pixelColour.R();
+      img(x, height-1-y, 1) = pixelColour.G();
+      img(x, height-1-y, 2) = pixelColour.B();
     }
   }
-  std::cerr << "done" << std::endl;
 
   // For now, just make a sample image.
   img.savePng(filename);

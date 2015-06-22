@@ -33,6 +33,9 @@ PixelTransformer::PixelTransformer(int width, int height,
   auto v = w.cross(u);
   v.normalize();
 
+  std::cerr << "Got w (z), u(x), v(y)\n"
+    << w <<'\n'<<u<<'\n'<<v<<'\n';
+
   // Manual rotation matrix is easier :)
   Matrix4x4 R(
       {u[0], v[0], w[0], 0},

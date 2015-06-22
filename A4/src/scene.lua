@@ -3,6 +3,7 @@ red = gr.material({0, 1, 0}, {0, 0, 0}, 0)
 root = gr.node('root')
 
 s1 = gr.sphere('s1', {0, 0, 0})
+s1:translate(0, 1, 1)
 root:add_child(s1)
 s1:set_material(red)
 

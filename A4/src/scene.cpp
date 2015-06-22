@@ -60,14 +60,11 @@ bool GeometryNode::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
   // Check if our primitive intersects anything
   auto inverse = inverseTrans * inverseTransform;
-  //std::cerr << "Geometry node intersecting"<< std::endl;
 
   bool hit = false;
   if (primitive->intersects(ray, hitRecord, inverse)) {
     // It's a pointer
-    std::cerr << "My material is " << material << std::endl;
     hitRecord->material = material;
-    std::cerr << "INTERSECTION!" << std::endl;
     hit = true;
   }
 
