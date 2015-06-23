@@ -35,7 +35,7 @@ Colour rayColour(const Ray& ray,
     if (!root->fastIntersects(shadowRay)) {
       // Only add from light source if nothing is hit first
       colour = colour + hitRecord.material->getColour(
-          *light, hitRecord.point, hitRecord.norm, ray.dir);
+          *light, hitRecord.point, hitRecord.norm, direction);
     }
   }
 
@@ -67,6 +67,10 @@ void a4_render(// What to render
                const Colour& ambient,
                const std::list<Light*>& lights) {
   Image img(width, height, 3);
+
+  //HitRecord r;
+  //std::cerr << root->intersects(Ray({0,0,1},{0,0,0}),&r) << std::endl;
+  //std::exit(1);
 
   PixelTransformer pixelTransformer(width, height, viewConfig);
 

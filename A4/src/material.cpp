@@ -12,7 +12,6 @@ Colour PhongMaterial::getColour(const Light& light,
                                 const Point3D& pt,
                                 const Vector3D& norm,
                                 Vector3D dir) const {
-  dir.normalize();
   // Direction to the light (away from surface)
   auto lightDir = light.position - pt;
   Colour lightColour = light.colour;

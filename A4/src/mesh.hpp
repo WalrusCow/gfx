@@ -23,8 +23,10 @@ public:
   typedef std::vector<int> Face;
 
 private:
-  std::vector<Point3D> m_verts;
-  std::vector<Face> m_faces;
+  const std::vector<Point3D> m_verts;
+  const std::vector<Face> m_faces;
 
   friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
+  bool faceIntersection(
+      const Ray& ray, HitRecord* hitRecord, const Face& face);
 };
