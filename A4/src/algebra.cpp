@@ -141,3 +141,15 @@ Matrix4x4 Matrix4x4::invert() const
 
   return ret;
 }
+
+double det(const Vector3D& col1, const Vector3D& col2, const Vector3D& col3) {
+  return
+    // Ups
+      col1[0] * col2[1] * col3[2]
+    + col2[0] * col3[1] * col1[2]
+    + col3[0] * col1[1] * col2[2]
+    // Downs
+    - col1[2] * col2[1] * col3[0]
+    - col2[2] * col3[1] * col1[0]
+    - col3[2] * col1[1] * col2[0];
+}

@@ -496,3 +496,5 @@ inline bool isZero(double d) {
   static const double EPSILON = 1e-2;
   return d < EPSILON;
 }
+
+double det(const Vector3D& col1, const Vector3D& col2, const Vector3D& col3);

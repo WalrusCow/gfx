@@ -66,7 +66,6 @@ void a4_render(// What to render
                // Lighting parameters
                const Colour& ambient,
                const std::list<Light*>& lights) {
-
   Image img(width, height, 3);
 
   PixelTransformer pixelTransformer(width, height, viewConfig);
