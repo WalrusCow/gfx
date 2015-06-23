@@ -45,6 +45,17 @@ bool SceneNode::intersects(
   return hit;
 }
 
+bool SceneNode::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  auto inverse = inverseTrans * inverseTransform;
+  for (auto child : children) {
+    if (child->fastIntersects(ray, inverse)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 JointNode::JointNode(const std::string& name) : SceneNode(name) {
 }
 
@@ -77,4 +88,17 @@ bool GeometryNode::intersects(
   }
 
   return SceneNode::intersects(ray, hitRecord, inverseTransform) || hit;
+}
+
+bool GeometryNode::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  // Check if our primitive intersects anything
+  auto inverse = inverseTrans * inverseTransform;
+
+  if (primitive->fastIntersects(ray, inverse)) {
+    // It's a pointer
+    return true;
+  }
+
+  return SceneNode::fastIntersects(ray, inverseTransform);
 }

@@ -13,6 +13,13 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
 bool Mesh::intersects(const Ray& ray,
                 HitRecord* hitRecord,
                 const Matrix4x4& inverseTransform) {
+  (void) ray; (void) hitRecord; (void) inverseTransform;
+  return false;
+}
+
+bool Mesh::fastIntersects(const Ray& ray,
+                          const Matrix4x4& inverseTransform) {
+  (void) ray; (void) inverseTransform;
   return false;
 }
 

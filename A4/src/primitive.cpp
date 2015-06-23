@@ -8,28 +8,75 @@
 
 bool NonhierBox::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) hitRecord; (void) inverseTransform;
+  return false;
+}
+
+bool NonhierBox::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) inverseTransform;
   return false;
 }
 
 bool NonhierSphere::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) hitRecord; (void) inverseTransform;
+  return false;
+}
+
+bool NonhierSphere::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) inverseTransform;
   return false;
 }
 
 bool Cube::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) hitRecord; (void) inverseTransform;
+  return false;
+}
+
+bool Cube::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  (void) ray; (void) inverseTransform;
   return false;
 }
 
 bool Sphere::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
   // New ray
-  //std::cerr << ray.start << "   " << ray.other << std::endl;
   const auto p1 = inverseTransform * ray.start;
   const auto p2 = inverseTransform * ray.other;
-  //std::cerr << "a" << p1 << "   " << p2 << std::endl;
   const auto dir = p2 - p1;
 
+  double t = solveIntersection(p1, dir);
+
+  // Since this is a unit sphere, the norm at p is a vector to p
+  auto localPoint = p1 + t * dir;
+  Vector3D localNorm(localPoint[0], localPoint[1], localPoint[2]);
+
+  // t is unchanged by this
+  // Remember to use the *original* intersection point
+  auto point = ray.at(t);
+
+  // To get the appropriate normal vector, we must also transpose
+  // the inverse transform
+  auto norm = inverseTransform.transpose() * localNorm;
+  norm.normalize();
+
+  // We will return whether or not this intersection was
+  // better than whatever was already stored there
+  return hitRecord->update(norm, point, t);
+}
+
+bool Sphere::fastIntersects(
+    const Ray& ray, const Matrix4x4& inverseTransform) {
+  const auto p1 = inverseTransform * ray.start;
+  const auto p2 = inverseTransform * ray.other;
+  return solveIntersection(p1, p2 - p1) > 0;
+}
+
+double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) {
   // Now do intersection against unit sphere centred at origin
   // x^2 + y^2 + z^2 = 1
   // We want to check whether or not p.dot(p) == 1 for some p on the line
@@ -46,8 +93,7 @@ bool Sphere::intersects(
 
   if (numRoots == 0) {
     // No intersection
-    //std::cerr << "No intersection" << std::endl;
-    return false;
+    return -1;
   }
 
   // Only t >= 0 matters (and we should probably discard < EPSILON as well)
@@ -58,28 +104,7 @@ bool Sphere::intersects(
   }
   if (t < 0 || isZero(t)) {
     // No *valid* intersections
-    //std::cerr << "No valid intersection" << std::endl;
-    return false;
+    return -1;
   }
-
-  //std::cerr << "t is " << t << std::endl;
-  // Since this is a unit sphere, the norm at p is a vector to p
-  auto localPoint = p1 + t * dir;
-  Vector3D localNorm(localPoint[0], localPoint[1], localPoint[2]);
-
-  // t is unchanged by this
-  // Remember to use the *original* intersection point
-  auto point = ray.at(t);
-  //std::cerr << "Point is " << point << std::endl;
-
-  // To get the appropriate normal vector, we must also transpose
-  // the inverse transform
-  auto norm = inverseTransform.transpose() * localNorm;
-  norm.normalize();
-  //std::cerr << "Norm is " << norm << std::endl;
-
-  // We will return whether or not this intersection was
-  // better than whatever was already stored there
-  //std::cerr << "Trying to update hit record" << std::endl;
-  return hitRecord->update(norm, point, t);
+  return t;
 }

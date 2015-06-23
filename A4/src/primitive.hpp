@@ -11,18 +11,26 @@ class Primitive {
   virtual bool intersects(const Ray& ray,
                           HitRecord* hitRecord,
                           const Matrix4x4& inverseTransform) = 0;
+  virtual bool fastIntersects(const Ray& ray,
+                              const Matrix4x4& inverseTransform) = 0;
 };
 
 class Sphere : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  bool fastIntersects(const Ray& ray,
+                      const Matrix4x4& inverseTransform) override;
+ private:
+  double solveIntersection(const Point3D& p1, const Vector3D& dir);
 };
 
 class Cube : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  bool fastIntersects(const Ray& ray,
+                      const Matrix4x4& inverseTransform) override;
 };
 
 class NonhierSphere : public Primitive {
@@ -32,6 +40,8 @@ class NonhierSphere : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  bool fastIntersects(const Ray& ray,
+                      const Matrix4x4& inverseTransform) override;
 
  private:
   Point3D m_pos;
@@ -44,6 +54,8 @@ class NonhierBox : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  bool fastIntersects(const Ray& ray,
+                      const Matrix4x4& inverseTransform) override;
 
  private:
   Point3D m_pos;

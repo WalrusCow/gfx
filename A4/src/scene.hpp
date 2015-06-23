@@ -21,6 +21,14 @@ class SceneNode {
   virtual bool intersects(
       const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform);
 
+  // Check if anything hits, and we only need a boolean (no record)
+  bool fastIntersects(const Ray& ray) {
+    return fastIntersects(ray, Matrix4x4());
+  }
+
+  virtual bool fastIntersects(
+      const Ray& ray, const Matrix4x4& inverseTransform);
+
   void set_transform(const Matrix4x4& m) {
     trans = m;
     inverseTrans = m.invert();
@@ -82,6 +90,8 @@ class GeometryNode : public SceneNode {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  bool fastIntersects(
+      const Ray& ray, const Matrix4x4& inverseTransform) override;
 
   void set_material(Material* material) {
     this->material = material;

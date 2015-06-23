@@ -31,11 +31,8 @@ Colour rayColour(const Ray& ray,
   direction.normalize();
 
   for (const auto light : lights) {
-    // Direction to the light
-    auto lightDir = light->position - hitRecord.point;
-    HitRecord shadowRecord;
     Ray shadowRay(hitRecord.point, light->position);
-    if (!root->intersects(shadowRay, &shadowRecord)) {
+    if (!root->fastIntersects(shadowRay)) {
       // Only add from light source if nothing is hit first
       colour = colour + hitRecord.material->getColour(
           *light, hitRecord.point, hitRecord.norm, ray.dir);
@@ -46,7 +43,7 @@ Colour rayColour(const Ray& ray,
 }
 
 Colour backgroundColour(int x, int y, int width, int height) {
-  (void) x;
+  (void) x; (void) width;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
   const Colour bottom(1.0, 0.596, 0.9215);
