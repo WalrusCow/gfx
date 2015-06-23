@@ -11,27 +11,27 @@ hide = gr.material({0.84, 0.6, 0.53}, {0.3, 0.3, 0.3}, 20)
 
 inst = gr.node('inst')
 
---arc = gr.node('arc')
---inst:add_child(arc)
---arc:translate(0, 0, -10)
---
---p1 = gr.nh_box('p1', {0, 0, 0}, 1)
---arc:add_child(p1)
---p1:set_material(stone)
---p1:translate(-2.4, 0, -0.4)
---p1:scale(0.8, 4, 0.8)
---
---p2 = gr.nh_box('p2', {0, 0, 0}, 1)
---arc:add_child(p2)
---p2:set_material(stone)
---p2:translate(1.6, 0, -0.4)
---p2:scale(0.8, 4, 0.8)
+arc = gr.node('arc')
+inst:add_child(arc)
+arc:translate(0, 0, -10)
 
---s = gr.nh_sphere('s', {0, 0, 0}, 1)
---arc:add_child(s)
---s:set_material(stone)
---s:translate(0, 4, 0)
---s:scale(4, 0.6, 0.6)
+p1 = gr.nh_box('p1', {0, 0, 0}, 1)
+arc:add_child(p1)
+p1:set_material(stone)
+p1:translate(-2.4, 0, -0.4)
+p1:scale(0.8, 4, 0.8)
+
+p2 = gr.nh_box('p2', {0, 0, 0}, 1)
+arc:add_child(p2)
+p2:set_material(stone)
+p2:translate(1.6, 0, -0.4)
+p2:scale(0.8, 4, 0.8)
+
+s = gr.nh_sphere('s', {0, 0, 0}, 1)
+arc:add_child(s)
+s:set_material(stone)
+s:translate(0, 4, 0)
+s:scale(4, 0.6, 0.6)
 
 -- #############################################
 -- Let's assume that cows are spheres
@@ -105,12 +105,12 @@ end
 
 -- Place a ring of arches.
 
---for i = 1, 6 do
---   an_arc = gr.node('arc' .. tostring(i))
---   an_arc:rotate('Y', (i-1) * 60)
---   scene:add_child(an_arc)
---   an_arc:add_child(arc)
---end
+for i = 1, 6 do
+   an_arc = gr.node('arc' .. tostring(i))
+   an_arc:rotate('Y', (i-1) * 60)
+   scene:add_child(an_arc)
+   an_arc:add_child(arc)
+end
 
 gr.render(scene,
 	  'simple-cows.png', 256, 256,

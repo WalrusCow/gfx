@@ -20,17 +20,11 @@ void SceneNode::rotate(char axis, double angle) {
 }
 
 void SceneNode::scale(const Vector3D& amount) {
-  std::cerr << "Scale: " << amount << std::endl;
-  std::cerr << trans << std::endl;
   set_transform(scaleMatrix(amount[0], amount[1], amount[2]) * trans);
-  std::cerr << trans << std::endl;
 }
 
 void SceneNode::translate(const Vector3D& amount) {
-  std::cerr << "Translate: " << amount << std::endl;
-  std::cerr << trans << std::endl;
   set_transform(translationMatrix(amount[0], amount[1], amount[2]) * trans);
-  std::cerr << trans << std::endl;
 }
 
 bool SceneNode::intersects(

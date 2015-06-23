@@ -52,34 +52,5 @@ class Cube : public Primitive {
   const std::vector<Point3D> f5 = {p7, p6, p2, p3};
   const std::vector<Point3D> f6 = {p4, p5, p1, p0};
 
-  double solveIntersection(const Point3D& p1, const Vector3D& dir);
-};
-
-class NonhierSphere : public Primitive {
- public:
-  NonhierSphere(const Point3D& pos, double radius)
-    : m_pos(pos), m_radius(radius) {}
-  bool intersects(const Ray& ray,
-                  HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
-  bool fastIntersects(const Ray& ray,
-                      const Matrix4x4& inverseTransform) override;
-
- private:
-  Point3D m_pos;
-  double m_radius;
-};
-
-class NonhierBox : public Primitive {
- public:
-  NonhierBox(const Point3D& pos, double size) : m_pos(pos), m_size(size) {}
-  bool intersects(const Ray& ray,
-                  HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
-  bool fastIntersects(const Ray& ray,
-                      const Matrix4x4& inverseTransform) override;
-
- private:
-  Point3D m_pos;
-  double m_size;
+  double solveIntersection(const Point3D& p1, const Vector3D& dir,bool debug);
 };

@@ -6,30 +6,6 @@
 #include "HitRecord.hpp"
 #include "Ray.hpp"
 
-bool NonhierBox::intersects(
-    const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
-  (void) ray; (void) hitRecord; (void) inverseTransform;
-  return false;
-}
-
-bool NonhierBox::fastIntersects(
-    const Ray& ray, const Matrix4x4& inverseTransform) {
-  (void) ray; (void) inverseTransform;
-  return false;
-}
-
-bool NonhierSphere::intersects(
-    const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
-  (void) ray; (void) hitRecord; (void) inverseTransform;
-  return false;
-}
-
-bool NonhierSphere::fastIntersects(
-    const Ray& ray, const Matrix4x4& inverseTransform) {
-  (void) ray; (void) inverseTransform;
-  return false;
-}
-
 bool Cube::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
   // New ray
@@ -38,11 +14,24 @@ bool Cube::intersects(
   const auto dir = b - a;
 
   // Ohkay
-  double t = solveIntersection(a, dir);
+  double t = solveIntersection(a, dir,false);
+  if (t < 0) return false;
 
-  // Since this is a unit sphere, the norm at p is a vector to p
-  auto localPoint = p1 + t * dir;
-  Vector3D localNorm(localPoint[0], localPoint[1], localPoint[2]);
+  auto localPoint = a + t * dir;
+
+  // We will be on some face, and that coordinate will be ~ +- 1
+  // So the norm (outwards) from that face should be just the coordinate
+  // closest to 1.
+  Vector3D localNorm(0, 0, 0);
+  if (isEqual(std::abs(localPoint[0]), 1.0)) {
+    localNorm[0] = localPoint[0] >= 0 ? 1 : -1;
+  }
+  if (isEqual(std::abs(localPoint[1]), 1.0)) {
+    localNorm[1] = localPoint[1] >= 0 ? 1 : -1;
+  }
+  if (isEqual(std::abs(localPoint[2]), 1.0)) {
+    localNorm[2] = localPoint[2] >= 0 ? 1 : -1;
+  }
 
   // t is unchanged by this
   // Remember to use the *original* intersection point
@@ -58,10 +47,12 @@ bool Cube::intersects(
   return hitRecord->update(norm, point, t);
 }
 
-double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
+double Cube::solveIntersection(const Point3D& a, const Vector3D& dir,bool debug) {
   int count = 0;
   double minT = -1;
+  int __zz__=0;
   for (const auto& face : {f1, f2, f3, f4, f5, f6}) {
+    __zz__++;
     // Check intersection with each face
     // We will use a parametric eqn for a square
     // p0 + (p1 - p0)r + (p3 - p0)s = p
@@ -72,26 +63,32 @@ double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
 
     Vector3D col1 = p1 - p0;
     Vector3D col2 = p3 - p0;
-    Vector3D col3 = dir;
+    Vector3D col3 = -dir;
     Vector3D rhs = -p0 + Vector3D(a[0], a[1], a[2]);
 
     double detA = det(col1, col2, col3);
+    if (isZero(detA)) {
+      continue;
+    }
     double c1 = det(rhs, col2, col3);
     double r = c1 / detA;
-    if (r < 0 || r > 1)
+    if (r < 0 || r > 1) {
       // Outside of square
       continue;
+    }
 
     double c2 = det(col1, rhs, col3);
     double s = c2 / detA;
-    if (s < 0 || s > 1)
+    if (s < 0 || s > 1) {
       // Outside of square
       continue;
+    }
 
     double c3 = det(col1, col2, rhs);
     double t = c3 / detA;
-    if (t < 0 || isZero(t))
+    if (t < 0 || isZero(t)) {
       continue;
+    }
 
     // Intersection on this face
     if (count == 0) {
@@ -108,6 +105,7 @@ double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
     }
   }
 
+  //if (debug) std::cerr << "Intersection: " << minT << std::endl;
   // And discard near zero
   return isZero(minT) ? -1 : minT;
 }
@@ -119,7 +117,7 @@ bool Cube::fastIntersects(
   const auto b = inverseTransform * ray.other;
   const auto dir = b - a;
 
-  return solveIntersection(a, dir) > 0;
+  return solveIntersection(a, dir,true) > 0;
 }
 
 bool Sphere::intersects(
@@ -130,6 +128,7 @@ bool Sphere::intersects(
   const auto dir = p2 - p1;
 
   double t = solveIntersection(p1, dir);
+  if (t < 0) return false;
 
   // Since this is a unit sphere, the norm at p is a vector to p
   auto localPoint = p1 + t * dir;

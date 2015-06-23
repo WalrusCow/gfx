@@ -503,9 +503,12 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c)
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 }
 
+const double EPSILON = 1e-8;
 inline bool isZero(double d) {
-  static const double EPSILON = 1e-2;
-  return d < EPSILON;
+  return std::abs(d) < EPSILON;
+}
+inline bool isEqual(double a, double b) {
+  return std::abs(a - b) < EPSILON;
 }
 
 double det(const Vector3D& col1, const Vector3D& col2, const Vector3D& col3);
