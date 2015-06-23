@@ -50,9 +50,7 @@ bool Cube::intersects(
 double Cube::solveIntersection(const Point3D& a, const Vector3D& dir,bool debug) {
   int count = 0;
   double minT = -1;
-  int __zz__=0;
   for (const auto& face : {f1, f2, f3, f4, f5, f6}) {
-    __zz__++;
     // Check intersection with each face
     // We will use a parametric eqn for a square
     // p0 + (p1 - p0)r + (p3 - p0)s = p
@@ -105,7 +103,6 @@ double Cube::solveIntersection(const Point3D& a, const Vector3D& dir,bool debug)
     }
   }
 
-  //if (debug) std::cerr << "Intersection: " << minT << std::endl;
   // And discard near zero
   return isZero(minT) ? -1 : minT;
 }

@@ -37,12 +37,6 @@ Colour rayColour(const Ray& ray,
       colour = colour + hitRecord.material->getColour(
           *light, hitRecord.point, hitRecord.norm, ray.dir);
     }
-    //else {
-    //  if (x == width/2&&y>=height/2) {
-    //    std::cerr << "Zero x hit box and shadow blocked" << std::endl;
-    //    std::cerr << hitRecord.point << " " << hitRecord.norm << " " << *light << std::endl;
-    //  }
-    //}
   }
 
   return colour + hitRecord.material->getMainColour() * ambientColour;
@@ -73,9 +67,6 @@ void a4_render(// What to render
                const Colour& ambient,
                const std::list<Light*>& lights) {
   Image img(width, height, 3);
-  HitRecord record;
-  std::cerr << root->intersects(Ray({0, 0, -4}, {0, 0, 4}), &record) << std::endl;
-  //std::exit(1);
 
   PixelTransformer pixelTransformer(width, height, viewConfig);
 
