@@ -31,8 +31,15 @@ Colour rayColour(const Ray& ray,
   direction.normalize();
 
   for (const auto light : lights) {
-    colour = colour + hitRecord.material->getColour(
-        *light, hitRecord.point, hitRecord.norm, ray.dir);
+    // Direction to the light
+    auto lightDir = light->position - hitRecord.point;
+    HitRecord shadowRecord;
+    Ray shadowRay(hitRecord.point, light->position);
+    if (!root->intersects(shadowRay, &shadowRecord)) {
+      // Only add from light source if nothing is hit first
+      colour = colour + hitRecord.material->getColour(
+          *light, hitRecord.point, hitRecord.norm, ray.dir);
+    }
   }
 
   return colour + colour * ambientColour;

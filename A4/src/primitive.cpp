@@ -52,11 +52,11 @@ bool Sphere::intersects(
 
   // Only t >= 0 matters (and we should probably discard < EPSILON as well)
   double t = roots[0];
-  if (numRoots == 2 && roots[1] > 0) {
+  if (numRoots == 2 && roots[1] > 0 && !isZero(roots[1])) {
     // Take smallest non-negative value
     t = (t < 0) ? roots[1] : std::min(t, roots[1]);
   }
-  if (t < 0) {
+  if (t < 0 || isZero(t)) {
     // No *valid* intersections
     //std::cerr << "No valid intersection" << std::endl;
     return false;
