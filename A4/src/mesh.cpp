@@ -92,8 +92,10 @@ bool Mesh::intersects(const Ray& ray,
 
 bool Mesh::fastIntersects(const Ray& ray,
                           const Matrix4x4& inverseTransform) {
-  (void) ray; (void) inverseTransform;
-  return false;
+  HitRecord r;
+  intersects(ray, &r, inverseTransform);
+  // lol epsilon here should be larger, I guess...
+  return r.t >= 0.01;
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {

@@ -68,13 +68,15 @@ void a4_render(// What to render
                const std::list<Light*>& lights) {
   Image img(width, height, 3);
 
-  //HitRecord r;
-  //std::cerr << root->intersects(Ray({0,0,1},{0,0,0}),&r) << std::endl;
-  //std::exit(1);
-
   PixelTransformer pixelTransformer(width, height, viewConfig);
 
+  double lastP = 0;
   for (int y = 0; y < height; ++y) {
+    if (y *100/ (double) height > lastP+9.9) {
+      // hacky percent done
+      lastP = y*100/(double)height;
+      std::cerr << lastP << "% done." << std::endl;
+    }
     for (int x = 0; x < width; ++x) {
       // Get world coordinates of pixel (x, y)
       auto worldPx = pixelTransformer.transform(x, y);

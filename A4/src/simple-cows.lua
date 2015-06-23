@@ -62,27 +62,27 @@ scene:rotate('X', 23)
 
 -- the floor
 
---plane = gr.mesh('plane', {
---		   { -1, 0, -1 }, 
---		   {  1, 0, -1 }, 
---		   {  1,  0, 1 }, 
---		   { -1, 0, 1  }
---		}, {
---		   {3, 2, 1, 0}
---		})
---scene:add_child(plane)
---plane:set_material(grass)
---plane:scale(30, 30, 30)
+plane = gr.mesh('plane', {
+		   { -1, 0, -1 },
+		   {  1, 0, -1 },
+		   {  1,  0, 1 },
+		   { -1, 0, 1  }
+		}, {
+		   {3, 2, 1, 0}
+		})
+scene:add_child(plane)
+plane:set_material(grass)
+plane:scale(30, 30, 30)
 
 -- Construct a central altar in the shape of a buckyball.  The
 -- buckyball at the centre of the real Stonehenge was destroyed
 -- in the great fire of 733 AD.
 
---require('buckyball')
+require('buckyball')
 
---scene:add_child(buckyball)
---buckyball:set_material(stone)
---buckyball:scale(1.5, 1.5, 1.5)
+scene:add_child(buckyball)
+buckyball:set_material(stone)
+buckyball:scale(1.5, 1.5, 1.5)
 
 -- Use the instanced cow model to place some actual cows in the scene.
 -- For convenience, do this in a loop.
@@ -99,7 +99,7 @@ for _, pt in pairs({
    cow_instance:translate(unpack(pt[1]))
    cow_instance:rotate('Y', pt[2])
    cow_instance:scale(1.4, 1.4, 1.4)
-   
+
    cow_number = cow_number + 1
 end
 
