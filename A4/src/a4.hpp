@@ -23,6 +23,7 @@ void a4_render(// What to render
 Colour rayColour(const Ray& ray,
     const std::list<Light*>& lights,
     int x, int y, int w, int h,
+    const Colour& ambientColour,
     SceneNode* scene);
 
 Colour backgroundColour(int, int, int, int);

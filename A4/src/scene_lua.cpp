@@ -195,12 +195,15 @@ int gr_nh_sphere_cmd(lua_State* L)
 
   const char* name = luaL_checkstring(L, 1);
 
-  Point3D pos;
+  Vector3D pos;
   get_tuple(L, 2, &pos[0], 3);
 
   double radius = luaL_checknumber(L, 3);
 
-  data->node = new GeometryNode(name, new NonhierSphere(pos, radius));
+  data->node = new GeometryNode(name, new Sphere());
+  std::cerr << "Trying to scale by " << radius << std::endl;
+  data->node->scale({radius, radius, radius});
+  data->node->translate(pos);
 
   luaL_getmetatable(L, "gr.node");
   lua_setmetatable(L, -2);

@@ -24,8 +24,10 @@ bool Cube::intersects(
 bool Sphere::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
   // New ray
+  //std::cerr << ray.start << "   " << ray.other << std::endl;
   const auto p1 = inverseTransform * ray.start;
   const auto p2 = inverseTransform * ray.other;
+  //std::cerr << "a" << p1 << "   " << p2 << std::endl;
   const auto dir = p2 - p1;
 
   // Now do intersection against unit sphere centred at origin
@@ -73,6 +75,7 @@ bool Sphere::intersects(
   // To get the appropriate normal vector, we must also transpose
   // the inverse transform
   auto norm = inverseTransform.transpose() * localNorm;
+  norm.normalize();
   //std::cerr << "Norm is " << norm << std::endl;
 
   // We will return whether or not this intersection was

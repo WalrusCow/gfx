@@ -15,18 +15,31 @@ Colour rayColour(const Ray& ray,
                  const std::list<Light*>& lights,
                  int x, int y,
                  int width, int height,
+                 const Colour& ambientColour,
                  SceneNode* root) {
+
   HitRecord hitRecord;
   if (!root->intersects(ray, &hitRecord)) {
     // No intersection - use background colour
     return backgroundColour(x, y, width, height);
   }
 
-  // TODO: Compute phong shading or something
-  return static_cast<const PhongMaterial*>(hitRecord.material)->m_kd;
+  Colour colour(0, 0, 0);
+
+  // Unit direction
+  Vector3D direction = ray.dir;
+  direction.normalize();
+
+  for (const auto light : lights) {
+    colour = colour + hitRecord.material->getColour(
+        *light, hitRecord.point, hitRecord.norm, ray.dir);
+  }
+
+  return colour + colour * ambientColour;
 }
 
 Colour backgroundColour(int x, int y, int width, int height) {
+  (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
   const Colour bottom(1.0, 0.596, 0.9215);
@@ -62,7 +75,8 @@ void a4_render(// What to render
       Ray ray(viewConfig.eye, worldPx);
 
       // Now check the intersection with every object lmao
-      auto pixelColour = rayColour(ray, lights, x, y, width,height,root);
+      auto pixelColour = rayColour(
+          ray, lights, x, y, width, height, ambient, root);
       img(x, height-1-y, 0) = pixelColour.R();
       img(x, height-1-y, 1) = pixelColour.G();
       img(x, height-1-y, 2) = pixelColour.B();

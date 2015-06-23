@@ -10,7 +10,7 @@ PixelTransformer::PixelTransformer(int width, int height,
   // How far we are away
   double d = viewConfig.view.length();
   // This is height in world units of near plane
-  double h = 2 * d * std::tan(viewConfig.fov / 2);
+  double h = 2 * d * std::tan(2 * M_PI * viewConfig.fov / 360 / 2);
 
   // Instead of going from (0, 0) to (width, height) we want
   // to go from (-width/2, -height/2) to (width/2, height/2)
