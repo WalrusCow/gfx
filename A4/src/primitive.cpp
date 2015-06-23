@@ -23,15 +23,15 @@ bool Cube::intersects(
   // So the norm (outwards) from that face should be just the coordinate
   // closest to 1.
   Vector3D localNorm(0, 0, 0);
-  if (isEqual(std::abs(localPoint[0]), 1.0)) {
-    localNorm[0] = localPoint[0] >= 0 ? 1 : -1;
-  }
-  if (isEqual(std::abs(localPoint[1]), 1.0)) {
-    localNorm[1] = localPoint[1] >= 0 ? 1 : -1;
-  }
-  if (isEqual(std::abs(localPoint[2]), 1.0)) {
-    localNorm[2] = localPoint[2] >= 0 ? 1 : -1;
-  }
+  auto getNormCoord = [&] (int c) {
+    if (isEqual(localPoint[c], 1.0)) {
+      localNorm[c] = 1;
+    }
+    else if (isZero(localPoint[c])) {
+      localNorm[c] = -1;
+    }
+  };
+  for (int c = 0; c < 3; ++c) getNormCoord(c);
 
   // t is unchanged by this
   // Remember to use the *original* intersection point
