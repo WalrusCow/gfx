@@ -2,7 +2,7 @@ red = gr.material({0.91, 0.5, 0.78}, {0.1, 0.1, 0.1}, 10)
 
 root = gr.node('root')
 
-s1 = gr.nh_sphere('s1', {0, 100, -500}, 100)
+s1 = gr.nh_box('s1', {0, 100, -500}, 100)
 --s1:scale(100, 100, 100)
 --s1:scale(1, 3, 4)
 root:add_child(s1)

@@ -134,6 +134,12 @@ public:
     return *this;
   }
 
+  Vector3D(const Point3D& other) {
+    v_[0] = other[0];
+    v_[1] = other[1];
+    v_[2] = other[2];
+  }
+
   double& operator[](size_t idx)
   {
     return v_[ idx ];
@@ -199,6 +205,11 @@ inline Vector3D operator -(const Vector3D& a, const Vector3D& b)
 inline Vector3D operator -(const Vector3D& a)
 {
   return Vector3D(-a[0], -a[1], -a[2]);
+}
+
+inline Point3D operator -(const Point3D& a)
+{
+  return Point3D(-a[0], -a[1], -a[2]);
 }
 
 inline Point3D operator -(const Point3D& a, const Vector3D& b)
