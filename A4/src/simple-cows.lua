@@ -63,9 +63,9 @@ scene:rotate('X', 23)
 -- the floor
 
 plane = gr.mesh('plane', {
-		   { -1, 0, -1 },
-		   {  1, 0, -1 },
-		   {  1,  0, 1 },
+		   { -1, 0, -1 }, 
+		   {  1, 0, -1 }, 
+		   {  1,  0, 1 }, 
 		   { -1, 0, 1  }
 		}, {
 		   {3, 2, 1, 0}
@@ -90,7 +90,7 @@ buckyball:scale(1.5, 1.5, 1.5)
 cow_number = 1
 
 for _, pt in pairs({
-		      {{1,1.3,10}, 20},
+		      {{1,1.3,14}, 20},
 		      {{5,1.3,-11}, 180},
 		      {{-5.5,1.3,-3}, -60}}) do
    cow_instance = gr.node('cow' .. tostring(cow_number))
@@ -99,7 +99,7 @@ for _, pt in pairs({
    cow_instance:translate(unpack(pt[1]))
    cow_instance:rotate('Y', pt[2])
    cow_instance:scale(1.4, 1.4, 1.4)
-
+   
    cow_number = cow_number + 1
 end
 

@@ -41,7 +41,7 @@ bool Mesh::faceIntersection(
   // Intersection point
   auto planePt = ray.at(t);
   // Now check if planePt is "left" of everything
-  for (auto i = 0; i < face.size(); ++i) {
+  for (size_t i = 0; i < face.size(); ++i) {
     // Go over points in order
     const auto& p1 = m_verts[face[i]];
     const auto& p2 = m_verts[face[(i + 1) % face.size()]];
@@ -61,9 +61,7 @@ bool Mesh::faceIntersection(
   // We got it.
   norm.normalize();
   // Update if this is a better t value
-  hitRecord->update(norm, planePt, t);
-  // True that we did hit this face
-  return true;
+  return hitRecord->update(norm, planePt, t);
 }
 
 bool Mesh::intersects(const Ray& ray,
@@ -74,20 +72,18 @@ bool Mesh::intersects(const Ray& ray,
   const auto b = inverseTransform * ray.other;
   const Ray newRay(a, b);
 
-  int intersections = 0;
+  // Note: This is not implemented correctly, since faceIntersection
+  // checks if the face was intersected *and* was a better t value
+  bool hit = false;
   // For each polygon, check for polygon intersection lol...
   for (const auto& face : m_faces) {
     if (faceIntersection(newRay, hitRecord, face)) {
       // Yay
-      intersections += 1;
+      hit = true;
     }
 
-    if (intersections >= 2) {
-      // We are convex
-      break;
-    }
   }
-  return intersections > 0;
+  return hit;
 }
 
 bool Mesh::fastIntersects(const Ray& ray,
