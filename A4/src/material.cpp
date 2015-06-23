@@ -13,16 +13,24 @@ Colour PhongMaterial::getColour(const Light& light,
                                 const Vector3D& norm,
                                 Vector3D dir) const {
   dir.normalize();
-  // Direction *to* the light
-  auto lightDirection = light.position - pt;
+  // Direction to the light (away from surface)
+  auto lightDir = light.position - pt;
   Colour lightColour = light.colour;
-  lightDirection.normalize();
-  auto reflection = lightDirection + -2 * lightDirection.dot(norm) * norm;
 
-  // Note: dir is backwards viewerDirection
-  Vector3D cv(0, 0, 0);
-  Colour diffuseIllumination = std::max(0.0, lightDirection.dot(norm)) * m_kd;
-  Colour specularIllumination = std::pow(std::max(0.0, reflection.dot(dir)),
-                                         m_shininess) * m_ks;
-  return lightColour * diffuseIllumination + lightColour * specularIllumination;
+  auto r = lightDir.length();
+  lightDir.normalize();
+
+  auto ldotn = lightDir.dot(norm);
+
+  // In direction away from surface
+  auto refl = -1 * lightDir + 2 * ldotn * norm;
+
+  auto specular = std::pow(std::max(0.0, refl.dot(-1 * dir)), m_shininess);
+  specular /= ldotn;
+
+  auto phi = m_kd + m_ks * specular;
+  auto atten = light.falloff[0] + light.falloff[1]*r + light.falloff[2]*r*r;
+  atten = ldotn / atten;
+
+  return phi * lightColour * atten;
 }

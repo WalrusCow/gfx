@@ -466,9 +466,15 @@ private:
   double b_;
 };
 
-inline Colour operator *(double s, const Colour& a)
-{
+inline Colour operator *(double s, const Colour& a) {
   return Colour(s*a.R(), s*a.G(), s*a.B());
+}
+inline Colour operator *(const Colour& a, double s) {
+  return Colour(s*a.R(), s*a.G(), s*a.B());
+}
+
+inline Colour operator /(const Colour& a, double s) {
+  return Colour(s/a.R(), s/a.G(), s/a.B());
 }
 
 inline Colour operator *(const Colour& a, const Colour& b)

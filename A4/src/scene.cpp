@@ -1,5 +1,6 @@
 #include "scene.hpp"
 
+#include <cmath>
 #include <iostream>
 
 #include "xform.hpp"
@@ -9,25 +10,26 @@
 SceneNode::SceneNode(const std::string& name) : m_name(name) {}
 
 void SceneNode::rotate(char axis, double angle) {
-  if (axis == 'x')
+  angle = 2*M_PI * angle / 360.0;
+  if (axis == 'x' || axis == 'X')
     set_transform(trans * xRotationMatrix(angle));
-  else if (axis == 'y')
+  else if (axis == 'y' || axis == 'Y')
     set_transform(trans * yRotationMatrix(angle));
-  else if (axis == 'z')
+  else if (axis == 'z' || axis == 'Z')
     set_transform(trans * zRotationMatrix(angle));
 }
 
 void SceneNode::scale(const Vector3D& amount) {
   std::cerr << "Scale: " << amount << std::endl;
   std::cerr << trans << std::endl;
-  set_transform( scaleMatrix(amount[0], amount[1], amount[2]) * trans);
+  set_transform(scaleMatrix(amount[0], amount[1], amount[2]) * trans);
   std::cerr << trans << std::endl;
 }
 
 void SceneNode::translate(const Vector3D& amount) {
   std::cerr << "Translate: " << amount << std::endl;
   std::cerr << trans << std::endl;
-  set_transform( translationMatrix(amount[0], amount[1], amount[2]) * trans);
+  set_transform(translationMatrix(amount[0], amount[1], amount[2]) * trans);
   std::cerr << trans << std::endl;
 }
 

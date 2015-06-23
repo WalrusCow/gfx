@@ -201,7 +201,6 @@ int gr_nh_sphere_cmd(lua_State* L)
   double radius = luaL_checknumber(L, 3);
 
   data->node = new GeometryNode(name, new Sphere());
-  std::cerr << "Trying to scale by " << radius << std::endl;
   data->node->scale({radius, radius, radius});
   data->node->translate(pos);
 
