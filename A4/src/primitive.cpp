@@ -19,9 +19,7 @@ bool Cube::intersects(
 
   auto localPoint = a + t * dir;
 
-  // We will be on some face, and that coordinate will be ~ +- 1
-  // So the norm (outwards) from that face should be just the coordinate
-  // closest to 1.
+  // We will be on some face, and that coordinate will be ~ 0 or 1
   Vector3D localNorm(0, 0, 0);
   auto getNormCoord = [&] (int c) {
     if (isEqual(localPoint[c], 1.0)) {

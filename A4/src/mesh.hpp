@@ -28,6 +28,7 @@ private:
   Point3D lowerBound;
   Vector3D boundsRange;
   Cube boundingCube;
+  Matrix4x4 boundingCubeInverse;
 
   friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
   bool faceIntersection(

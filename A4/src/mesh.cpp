@@ -25,9 +25,21 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
   boundsRange = largePoint - smallPoint;
   // Enforce a minimum size (e.g. for planes)
   double MIN_SIZE = 0.2;
+  std::cerr << "initial Bounds range is " << boundsRange << std::endl;
+  std::cerr << "Lower bound is " << lowerBound << std::endl;
   for (auto i = 0; i < 3; ++i) {
     boundsRange[i] = std::max(boundsRange[i], MIN_SIZE);
   }
+  std::cerr << "Bounds range is " << boundsRange << std::endl;
+
+  // Translate to put lower corner at origin
+  Matrix4x4 xlate = translationMatrix(
+      -lowerBound[0], -lowerBound[1], -lowerBound[2]);
+  // And scale down to get unit cube
+  Matrix4x4 scale = scaleMatrix(
+      1/boundsRange[0], 1/boundsRange[1], 1/boundsRange[2]);
+  boundingCubeInverse = scale * xlate;//xlate * scale;
+  std::cerr << "Matrices are\n" << xlate << "\n\n"<<scale<<"\n\n"<<boundingCubeInverse<<std::endl;
 }
 
 bool Mesh::faceIntersection(
@@ -69,22 +81,8 @@ bool Mesh::faceIntersection(
     }
   }
 
-  // We got it.
-  //norm.normalize();
   // Update if this is a better t value
   return hitRecord->update(norm, planePt, t);
-}
-
-bool Mesh::withinBounds(const Ray& ray, HitRecord* hitRecord) {
-  // We need to transform the ray to our bounding box space now
-  Matrix4x4 xlate = translationMatrix(
-      lowerBound[0], lowerBound[1], lowerBound[2]).invert();
-  Matrix4x4 scale = scaleMatrix(
-      boundsRange[0], boundsRange[1], boundsRange[2]).invert();
-  auto inverseTransform = xlate * scale;
-
-  // This will update the hit record
-  return boundingCube.intersects(ray, hitRecord, inverseTransform);
 }
 
 bool Mesh::intersects(const Ray& ray,
@@ -104,9 +102,12 @@ bool Mesh::intersects(const Ray& ray,
     boundingPtr = &boundingRecord;
   }
   // First, check for intersection against our bounding box
-  //if (!withinBounds(newRay, boundingPtr)) {
-  //  return false;
-  //}
+  if (!boundingCube.intersects(ray, boundingPtr, boundingCubeInverse * inverseTransform)) {
+    return false;
+  }
+  else if (BOUNDING_BOX_RENDER) {
+    return true;
+  }
 
   // Note: This is not implemented correctly, since faceIntersection
   // checks if the face was intersected *and* was a better t value
