@@ -22,18 +22,14 @@ bool Mesh::faceIntersection(
     const auto& p1 = m_verts[face[1]];
     const auto& p2 = m_verts[face[face.size()-1]];
     norm = (p1 - p0).cross(p2 - p0);
-    //std::cerr << "Two lines are " << p1-p0 << " and " << p2-p0 <<std::endl;
-    //std::cerr << "norm " << norm << std::endl;
     auto rayNorm = ray.dir.dot(norm);
 
-    //std::cerr << "Ray norm " << rayNorm << std::endl;
     // Parallel
     if (isZero(rayNorm)) return false;
 
     t = (p0 - ray.start).dot(norm) / rayNorm;
     // No intersection
     if (t < 0 || isZero(t)) {
-      //std::cerr << "bad t " << t << std::endl;
       return false;
     }
   }
@@ -47,12 +43,9 @@ bool Mesh::faceIntersection(
     const auto& p2 = m_verts[face[(i + 1) % face.size()]];
     // from p1 to p2
     const auto side = p2 - p1;
-    //std::cerr << "Checking against line " <<side << std::endl;
     // cross from p1 to plane pt and dot against normal
     auto k = norm.dot(side.cross(planePt - p1));
-    //std::cerr << "cross product " <<side.cross(planePt - p1) << std::endl;
     if (!isZero(k) && k < 0) {
-      //std::cerr << "outside " << k << std::endl;
       // Zero means on the side; negative means opposite dir from norm
       return false;
     }
@@ -78,7 +71,8 @@ bool Mesh::intersects(const Ray& ray,
   // For each polygon, check for polygon intersection lol...
   for (const auto& face : m_faces) {
     if (faceIntersection(newRay, hitRecord, face)) {
-      // Yay
+      // haha, use real ray
+      hitRecord->point = ray.at(hitRecord->t);
       hit = true;
     }
 
@@ -90,8 +84,7 @@ bool Mesh::fastIntersects(const Ray& ray,
                           const Matrix4x4& inverseTransform) {
   HitRecord r;
   intersects(ray, &r, inverseTransform);
-  // lol epsilon here should be larger, I guess...
-  return r.t >= 0.01;
+  return r.t > 0 && !isZero(r.t);
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
