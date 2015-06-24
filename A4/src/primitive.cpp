@@ -14,7 +14,7 @@ bool Cube::intersects(
   const auto dir = b - a;
 
   // Ohkay
-  double t = solveIntersection(a, dir,false);
+  double t = solveIntersection(a, dir);
   if (t < 0) return false;
 
   auto localPoint = a + t * dir;
@@ -47,7 +47,7 @@ bool Cube::intersects(
   return hitRecord->update(norm, point, t);
 }
 
-double Cube::solveIntersection(const Point3D& a, const Vector3D& dir,bool debug) {
+double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
   int count = 0;
   double minT = -1;
   for (const auto& face : {f1, f2, f3, f4, f5, f6}) {
@@ -114,7 +114,7 @@ bool Cube::fastIntersects(
   const auto b = inverseTransform * ray.other;
   const auto dir = b - a;
 
-  return solveIntersection(a, dir,true) > 0;
+  return solveIntersection(a, dir) > 0;
 }
 
 bool Sphere::intersects(
