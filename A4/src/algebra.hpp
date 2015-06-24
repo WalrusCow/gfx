@@ -485,7 +485,7 @@ inline Colour operator *(const Colour& a, double s) {
 }
 
 inline Colour operator /(const Colour& a, double s) {
-  return Colour(s/a.R(), s/a.G(), s/a.B());
+  return Colour(a.R()/s, a.G()/s, a.B()/s);
 }
 
 inline Colour operator *(const Colour& a, const Colour& b)

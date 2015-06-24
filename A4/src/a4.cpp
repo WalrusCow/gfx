@@ -66,18 +66,28 @@ void a4_render(// What to render
                // Lighting parameters
                const Colour& ambient,
                const std::list<Light*>& lights) {
+  const int superSampleX = 3;
+  const int superSampleY = 3;
+
   Image img(width, height, 3);
 
-  PixelTransformer pixelTransformer(width, height, viewConfig);
+  PixelTransformer pixelTransformer(width*superSampleX, height*superSampleY, viewConfig);
+
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      for (int i = 0; i < 3; ++i)
+        img(x, y, i) = 0;
+    }
+  }
 
   double lastP = 0;
-  for (int y = 0; y < height; ++y) {
-    if (y *100/ (double) height > lastP+9.9) {
+  for (int y = 0; y < height*superSampleY; ++y) {
+    if (y *100/ ((double) height*superSampleY) > lastP+9.9) {
       // hacky percent done
-      lastP = y*100/(double)height;
+      lastP = y*100/((double)height*superSampleY);
       std::cerr << lastP << "% done." << std::endl;
     }
-    for (int x = 0; x < width; ++x) {
+    for (int x = 0; x < width*superSampleX; ++x) {
       // Get world coordinates of pixel (x, y)
       auto worldPx = pixelTransformer.transform(x, y);
 
@@ -86,9 +96,11 @@ void a4_render(// What to render
       // Now check the intersection with every object lmao
       auto pixelColour = rayColour(
           ray, lights, x, y, width, height, ambient, root);
-      img(x, height-1-y, 0) = pixelColour.R();
-      img(x, height-1-y, 1) = pixelColour.G();
-      img(x, height-1-y, 2) = pixelColour.B();
+      // This is worth such a percent
+      pixelColour = pixelColour / (superSampleX * superSampleY);
+      img(x/superSampleX, height-1-y/superSampleY, 0) += pixelColour.R();
+      img(x/superSampleX, height-1-y/superSampleY, 1) += pixelColour.G();
+      img(x/superSampleX, height-1-y/superSampleY, 2) += pixelColour.B();
     }
   }
 
