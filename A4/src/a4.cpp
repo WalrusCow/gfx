@@ -66,8 +66,8 @@ void a4_render(// What to render
                // Lighting parameters
                const Colour& ambient,
                const std::list<Light*>& lights) {
-  const int superSampleX = 3;
-  const int superSampleY = 3;
+  const int superSampleX = 1;
+  const int superSampleY = 1;
 
   Image img(width, height, 3);
 
@@ -95,7 +95,7 @@ void a4_render(// What to render
 
       // Now check the intersection with every object lmao
       auto pixelColour = rayColour(
-          ray, lights, x, y, width, height, ambient, root);
+          ray, lights, x, y, width*superSampleX, height*superSampleY, ambient, root);
       // This is worth such a percent
       pixelColour = pixelColour / (superSampleX * superSampleY);
       img(x/superSampleX, height-1-y/superSampleY, 0) += pixelColour.R();

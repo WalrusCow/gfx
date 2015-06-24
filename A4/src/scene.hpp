@@ -53,16 +53,17 @@ class SceneNode {
   void scale(const Vector3D& amount);
   void translate(const Vector3D& amount);
 
- protected:
-  std::string m_name;
-
-  // Transformations
-  Matrix4x4 trans;
-  Matrix4x4 inverseTrans;
 
   // Hierarchy
   typedef std::list<SceneNode*> ChildList;
   ChildList children;
+
+  std::string m_name;
+ protected:
+
+  // Transformations
+  Matrix4x4 trans;
+  Matrix4x4 inverseTrans;
 };
 
 class JointNode : public SceneNode {
