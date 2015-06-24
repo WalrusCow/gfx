@@ -12,12 +12,31 @@ How to use my extra features:
   To change rate of sampling, edit a4.cpp and change the constants
   superSampleX and superSampleY. The provided executable is 3x3.
 
+  To run and render the bounding box, edit mesh.cpp and change the macro
+  BOUNDING_BOX_RENDER from false to true
+
 
 I have created the following data files, which are in the data directory:
   sample.lua
-  A custom scene.  In the scene there is a plane for the floor and there are
-  four instances of a single spherical fractal.
-  For good measure, I included a buckyball and a cube which float in mid air.
+    A custom scene.  In the scene there is a plane for the floor and there are
+    four instances of a single spherical fractal.
+    For good measure, I included a buckyball and a cube which float in mid air.
+  sample.png
+    A rendering of sample.lua with 2x2 antialiasing
+  sample_noantialias.png
+    A rendering of sample.lua with no antialiasing
+  nonhier.png
+    A rendering of nonhier.lua with no antialiasing
+  nonhier_antialias.png
+    A rendering of nonhier.lua with 3x3 antialiasing
+  nonhier_bounding.png
+    A rendering of nonhier.lua with bounding boxes (no antialiasing).
+  macho-cows.png
+    A rendering of macho-cows.lua
+  simple-cows.png
+    A rendering of simple-cows.lua
+  simple-cows-antialias.png
+    A rendering of simple-cows.lua with antialiasing
 
 There are two executables provided:
   rt : Basic raytracer
