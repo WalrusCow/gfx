@@ -25,8 +25,13 @@ public:
 private:
   const std::vector<Point3D> m_verts;
   const std::vector<Face> m_faces;
+  Point3D lowerBound;
+  Vector3D boundsRange;
+  Cube boundingCube;
 
   friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
   bool faceIntersection(
       const Ray& ray, HitRecord* hitRecord, const Face& face);
+  // Take as input a ray transformed into our model space
+  bool withinBounds(const Ray& ray, HitRecord* hitRecord);
 };

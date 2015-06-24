@@ -4,16 +4,34 @@
 
 #include "HitRecord.hpp"
 #include "Ray.hpp"
+#include "xform.hpp"
+
+#define BOUNDING_BOX_RENDER false
 
 Mesh::Mesh(const std::vector<Point3D>& verts,
            const std::vector<std::vector<int>>& faces)
     : m_verts(verts), m_faces(faces) {
+  Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
+  Point3D largePoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
+
+  // Get the minimum and maximum coordinates
+  for (const auto& vert : m_verts) {
+    for (auto i = 0; i < 3; ++i) {
+      largePoint[i] = std::max(largePoint[i], vert[i]);
+      smallPoint[i] = std::min(smallPoint[i], vert[i]);
+    }
+  }
+  lowerBound = smallPoint;
+  boundsRange = largePoint - smallPoint;
+  // Enforce a minimum size (e.g. for planes)
+  double MIN_SIZE = 0.2;
+  for (auto i = 0; i < 3; ++i) {
+    boundsRange[i] = std::max(boundsRange[i], MIN_SIZE);
+  }
 }
 
 bool Mesh::faceIntersection(
     const Ray& ray, HitRecord* hitRecord, const Mesh::Face& face) {
-  // Check if ray intersects this face...
-  // First, get the point where the ray intersects
   // Get a point on the plane
   Vector3D norm;
   double t;
@@ -52,9 +70,21 @@ bool Mesh::faceIntersection(
   }
 
   // We got it.
-  norm.normalize();
+  //norm.normalize();
   // Update if this is a better t value
   return hitRecord->update(norm, planePt, t);
+}
+
+bool Mesh::withinBounds(const Ray& ray, HitRecord* hitRecord) {
+  // We need to transform the ray to our bounding box space now
+  Matrix4x4 xlate = translationMatrix(
+      lowerBound[0], lowerBound[1], lowerBound[2]).invert();
+  Matrix4x4 scale = scaleMatrix(
+      boundsRange[0], boundsRange[1], boundsRange[2]).invert();
+  auto inverseTransform = xlate * scale;
+
+  // This will update the hit record
+  return boundingCube.intersects(ray, hitRecord, inverseTransform);
 }
 
 bool Mesh::intersects(const Ray& ray,
@@ -65,6 +95,19 @@ bool Mesh::intersects(const Ray& ray,
   const auto b = inverseTransform * ray.other;
   const Ray newRay(a, b);
 
+  HitRecord boundingRecord;
+  HitRecord* boundingPtr;
+  if (BOUNDING_BOX_RENDER) {
+    boundingPtr = hitRecord;
+  }
+  else {
+    boundingPtr = &boundingRecord;
+  }
+  // First, check for intersection against our bounding box
+  //if (!withinBounds(newRay, boundingPtr)) {
+  //  return false;
+  //}
+
   // Note: This is not implemented correctly, since faceIntersection
   // checks if the face was intersected *and* was a better t value
   bool hit = false;
@@ -73,6 +116,8 @@ bool Mesh::intersects(const Ray& ray,
     if (faceIntersection(newRay, hitRecord, face)) {
       // haha, use real ray
       hitRecord->point = ray.at(hitRecord->t);
+      hitRecord->norm = inverseTransform.transpose() * hitRecord->norm;
+      hitRecord->norm.normalize();
       hit = true;
     }
 

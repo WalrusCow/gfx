@@ -18,6 +18,7 @@ class Primitive {
 };
 
 class Sphere : public Primitive {
+ public:
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
@@ -28,6 +29,7 @@ class Sphere : public Primitive {
 };
 
 class Cube : public Primitive {
+ public:
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
