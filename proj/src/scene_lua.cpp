@@ -36,16 +36,18 @@
 // -- University of Waterloo Computer Graphics Lab 2005
 
 #include "scene_lua.hpp"
+
 #include <iostream>
 #include <cctype>
 #include <cstring>
 #include <cstdio>
 #include <vector>
+
 #include "lua488.hpp"
 #include "light.hpp"
-#include "a4.hpp"
 #include "mesh.hpp"
 
+#include "RayTracer.hpp"
 #include "ViewConfig.hpp"
 
 // Uncomment the following line to enable debugging messages
@@ -365,8 +367,9 @@ int gr_render_cmd(lua_State* L)
   }
 
   ViewConfig viewConfig = ViewConfig(eye, view, up, fov);
-  a4_render(root->node, filename, width, height, viewConfig, ambient, lights);
 
+  RayTracer rt;
+  rt.render(root->node, filename, width, height, viewConfig, ambient, lights);
   return 0;
 }
 

@@ -1,4 +1,4 @@
-#include "a4.hpp"
+#include "RayTracer.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -6,17 +6,18 @@
 #include "image.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include "scene.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
 
-Colour rayColour(const Ray& ray,
-                 const std::list<Light*>& lights,
-                 int x, int y,
-                 int width, int height,
-                 const Colour& ambientColour,
-                 SceneNode* root) {
+Colour RayTracer::rayColour(const Ray& ray,
+                            const std::list<Light*>& lights,
+                            int x, int y,
+                            int width, int height,
+                            const Colour& ambientColour,
+                            SceneNode* root) {
 
   HitRecord hitRecord;
   if (!root->intersects(ray, &hitRecord)) {
@@ -42,7 +43,7 @@ Colour rayColour(const Ray& ray,
   return colour + hitRecord.material->getMainColour() * ambientColour;
 }
 
-Colour backgroundColour(int x, int y, int width, int height) {
+Colour RayTracer::backgroundColour(int x, int y, int width, int height) {
   (void) x; (void) width;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
@@ -55,17 +56,12 @@ Colour backgroundColour(int x, int y, int width, int height) {
   return bottom + yp * (top + (-1 * bottom));
 }
 
-void a4_render(// What to render
-               SceneNode* root,
-               // Where to output the image
-               const std::string& filename,
-               // Image size
-               int width, int height,
-               // Viewing parameters
-               const ViewConfig& viewConfig,
-               // Lighting parameters
-               const Colour& ambient,
-               const std::list<Light*>& lights) {
+void RayTracer::render(SceneNode* root,
+                       const std::string& filename,
+                       int width, int height,
+                       const ViewConfig& viewConfig,
+                       const Colour& ambient,
+                       const std::list<Light*>& lights) {
   const int superSampleX = 1;
   const int superSampleY = 1;
 
