@@ -1,8 +1,8 @@
 #include <iostream>
+
 #include "scene_lua.hpp"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   std::string filename = "scene.lua";
   if (argc >= 2) {
     filename = argv[1];
@@ -13,4 +13,3 @@ int main(int argc, char** argv)
     return 1;
   }
 }
-

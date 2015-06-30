@@ -47,7 +47,6 @@
 #include "light.hpp"
 #include "mesh.hpp"
 
-#include "RayTracer.hpp"
 #include "ViewConfig.hpp"
 
 // Uncomment the following line to enable debugging messages
@@ -60,6 +59,8 @@
 #  define GRLUA_DEBUG(x) do { } while (0)
 #  define GRLUA_DEBUG_CALL do { } while (0)
 #endif
+
+RayTracer luaSceneRayTracer;
 
 // You may wonder, for the following types, why we use special "_ud"
 // types instead of, for example, just allocating SceneNodes directly
@@ -107,8 +108,7 @@ void get_tuple(lua_State* L, int arg, T* data, int n)
 
 // Create a node
 extern "C"
-int gr_node_cmd(lua_State* L)
-{
+int gr_node_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
@@ -125,8 +125,7 @@ int gr_node_cmd(lua_State* L)
 
 // Create a joint node
 extern "C"
-int gr_joint_cmd(lua_State* L)
-{
+int gr_joint_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
@@ -152,8 +151,7 @@ int gr_joint_cmd(lua_State* L)
 
 // Create a sphere node
 extern "C"
-int gr_sphere_cmd(lua_State* L)
-{
+int gr_sphere_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
@@ -170,8 +168,7 @@ int gr_sphere_cmd(lua_State* L)
 
 // Create a cube node
 extern "C"
-int gr_cube_cmd(lua_State* L)
-{
+int gr_cube_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
@@ -179,58 +176,6 @@ int gr_cube_cmd(lua_State* L)
 
   const char* name = luaL_checkstring(L, 1);
   data->node = new GeometryNode(name, new Cube());
-
-  luaL_getmetatable(L, "gr.node");
-  lua_setmetatable(L, -2);
-
-  return 1;
-}
-
-// Create a non-hierarchical sphere node
-extern "C"
-int gr_nh_sphere_cmd(lua_State* L)
-{
-  GRLUA_DEBUG_CALL;
-
-  gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
-  data->node = 0;
-
-  const char* name = luaL_checkstring(L, 1);
-
-  Vector3D pos;
-  get_tuple(L, 2, &pos[0], 3);
-
-  double radius = luaL_checknumber(L, 3);
-
-  data->node = new GeometryNode(name, new Sphere());
-  data->node->translate(pos);
-  data->node->scale({radius, radius, radius});
-
-  luaL_getmetatable(L, "gr.node");
-  lua_setmetatable(L, -2);
-
-  return 1;
-}
-
-// Create a non-hierarchical box node
-extern "C"
-int gr_nh_box_cmd(lua_State* L)
-{
-  GRLUA_DEBUG_CALL;
-
-  gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
-  data->node = 0;
-
-  const char* name = luaL_checkstring(L, 1);
-
-  Point3D pos;
-  get_tuple(L, 2, &pos[0], 3);
-
-  double size = luaL_checknumber(L, 3);
-
-  data->node = new GeometryNode(name, new Cube());
-  data->node->translate(pos);
-  data->node->scale({size, size, size});
 
   luaL_getmetatable(L, "gr.node");
   lua_setmetatable(L, -2);
@@ -240,8 +185,7 @@ int gr_nh_box_cmd(lua_State* L)
 
 // Create a polygonal mesh node
 extern "C"
-int gr_mesh_cmd(lua_State* L)
-{
+int gr_mesh_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
@@ -300,8 +244,7 @@ int gr_mesh_cmd(lua_State* L)
 
 // Make a point light
 extern "C"
-int gr_light_cmd(lua_State* L)
-{
+int gr_light_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_light_ud* data = (gr_light_ud*)lua_newuserdata(L, sizeof(gr_light_ud));
@@ -327,8 +270,7 @@ int gr_light_cmd(lua_State* L)
 
 // Render a scene
 extern "C"
-int gr_render_cmd(lua_State* L)
-{
+int gr_render_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* root = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -368,15 +310,14 @@ int gr_render_cmd(lua_State* L)
 
   ViewConfig viewConfig = ViewConfig(eye, view, up, fov);
 
-  RayTracer rt;
-  rt.render(root->node, filename, width, height, viewConfig, ambient, lights);
+  luaSceneRayTracer.render(
+      root->node, filename, width, height, viewConfig, ambient, lights);
   return 0;
 }
 
 // Create a material
 extern "C"
-int gr_material_cmd(lua_State* L)
-{
+int gr_material_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_material_ud* data = (gr_material_ud*)lua_newuserdata(L, sizeof(gr_material_ud));
@@ -400,8 +341,7 @@ int gr_material_cmd(lua_State* L)
 
 // Add a child to a node
 extern "C"
-int gr_node_add_child_cmd(lua_State* L)
-{
+int gr_node_add_child_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -421,8 +361,7 @@ int gr_node_add_child_cmd(lua_State* L)
 
 // Set a node's material
 extern "C"
-int gr_node_set_material_cmd(lua_State* L)
-{
+int gr_node_set_material_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -444,8 +383,7 @@ int gr_node_set_material_cmd(lua_State* L)
 
 // Add a scaling transformation to a node.
 extern "C"
-int gr_node_scale_cmd(lua_State* L)
-{
+int gr_node_scale_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -466,8 +404,7 @@ int gr_node_scale_cmd(lua_State* L)
 
 // Add a translation to a node.
 extern "C"
-int gr_node_translate_cmd(lua_State* L)
-{
+int gr_node_translate_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -488,8 +425,7 @@ int gr_node_translate_cmd(lua_State* L)
 
 // Rotate a node.
 extern "C"
-int gr_node_rotate_cmd(lua_State* L)
-{
+int gr_node_rotate_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -514,8 +450,7 @@ int gr_node_rotate_cmd(lua_State* L)
 
 // Garbage collection function for lua.
 extern "C"
-int gr_node_gc_cmd(lua_State* L)
-{
+int gr_node_gc_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
   gr_node_ud* data = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
@@ -543,13 +478,12 @@ static const luaL_reg grlib_functions[] = {
   {"material", gr_material_cmd},
   // New for assignment 4
   {"cube", gr_cube_cmd},
-  {"nh_sphere", gr_nh_sphere_cmd},
-  {"nh_box", gr_nh_box_cmd},
   {"mesh", gr_mesh_cmd},
   {"light", gr_light_cmd},
   {"render", gr_render_cmd},
   {0, 0}
 };
+
 
 // This is where all the member functions for "gr.node" objects are
 // declared. Since all the other objects (e.g. materials) are so
@@ -576,8 +510,7 @@ static const luaL_reg grlib_node_methods[] = {
 
 // This function calls the lua interpreter to define the scene and
 // raytrace it as appropriate.
-bool run_lua(const std::string& filename)
-{
+bool run_lua(const std::string& filename) {
   GRLUA_DEBUG("Importing scene from " << filename);
 
   // Start a lua interpreter
@@ -587,7 +520,6 @@ bool run_lua(const std::string& filename)
 
   // Load some base library
   luaL_openlibs(L);
-
 
   GRLUA_DEBUG("Setting up our functions");
 
