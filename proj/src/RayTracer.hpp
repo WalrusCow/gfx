@@ -18,7 +18,16 @@ class RayTracer {
               const Colour& ambient,
               const std::list<Light*>& lights);
 
+  void setSampleRate(int x, int y);
+
+  void setSampleRate(int rate) {
+    setSampleRate(rate, rate);
+  }
+
  private:
+  int sampleRateX = 1;
+  int sampleRateY = 1;
+
   Colour rayColour(const Ray& ray,
                    const std::list<Light*>& lights,
                    int x, int y, int w, int h,

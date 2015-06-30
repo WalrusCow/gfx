@@ -110,7 +110,7 @@ extern "C"
 int gr_node_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
 
@@ -128,7 +128,7 @@ extern "C"
 int gr_joint_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
 
@@ -141,7 +141,7 @@ int gr_joint_cmd(lua_State* L)
 
   node->set_joint_x(x[0], x[1], x[2]);
   node->set_joint_y(y[0], y[1], y[2]);
-  
+
   data->node = node;
 
   luaL_getmetatable(L, "gr.node");
@@ -155,10 +155,10 @@ extern "C"
 int gr_sphere_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
-  
+
   const char* name = luaL_checkstring(L, 1);
   data->node = new GeometryNode(name, new Sphere());
 
@@ -173,10 +173,10 @@ extern "C"
 int gr_cube_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
-  
+
   const char* name = luaL_checkstring(L, 1);
   data->node = new GeometryNode(name, new Cube());
 
@@ -191,7 +191,7 @@ extern "C"
 int gr_nh_sphere_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
 
@@ -217,7 +217,7 @@ extern "C"
 int gr_nh_box_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
 
@@ -243,7 +243,7 @@ extern "C"
 int gr_mesh_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)lua_newuserdata(L, sizeof(gr_node_ud));
   data->node = 0;
 
@@ -254,7 +254,7 @@ int gr_mesh_cmd(lua_State* L)
 
   luaL_checktype(L, 2, LUA_TTABLE);
   int vert_count = luaL_getn(L, 2);
-  
+
   luaL_argcheck(L, vert_count >= 1, 2, "Tuple of vertices expected");
 
   for (int i = 1; i <= vert_count; i++) {
@@ -262,18 +262,18 @@ int gr_mesh_cmd(lua_State* L)
 
     Point3D vertex;
     get_tuple(L, -1, &vertex[0], 3);
-    
+
     verts.push_back(vertex);
     lua_pop(L, 1);
   }
 
   luaL_checktype(L, 3, LUA_TTABLE);
   int face_count = luaL_getn(L, 3);
-  
+
   luaL_argcheck(L, face_count >= 1, 3, "Tuple of faces expected");
 
   faces.resize(face_count);
-  
+
   for (int i = 1; i <= face_count; i++) {
     lua_rawgeti(L, 3, i);
 
@@ -284,7 +284,7 @@ int gr_mesh_cmd(lua_State* L)
 
     faces[i - 1].resize(index_count);
     get_tuple(L, -1, &faces[i - 1][0], index_count);
-    
+
     lua_pop(L, 1);
   }
 
@@ -307,7 +307,7 @@ int gr_light_cmd(lua_State* L)
   gr_light_ud* data = (gr_light_ud*)lua_newuserdata(L, sizeof(gr_light_ud));
   data->light = 0;
 
-  
+
   Light l;
 
   double col[3];
@@ -316,7 +316,7 @@ int gr_light_cmd(lua_State* L)
   get_tuple(L, 3, l.falloff, 3);
 
   l.colour = Colour(col[0], col[1], col[2]);
-  
+
   data->light = new Light(l);
 
   luaL_newmetatable(L, "gr.light");
@@ -330,7 +330,7 @@ extern "C"
 int gr_render_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* root = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, root != 0, 1, "Root node expected");
 
@@ -341,7 +341,7 @@ int gr_render_cmd(lua_State* L)
 
   Point3D eye;
   Vector3D view, up;
-  
+
   get_tuple(L, 5, &eye[0], 3);
   get_tuple(L, 6, &view[0], 3);
   get_tuple(L, 7, &up[0], 3);
@@ -354,7 +354,7 @@ int gr_render_cmd(lua_State* L)
 
   luaL_checktype(L, 10, LUA_TTABLE);
   int light_count = luaL_getn(L, 10);
-  
+
   luaL_argcheck(L, light_count >= 1, 10, "Tuple of lights expected");
   std::list<Light*> lights;
   for (int i = 1; i <= light_count; i++) {
@@ -378,23 +378,23 @@ extern "C"
 int gr_material_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_material_ud* data = (gr_material_ud*)lua_newuserdata(L, sizeof(gr_material_ud));
   data->material = 0;
-  
+
   double kd[3], ks[3];
   get_tuple(L, 1, kd, 3);
   get_tuple(L, 2, ks, 3);
 
   double shininess = luaL_checknumber(L, 3);
-  
+
   data->material = new PhongMaterial(Colour(kd[0], kd[1], kd[2]),
                                      Colour(ks[0], ks[1], ks[2]),
                                      shininess);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);
-  
+
   return 1;
 }
 
@@ -403,12 +403,12 @@ extern "C"
 int gr_node_add_child_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, selfdata != 0, 1, "Node expected");
 
   SceneNode* self = selfdata->node;
-  
+
   gr_node_ud* childdata = (gr_node_ud*)luaL_checkudata(L, 2, "gr.node");
   luaL_argcheck(L, childdata != 0, 2, "Node expected");
 
@@ -424,14 +424,14 @@ extern "C"
 int gr_node_set_material_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, selfdata != 0, 1, "Node expected");
 
   GeometryNode* self = dynamic_cast<GeometryNode*>(selfdata->node);
 
   luaL_argcheck(L, self != 0, 1, "Geometry node expected");
-  
+
   gr_material_ud* matdata = (gr_material_ud*)luaL_checkudata(L, 2, "gr.material");
   luaL_argcheck(L, matdata != 0, 2, "Material expected");
 
@@ -447,14 +447,14 @@ extern "C"
 int gr_node_scale_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, selfdata != 0, 1, "Node expected");
 
   SceneNode* self = selfdata->node;
 
   double values[3];
-  
+
   for (int i = 0; i < 3; i++) {
     values[i] = luaL_checknumber(L, i + 2);
   }
@@ -469,14 +469,14 @@ extern "C"
 int gr_node_translate_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, selfdata != 0, 1, "Node expected");
 
   SceneNode* self = selfdata->node;
 
   double values[3];
-  
+
   for (int i = 0; i < 3; i++) {
     values[i] = luaL_checknumber(L, i + 2);
   }
@@ -491,7 +491,7 @@ extern "C"
 int gr_node_rotate_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* selfdata = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, selfdata != 0, 1, "Node expected");
 
@@ -502,9 +502,9 @@ int gr_node_rotate_cmd(lua_State* L)
   luaL_argcheck(L, axis_string
                 && std::strlen(axis_string) == 1, 2, "Single character expected");
   char axis = std::tolower(axis_string[0]);
-  
+
   luaL_argcheck(L, axis >= 'x' && axis <= 'z', 2, "Axis must be x, y or z");
-  
+
   double angle = luaL_checknumber(L, 3);
 
   self->rotate(axis, angle);
@@ -517,7 +517,7 @@ extern "C"
 int gr_node_gc_cmd(lua_State* L)
 {
   GRLUA_DEBUG_CALL;
-  
+
   gr_node_ud* data = (gr_node_ud*)luaL_checkudata(L, 1, "gr.node");
   luaL_argcheck(L, data != 0, 1, "Node expected");
 
@@ -579,12 +579,12 @@ static const luaL_reg grlib_node_methods[] = {
 bool run_lua(const std::string& filename)
 {
   GRLUA_DEBUG("Importing scene from " << filename);
-  
+
   // Start a lua interpreter
   lua_State* L = lua_open();
 
   GRLUA_DEBUG("Loading base libraries");
-  
+
   // Load some base library
   luaL_openlibs(L);
 
@@ -610,7 +610,7 @@ bool run_lua(const std::string& filename)
     return false;
   }
   GRLUA_DEBUG("Closing the interpreter");
-  
+
   // Close the interpreter, free up any resources not needed
   lua_close(L);
 

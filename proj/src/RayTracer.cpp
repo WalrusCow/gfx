@@ -62,12 +62,10 @@ void RayTracer::render(SceneNode* root,
                        const ViewConfig& viewConfig,
                        const Colour& ambient,
                        const std::list<Light*>& lights) {
-  const int superSampleX = 1;
-  const int superSampleY = 1;
 
   Image img(width, height, 3);
 
-  PixelTransformer pixelTransformer(width*superSampleX, height*superSampleY, viewConfig);
+  PixelTransformer pixelTransformer(width*sampleRateX, height*sampleRateY, viewConfig);
 
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
@@ -77,13 +75,13 @@ void RayTracer::render(SceneNode* root,
   }
 
   double lastP = 0;
-  for (int y = 0; y < height*superSampleY; ++y) {
-    if (y *100/ ((double) height*superSampleY) > lastP+9.9) {
+  for (int y = 0; y < height*sampleRateY; ++y) {
+    if (y *100/ ((double) height*sampleRateY) > lastP+9.9) {
       // hacky percent done
-      lastP = y*100/((double)height*superSampleY);
+      lastP = y*100/((double)height*sampleRateY);
       std::cerr << lastP << "% done." << std::endl;
     }
-    for (int x = 0; x < width*superSampleX; ++x) {
+    for (int x = 0; x < width*sampleRateX; ++x) {
       // Get world coordinates of pixel (x, y)
       auto worldPx = pixelTransformer.transform(x, y);
 
@@ -91,15 +89,20 @@ void RayTracer::render(SceneNode* root,
 
       // Now check the intersection with every object lmao
       auto pixelColour = rayColour(
-          ray, lights, x, y, width*superSampleX, height*superSampleY, ambient, root);
+          ray, lights, x, y, width*sampleRateX, height*sampleRateY, ambient, root);
       // This is worth such a percent
-      pixelColour = pixelColour / (superSampleX * superSampleY);
-      img(x/superSampleX, height-1-y/superSampleY, 0) += pixelColour.R();
-      img(x/superSampleX, height-1-y/superSampleY, 1) += pixelColour.G();
-      img(x/superSampleX, height-1-y/superSampleY, 2) += pixelColour.B();
+      pixelColour = pixelColour / (sampleRateX * sampleRateY);
+      img(x/sampleRateX, height-1-y/sampleRateY, 0) += pixelColour.R();
+      img(x/sampleRateX, height-1-y/sampleRateY, 1) += pixelColour.G();
+      img(x/sampleRateX, height-1-y/sampleRateY, 2) += pixelColour.B();
     }
   }
 
   // For now, just make a sample image.
   img.savePng(filename);
+}
+
+void RayTracer::setSampleRate(int x, int y) {
+  sampleRateX = x;
+  sampleRateY = y;
 }
