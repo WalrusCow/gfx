@@ -3,36 +3,48 @@
 #include <list>
 #include <string>
 #include "algebra.hpp"
-
-class Light;
-class Ray;
-class SceneNode;
-class ViewConfig;
+#include "image.hpp"
+#include "light.hpp"
+#include "PixelTransformer.hpp"
+#include "Ray.hpp"
+#include "scene.hpp"
+#include "ViewConfig.hpp"
 
 class RayTracer {
  public:
-  void render(SceneNode* root,
-              const std::string& filename,
-              int width, int height,
-              const ViewConfig& viewConfig,
-              const Colour& ambient,
-              const std::list<Light*>& lights);
+  struct Options {
+    uint32_t sampleRateX = 1;
+    uint32_t sampleRateY = 1;
+    uint32_t threadCount = 1;
+  };
 
-  void setSampleRate(int x, int y);
+  RayTracer(SceneNode* root_,
+            uint32_t width_, uint32_t height_,
+            ViewConfig viewConfig_,
+            Colour ambient_,
+            std::list<Light*> lights_,
+            Options options_);
 
-  void setSampleRate(int rate) {
-    setSampleRate(rate, rate);
-  }
+  void render(const std::string& filename);
 
  private:
-  int sampleRateX = 1;
-  int sampleRateY = 1;
+  SceneNode* root;
+  uint32_t imageWidth, imageHeight;
+  ViewConfig viewConfig;
+  Colour ambientColour;
+  std::list<Light*> lights;
+  Image image;
+  Options options;
+  PixelTransformer pixelTransformer;
 
-  Colour rayColour(const Ray& ray,
-                   const std::list<Light*>& lights,
-                   int x, int y, int w, int h,
-                   const Colour& ambientColour,
-                   SceneNode* scene);
+  // Account for supersampling
+  uint32_t rayHeight() const { return imageHeight * options.sampleRateY; }
+  uint32_t rayWidth() const { return imageWidth * options.sampleRateX; }
 
-  Colour backgroundColour(int x, int y, int width, int height);
+  void threadWork(uint32_t id);
+
+  Colour rayColour(const Ray& ray, uint32_t x, uint32_t y);
+  Colour backgroundColour(uint32_t x, uint32_t y);
+
+  void writePixel(uint32_t x, uint32_t y, const Colour& colour);
 };

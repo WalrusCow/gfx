@@ -49,6 +49,9 @@
 
 #include "ViewConfig.hpp"
 
+// Global options switch
+RayTracer::Options rayTracerOptions;
+
 // Uncomment the following line to enable debugging messages
 // #define GRLUA_ENABLE_DEBUG
 
@@ -59,8 +62,6 @@
 #  define GRLUA_DEBUG(x) do { } while (0)
 #  define GRLUA_DEBUG_CALL do { } while (0)
 #endif
-
-RayTracer luaSceneRayTracer;
 
 // You may wonder, for the following types, why we use special "_ud"
 // types instead of, for example, just allocating SceneNodes directly
@@ -310,8 +311,9 @@ int gr_render_cmd(lua_State* L) {
 
   ViewConfig viewConfig = ViewConfig(eye, view, up, fov);
 
-  luaSceneRayTracer.render(
-      root->node, filename, width, height, viewConfig, ambient, lights);
+  RayTracer rayTracer(root->node, width, height, viewConfig, ambient, lights,
+                      rayTracerOptions);
+  rayTracer.render(filename);
   return 0;
 }
 

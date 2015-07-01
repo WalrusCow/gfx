@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <thread>
 
 #include "image.hpp"
 #include "light.hpp"
@@ -12,17 +13,11 @@
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
 
-Colour RayTracer::rayColour(const Ray& ray,
-                            const std::list<Light*>& lights,
-                            int x, int y,
-                            int width, int height,
-                            const Colour& ambientColour,
-                            SceneNode* root) {
-
+Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   HitRecord hitRecord;
   if (!root->intersects(ray, &hitRecord)) {
     // No intersection - use background colour
-    return backgroundColour(x, y, width, height);
+    return backgroundColour(x, y);
   }
 
   Colour colour(0, 0, 0);
@@ -43,66 +38,80 @@ Colour RayTracer::rayColour(const Ray& ray,
   return colour + hitRecord.material->getMainColour() * ambientColour;
 }
 
-Colour RayTracer::backgroundColour(int x, int y, int width, int height) {
-  (void) x; (void) width;
+Colour RayTracer::backgroundColour(uint32_t x, uint32_t y) {
+  (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
   const Colour bottom(1.0, 0.596, 0.9215);
 
   // What percent we are
-  double yp = y / (double) height;
+  double yp = y / (double) rayHeight();
 
   // Upside down, because png starts top left, I guess
   return bottom + yp * (top + (-1 * bottom));
 }
 
-void RayTracer::render(SceneNode* root,
-                       const std::string& filename,
-                       int width, int height,
-                       const ViewConfig& viewConfig,
-                       const Colour& ambient,
-                       const std::list<Light*>& lights) {
+RayTracer::RayTracer(SceneNode* root_,
+                     uint32_t width_, uint32_t height_,
+                     ViewConfig viewConfig_,
+                     Colour ambient_,
+                     std::list<Light*> lights_,
+                     RayTracer::Options options_) :
+    root(root_),
+    imageWidth(width_), imageHeight(height_),
+    viewConfig(std::move(viewConfig_)),
+    ambientColour(std::move(ambient_)),
+    lights(std::move(lights_)),
+    image(width_, height_, 3),
+    options(std::move(options_)),
+    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
 
-  Image img(width, height, 3);
-
-  PixelTransformer pixelTransformer(width*sampleRateX, height*sampleRateY, viewConfig);
-
-  for (int y = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x) {
-      for (int i = 0; i < 3; ++i)
-        img(x, y, i) = 0;
+  // Initialize image data to black
+  for (uint32_t y = 0; y < imageHeight; ++y) {
+    for (uint32_t x = 0; x < imageWidth; ++x) {
+      for (auto i = 0; i < 3; ++i)
+        image(x, y, i) = 0;
     }
   }
 
-  double lastP = 0;
-  for (int y = 0; y < height*sampleRateY; ++y) {
-    if (y *100/ ((double) height*sampleRateY) > lastP+9.9) {
-      // hacky percent done
-      lastP = y*100/((double)height*sampleRateY);
-      std::cerr << lastP << "% done." << std::endl;
-    }
-    for (int x = 0; x < width*sampleRateX; ++x) {
-      // Get world coordinates of pixel (x, y)
-      auto worldPx = pixelTransformer.transform(x, y);
-
-      Ray ray(viewConfig.eye, worldPx);
-
-      // Now check the intersection with every object lmao
-      auto pixelColour = rayColour(
-          ray, lights, x, y, width*sampleRateX, height*sampleRateY, ambient, root);
-      // This is worth such a percent
-      pixelColour = pixelColour / (sampleRateX * sampleRateY);
-      img(x/sampleRateX, height-1-y/sampleRateY, 0) += pixelColour.R();
-      img(x/sampleRateX, height-1-y/sampleRateY, 1) += pixelColour.G();
-      img(x/sampleRateX, height-1-y/sampleRateY, 2) += pixelColour.B();
-    }
-  }
-
-  // For now, just make a sample image.
-  img.savePng(filename);
 }
 
-void RayTracer::setSampleRate(int x, int y) {
-  sampleRateX = x;
-  sampleRateY = y;
+void RayTracer::writePixel(uint32_t x, uint32_t y, const Colour& colour) {
+  auto xPx = x / options.sampleRateX;
+  auto yPx = imageHeight - 1 - (y / options.sampleRateY);
+
+  auto pixelColour = colour / (options.sampleRateX * options.sampleRateY);
+  image(xPx, yPx, 0) += pixelColour.R();
+  image(xPx, yPx, 1) += pixelColour.G();
+  image(xPx, yPx, 2) += pixelColour.B();
+}
+
+void RayTracer::render(const std::string& filename) {
+  // Threading
+  std::list<std::thread> threads;
+  for (uint32_t id = 0; id < options.threadCount; ++id) {
+    threads.emplace_back(&RayTracer::threadWork, this, id);
+  }
+
+  // Wait for them all to finish
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  image.savePng(filename);
+}
+
+void RayTracer::threadWork(uint32_t id) {
+  const auto threadCount = options.threadCount;
+  const auto w = rayWidth();
+  const auto h = rayHeight();
+  for (uint32_t y = 0; y < h; ++y) {
+    for (uint32_t x = (y + id) % options.threadCount; x < w; x += threadCount) {
+      // Get world coordinates of pixel (x, y)
+      auto worldCoords = pixelTransformer.transform(x, y);
+
+      Ray ray(viewConfig.eye, worldCoords);
+      writePixel(x, y, rayColour(ray, x, y));
+    }
+  }
 }
