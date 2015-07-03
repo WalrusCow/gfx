@@ -59,7 +59,6 @@ class SceneNode {
   ChildList children;
 
   std::string m_name;
- protected:
 
   // Transformations
   Matrix4x4 trans;
@@ -98,7 +97,6 @@ class GeometryNode : public SceneNode {
     this->material = material;
   }
 
- protected:
   Material* material;
   Primitive* primitive;
 };

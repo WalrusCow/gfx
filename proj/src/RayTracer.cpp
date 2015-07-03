@@ -15,7 +15,13 @@
 
 Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   HitRecord hitRecord;
-  if (!root->intersects(ray, &hitRecord)) {
+  bool hitModel = false;
+  for (const auto& model : models) {
+    if (model.intersects(ray, &hitRecord)) {
+      hitModel = true;
+    }
+  }
+  if (!hitModel) {
     // No intersection - use background colour
     return backgroundColour(x, y);
   }
@@ -28,7 +34,16 @@ Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
 
   for (const auto light : lights) {
     Ray shadowRay(hitRecord.point, light->position);
-    if (!root->fastIntersects(shadowRay)) {
+    HitRecord r;
+    hitModel = false;
+    for (const auto& model : models) {
+      if (model.intersects(shadowRay, &r)) {
+        hitModel = true;
+        break;
+      }
+    }
+
+    if (!hitModel) {
       // Only add from light source if nothing is hit first
       colour = colour + hitRecord.material->getColour(
           *light, hitRecord.point, hitRecord.norm, direction);
@@ -51,13 +66,12 @@ Colour RayTracer::backgroundColour(uint32_t x, uint32_t y) {
   return bottom + yp * (top + (-1 * bottom));
 }
 
-RayTracer::RayTracer(SceneNode* root_,
+RayTracer::RayTracer(SceneNode* root,
                      uint32_t width_, uint32_t height_,
                      ViewConfig viewConfig_,
                      Colour ambient_,
                      std::list<Light*> lights_,
                      RayTracer::Options options_) :
-    root(root_),
     imageWidth(width_), imageHeight(height_),
     viewConfig(std::move(viewConfig_)),
     ambientColour(std::move(ambient_)),
@@ -74,6 +88,22 @@ RayTracer::RayTracer(SceneNode* root_,
     }
   }
 
+  extractModels(root);
+}
+
+void RayTracer::extractModels(SceneNode* root) {
+  extractModels(root, Matrix4x4());
+}
+
+void RayTracer::extractModels(SceneNode* root, const Matrix4x4& inverse) {
+  auto inv = root->inverseTrans * inverse;
+  for (const auto& child : root->children) {
+    extractModels(child, inv);
+  }
+
+  if (auto* node = dynamic_cast<GeometryNode*>(root)) {
+    models.emplace_back(node->primitive, node->material, inv);
+  }
 }
 
 void RayTracer::writePixel(uint32_t x, uint32_t y, const Colour& colour) {
