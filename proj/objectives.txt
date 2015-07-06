@@ -1,0 +1,66 @@
+1. Primitives
+  - Cylinder
+  - Cone
+  - ???
+  - Torus
+  - Plane / Rectangle
+  - Disc
+3. Texture map
+  - Plane / Rectangle
+  - Cube
+  - Sphere
+  - Etc
+
+Performance
+===========
+Y Grid / Octree
+Y Adaptive anti-aliasing
+
+Looks
+=====
+Y Photon mapping
+Y Reflection
+Y Refraction / transparency
+- Glossy reflection / refraction
+Y Soft shadows / area lights
+Y Phong interpolation on meshes
+- Depth of view
+
+Modelling
+=========
+- Texture mapping
+Y Primitives
+- CSG
+Y Final scene
+
+1. Primitives
+2. Specular reflection
+3. Refraction/transparency
+4. Texture mapping
+5. Adaptive supersampling
+6. Uniform grid acceleration
+7. Soft shadows (area lights)
+8. Phong mesh interpolation
+9. Photon mapping (kd tree)
+10. Unique final scene
+
+
+
+Medium
+======
+6. CSG
+8. Texture Map
+
+Hard
+====
+10. Glossy reflection/refraction
+11. Photon mapping
+
+
+To Research
+===========
+Glossy reflection/refraction
+Adaptive antialiasing
+Binary partitioning / Octree
+Spline surfaces
+Glow? Like how the sun glows when it's behind your head...
