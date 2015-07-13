@@ -1,4 +1,4 @@
-#include "primitive.hpp"
+#include "Primitive.hpp"
 
 #include <algorithm>
 

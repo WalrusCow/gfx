@@ -34,10 +34,9 @@ Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
 
   for (const auto light : lights) {
     Ray shadowRay(hitRecord.point, light->position);
-    HitRecord r;
     hitModel = false;
     for (const auto& model : models) {
-      if (model.intersects(shadowRay, &r)) {
+      if (model.fastIntersects(shadowRay)) {
         hitModel = true;
         break;
       }

@@ -14,3 +14,7 @@ bool Model::intersects(const Ray& ray, HitRecord* hitRecord) const {
   }
   return false;
 }
+
+bool Model::fastIntersects(const Ray& ray) const {
+  return primitive->fastIntersects(ray, xform);
+}

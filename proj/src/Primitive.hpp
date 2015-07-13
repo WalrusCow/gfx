@@ -56,3 +56,10 @@ class Cube : public Primitive {
 
   double solveIntersection(const Point3D& p1, const Vector3D& dir);
 };
+
+class Cylinder : public Primitive {
+ public:
+  bool intersects(const Ray& ray,
+                  HitRecord* hitRecord,
+                  const Matrix4x4& inverseTransform) override;
+};

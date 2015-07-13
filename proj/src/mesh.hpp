@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <iosfwd>
-#include "primitive.hpp"
+#include "Primitive.hpp"
 #include "algebra.hpp"
 
 class Ray;
