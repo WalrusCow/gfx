@@ -16,7 +16,7 @@ class RayTracer {
   struct Options {
     uint32_t sampleRateX = 1;
     uint32_t sampleRateY = 1;
-    uint32_t threadCount = 1;
+    uint32_t threadCount = 4;
   };
 
   RayTracer(SceneNode* root_,
