@@ -14,21 +14,6 @@ class SceneNode {
   const Matrix4x4& get_transform() const { return trans; }
   const Matrix4x4& get_inverse() const { return inverseTrans; }
 
-  bool intersects(const Ray& ray, HitRecord* hitRecord) {
-    return intersects(ray, hitRecord, Matrix4x4());
-  }
-
-  virtual bool intersects(
-      const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform);
-
-  // Check if anything hits, and we only need a boolean (no record)
-  bool fastIntersects(const Ray& ray) {
-    return fastIntersects(ray, Matrix4x4());
-  }
-
-  virtual bool fastIntersects(
-      const Ray& ray, const Matrix4x4& inverseTransform);
-
   void set_transform(const Matrix4x4& m) {
     trans = m;
     inverseTrans = m.invert();
@@ -52,7 +37,6 @@ class SceneNode {
   void rotate(char axis, double angle);
   void scale(const Vector3D& amount);
   void translate(const Vector3D& amount);
-
 
   // Hierarchy
   typedef std::list<SceneNode*> ChildList;
@@ -86,12 +70,6 @@ class GeometryNode : public SceneNode {
 
   const Material* get_material() const;
   Material* get_material();
-
-  bool intersects(const Ray& ray,
-                  HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
-  bool fastIntersects(
-      const Ray& ray, const Matrix4x4& inverseTransform) override;
 
   void set_material(Material* material) {
     this->material = material;

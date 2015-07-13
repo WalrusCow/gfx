@@ -105,16 +105,6 @@ double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
   return isZero(minT) ? -1 : minT;
 }
 
-bool Cube::fastIntersects(
-    const Ray& ray, const Matrix4x4& inverseTransform) {
-  // New ray
-  const auto a = inverseTransform * ray.start;
-  const auto b = inverseTransform * ray.other;
-  const auto dir = b - a;
-
-  return solveIntersection(a, dir) > 0;
-}
-
 bool Sphere::intersects(
     const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
   // New ray
@@ -141,13 +131,6 @@ bool Sphere::intersects(
   // We will return whether or not this intersection was
   // better than whatever was already stored there
   return hitRecord->update(norm, point, t);
-}
-
-bool Sphere::fastIntersects(
-    const Ray& ray, const Matrix4x4& inverseTransform) {
-  const auto p1 = inverseTransform * ray.start;
-  const auto p2 = inverseTransform * ray.other;
-  return solveIntersection(p1, p2 - p1) > 0;
 }
 
 double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) {

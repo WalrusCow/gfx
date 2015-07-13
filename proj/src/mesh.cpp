@@ -122,13 +122,6 @@ bool Mesh::intersects(const Ray& ray,
   return hit;
 }
 
-bool Mesh::fastIntersects(const Ray& ray,
-                          const Matrix4x4& inverseTransform) {
-  HitRecord r;
-  intersects(ray, &r, inverseTransform);
-  return r.t > 0 && !isZero(r.t);
-}
-
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
   out << "mesh({";
   auto i = 0;

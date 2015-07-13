@@ -13,8 +13,6 @@ class Primitive {
   virtual bool intersects(const Ray& ray,
                           HitRecord* hitRecord,
                           const Matrix4x4& inverseTransform) = 0;
-  virtual bool fastIntersects(const Ray& ray,
-                              const Matrix4x4& inverseTransform) = 0;
 };
 
 class Sphere : public Primitive {
@@ -22,8 +20,6 @@ class Sphere : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
-  bool fastIntersects(const Ray& ray,
-                      const Matrix4x4& inverseTransform) override;
  private:
   double solveIntersection(const Point3D& p1, const Vector3D& dir);
 };
@@ -33,8 +29,6 @@ class Cube : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
-  bool fastIntersects(const Ray& ray,
-                      const Matrix4x4& inverseTransform) override;
  private:
   // "back" face
   const Point3D p0 = Point3D(0, 0, 0);

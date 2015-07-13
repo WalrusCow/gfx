@@ -14,7 +14,6 @@ class Model {
         const Matrix4x4& xform_);
 
   bool intersects(const Ray& ray, HitRecord* hitRecord) const;
-  bool fastIntersects(const Ray& ray) const;
 
  private:
   Primitive* primitive;
