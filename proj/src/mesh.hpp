@@ -18,13 +18,16 @@ public:
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
 
-  typedef std::vector<int> Face;
+  struct Face {
+    Face(const std::vector<int>& vertices_, const Vector3D& normal_)
+        : vertices(vertices_), normal(normal_) {}
+    std::vector<int> vertices;
+    Vector3D normal;
+  };
 
 private:
   const std::vector<Point3D> m_verts;
   const std::vector<Face> m_faces;
-  Point3D lowerBound;
-  Vector3D boundsRange;
   Cube boundingCube;
   Matrix4x4 boundingCubeInverse;
 
@@ -33,4 +36,8 @@ private:
       const Ray& ray, HitRecord* hitRecord, const Face& face);
   // Take as input a ray transformed into our model space
   bool withinBounds(const Ray& ray, HitRecord* hitRecord);
+
+  static std::vector<Face> getFaces(
+      const std::vector<Point3D>& verts,
+      const std::vector<std::vector<int>>& faces);
 };

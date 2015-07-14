@@ -6,13 +6,12 @@
 #include "Ray.hpp"
 #include "xform.hpp"
 
-#define BOUNDING_BOX_RENDER false
-
 Mesh::Mesh(const std::vector<Point3D>& verts,
            const std::vector<std::vector<int>>& faces)
-    : m_verts(verts), m_faces(faces) {
+           : m_verts(verts), m_faces(getFaces(verts, faces)) {
+
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
-  Point3D largePoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
+  Point3D largePoint(smallPoint);
 
   // Get the minimum and maximum coordinates
   for (const auto& vert : m_verts) {
@@ -21,8 +20,7 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
       smallPoint[i] = std::min(smallPoint[i], vert[i]);
     }
   }
-  lowerBound = smallPoint;
-  boundsRange = largePoint - smallPoint;
+  Vector3D boundsRange = largePoint - smallPoint;
   // Enforce a minimum size (e.g. for planes)
   double MIN_SIZE = 0.2;
   for (auto i = 0; i < 3; ++i) {
@@ -31,42 +29,37 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
 
   // Translate to put lower corner at origin
   Matrix4x4 xlate = translationMatrix(
-      -lowerBound[0], -lowerBound[1], -lowerBound[2]);
+      -smallPoint[0], -smallPoint[1], -smallPoint[2]);
   // And scale down to get unit cube
   Matrix4x4 scale = scaleMatrix(
       1/boundsRange[0], 1/boundsRange[1], 1/boundsRange[2]);
-  boundingCubeInverse = scale * xlate;//xlate * scale;
+  boundingCubeInverse = scale * xlate;
 }
 
 bool Mesh::faceIntersection(
     const Ray& ray, HitRecord* hitRecord, const Mesh::Face& face) {
   // Get a point on the plane
-  Vector3D norm;
-  double t;
-  {
-    const auto& p0 = m_verts[face[0]];
-    const auto& p1 = m_verts[face[1]];
-    const auto& p2 = m_verts[face[face.size()-1]];
-    norm = (p1 - p0).cross(p2 - p0);
-    auto rayNorm = ray.dir.dot(norm);
+  const Vector3D& norm = face.normal;
 
-    // Parallel
-    if (isZero(rayNorm)) return false;
+  const auto rayNorm = ray.dir.dot(norm);
 
-    t = (p0 - ray.start).dot(norm) / rayNorm;
-    // No intersection
-    if (t < 0 || isZero(t)) {
-      return false;
-    }
+  // Parallel
+  if (isZero(rayNorm)) return false;
+
+  const auto& p0 = m_verts[face.vertices.front()];
+  const double t = (p0 - ray.start).dot(norm) / rayNorm;
+  // No intersection
+  if (t < 0 || isZero(t)) {
+    return false;
   }
 
   // Intersection point
-  auto planePt = ray.at(t);
+  const auto planePt = ray.at(t);
   // Now check if planePt is "left" of everything
-  for (size_t i = 0; i < face.size(); ++i) {
+  for (size_t i = 0; i < face.vertices.size(); ++i) {
     // Go over points in order
-    const auto& p1 = m_verts[face[i]];
-    const auto& p2 = m_verts[face[(i + 1) % face.size()]];
+    const auto& p1 = m_verts[face.vertices[i]];
+    const auto& p2 = m_verts[face.vertices[(i + 1) % face.vertices.size()]];
     // from p1 to p2
     const auto side = p2 - p1;
     // cross from p1 to plane pt and dot against normal
@@ -90,19 +83,11 @@ bool Mesh::intersects(const Ray& ray,
   const Ray newRay(a, b);
 
   HitRecord boundingRecord;
-  HitRecord* boundingPtr;
-  if (BOUNDING_BOX_RENDER) {
-    boundingPtr = hitRecord;
-  }
-  else {
-    boundingPtr = &boundingRecord;
-  }
+
   // First, check for intersection against our bounding box
-  if (!boundingCube.intersects(ray, boundingPtr, boundingCubeInverse * inverseTransform)) {
+  if (!boundingCube.intersects(
+        ray, &boundingRecord, boundingCubeInverse * inverseTransform)) {
     return false;
-  }
-  else if (BOUNDING_BOX_RENDER) {
-    return true;
   }
 
   // Note: This is not implemented correctly, since faceIntersection
@@ -111,7 +96,7 @@ bool Mesh::intersects(const Ray& ray,
   // For each polygon, check for polygon intersection lol...
   for (const auto& face : m_faces) {
     if (faceIntersection(newRay, hitRecord, face)) {
-      // haha, use real ray
+      // Use real ray
       hitRecord->point = ray.at(hitRecord->t);
       hitRecord->norm = inverseTransform.transpose() * hitRecord->norm;
       hitRecord->norm.normalize();
@@ -139,7 +124,7 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
     out << "[";
 
     auto j = 0;
-    for (const auto& val : face) {
+    for (const auto& val : face.vertices) {
       if (j++)
         out << ", ";
       out << val;
@@ -149,4 +134,20 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
 
   out << "});" << std::endl;
   return out;
+}
+
+std::vector<Mesh::Face> Mesh::getFaces(
+    const std::vector<Point3D>& verts,
+    const std::vector<std::vector<int>>& faceVertices) {
+
+  std::vector<Mesh::Face> faces;
+  for (const auto& vertices : faceVertices) {
+    const auto& p0 = verts[vertices.front()];
+    const auto& p1 = verts[vertices[1]];
+    const auto& p2 = verts[vertices.back()];
+    const auto norm = (p1 - p0).cross(p2 - p0);
+    faces.emplace_back(vertices, norm);
+  }
+
+  return faces;
 }
