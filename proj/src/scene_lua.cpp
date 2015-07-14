@@ -212,7 +212,7 @@ int gr_mesh_cmd(lua_State* L) {
   const char* name = luaL_checkstring(L, 1);
 
   std::vector<Point3D> verts;
-  std::vector< std::vector<int> > faces;
+  std::vector<std::vector<std::vector<int>>> faces;
 
   luaL_checktype(L, 2, LUA_TTABLE);
   int vert_count = luaL_getn(L, 2);
@@ -242,10 +242,23 @@ int gr_mesh_cmd(lua_State* L) {
     luaL_checktype(L, -1, LUA_TTABLE);
     int index_count = luaL_getn(L, -1);
 
-    luaL_argcheck(L, index_count >= 3, 3, "Tuple of indices expected");
+    luaL_argcheck(L, index_count >= 3, 3, "Tuple of tuples expected");
 
-    faces[i - 1].resize(index_count);
-    get_tuple(L, -1, &faces[i - 1][0], index_count);
+    auto& f = faces[i - 1];
+    f.resize(index_count);
+
+    for (int j = 1; j <= index_count; ++j) {
+      lua_rawgeti(L, -1, j);
+
+      luaL_checktype(L, -1, LUA_TTABLE);
+      int spec_count = luaL_getn(L, -1);
+      f[j - 1].resize(spec_count);
+
+      luaL_argcheck(L, spec_count >= 1, 1, "Tuple of indices expected");
+
+      get_tuple(L, -1, &f[j - 1][0], spec_count);
+      lua_pop(L, 1);
+    }
 
     lua_pop(L, 1);
   }
