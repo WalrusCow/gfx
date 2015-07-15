@@ -6,10 +6,13 @@
 #include "Ray.hpp"
 #include "xform.hpp"
 
-Mesh::Mesh(const std::vector<Point3D>& verts,
-           const std::vector<Vector3D>& normals,
+bool Mesh::interpolateNormals = false;
+
+Mesh::Mesh(std::vector<Point3D>&& verts,
+           std::vector<Vector3D>&& normals,
            const FaceInput& faces)
-     : m_verts(verts), m_faces(getFaces(faces)) {
+     : m_verts(std::move(verts)),
+       m_normals(std::move(normals)), m_faces(getFaces(faces)) {
 
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
   Point3D largePoint(smallPoint);
@@ -41,7 +44,7 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
 bool Mesh::faceIntersection(
     const Ray& ray, HitRecord* hitRecord, const Mesh::Face& face) {
   // Get a point on the plane
-  const Vector3D& norm = face.normal;
+  Vector3D norm = face.normal;
 
   const auto rayNorm = ray.dir.dot(norm);
 
@@ -70,6 +73,10 @@ bool Mesh::faceIntersection(
       // Zero means on the side; negative means opposite dir from norm
       return false;
     }
+  }
+
+  if (interpolateNormals) {
+    norm = interpolatedNormal(face, planePt);
   }
 
   // Update if this is a better t value
@@ -109,33 +116,16 @@ bool Mesh::intersects(const Ray& ray,
   return hit;
 }
 
-std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
-  out << "mesh({";
-  auto i = 0;
-  for (const auto& vert : mesh.m_verts) {
-    if (i++)
-      out << ",\n      ";
-    out << vert;
-  }
-  out << "},\n\n     {";
-
-  i = 0;
-  for (const auto& face : mesh.m_faces) {
-    if (i++)
-      out << ",\n      ";
-    out << "[";
-
-    auto j = 0;
-    for (const auto& val : face.vertices) {
-      if (j++)
-        out << ", ";
-      out << val.vertex();
-    }
-    out << "]";
+Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) {
+  // Get the normal interpolated across the face
+  if (face.vertices.size() != 3) {
+    // Cannot
+    return face.normal;
   }
 
-  out << "});" << std::endl;
-  return out;
+  // Okay, so we can... and we will!
+  // ... soon
+  return face.normal;
 }
 
 std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
@@ -172,4 +162,33 @@ const Point3D& Mesh::FaceVertex::vertex() const {
 
 const Vector3D& Mesh::FaceVertex::normal() const {
   return parent->m_normals[m_normal];
+}
+
+std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
+  out << "mesh({";
+  auto i = 0;
+  for (const auto& vert : mesh.m_verts) {
+    if (i++)
+      out << ",\n      ";
+    out << vert;
+  }
+  out << "},\n\n     {";
+
+  i = 0;
+  for (const auto& face : mesh.m_faces) {
+    if (i++)
+      out << ",\n      ";
+    out << "[";
+
+    auto j = 0;
+    for (const auto& val : face.vertices) {
+      if (j++)
+        out << ", ";
+      out << val.vertex();
+    }
+    out << "]";
+  }
+
+  out << "});" << std::endl;
+  return out;
 }

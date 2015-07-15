@@ -279,7 +279,7 @@ int gr_mesh_cmd(lua_State* L) {
     lua_pop(L, 1);
   }
 
-  Mesh* mesh = new Mesh(verts, normals, faces);
+  Mesh* mesh = new Mesh(std::move(verts), std::move(normals), faces);
   GRLUA_DEBUG(*mesh);
   data->node = new GeometryNode(name, mesh);
 

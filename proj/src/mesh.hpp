@@ -12,13 +12,16 @@ class HitRecord;
 class Mesh : public Primitive {
   typedef std::vector<std::vector<std::vector<int>>> FaceInput;
  public:
-  Mesh(const std::vector<Point3D>& verts,
-       const std::vector<Vector3D>& normals,
+  Mesh(std::vector<Point3D>&& verts,
+       std::vector<Vector3D>&& normals,
        const FaceInput& faces);
 
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+
+  static bool interpolateNormals;
+
  private:
   class FaceVertex {
    public:
@@ -39,8 +42,8 @@ class Mesh : public Primitive {
   struct Face {
     Face(std::vector<FaceVertex>&& vertices_, const Vector3D& normal_)
         : vertices(std::move(vertices_)), normal(normal_) {}
-    std::vector<FaceVertex> vertices;
-    Vector3D normal;
+    const std::vector<FaceVertex> vertices;
+    const Vector3D normal;
   };
 
   const std::vector<Point3D> m_verts;
@@ -57,4 +60,6 @@ class Mesh : public Primitive {
   bool withinBounds(const Ray& ray, HitRecord* hitRecord);
 
   std::vector<Face> getFaces(const FaceInput& faces) const;
+
+  Vector3D interpolatedNormal(const Face& face, const Point3D& pt);
 };
