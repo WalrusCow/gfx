@@ -11,6 +11,8 @@
 #include "scene.hpp"
 #include "ViewConfig.hpp"
 
+class HitRecord;
+
 class RayTracer {
  public:
   struct Options {
@@ -52,4 +54,5 @@ class RayTracer {
   Colour backgroundColour(uint32_t x, uint32_t y);
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
+  bool getIntersection(const Ray& ray, HitRecord* hitRecord);
 };

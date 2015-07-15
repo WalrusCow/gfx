@@ -16,13 +16,7 @@
 
 Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   HitRecord hitRecord;
-  bool hitModel = false;
-  for (const auto& model : models) {
-    if (model.intersects(ray, &hitRecord)) {
-      hitModel = true;
-    }
-  }
-  if (!hitModel) {
+  if (!getIntersection(ray, &hitRecord)) {
     // No intersection - use background colour
     return backgroundColour(x, y);
   }
@@ -36,15 +30,7 @@ Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   for (const auto light : lights) {
     Ray shadowRay(hitRecord.point, light->position);
     HitRecord r;
-    hitModel = false;
-    for (const auto& model : models) {
-      if (model.intersects(shadowRay, &r)) {
-        hitModel = true;
-        break;
-      }
-    }
-
-    if (!hitModel) {
+    if (!getIntersection(shadowRay, &r)) {
       // Only add from light source if nothing is hit first
       colour = colour + hitRecord.material->getColour(
           *light, hitRecord.point, hitRecord.norm, direction);
@@ -148,4 +134,14 @@ void RayTracer::threadWork(uint32_t id) {
       writePixel(x, y, rayColour(ray, x, y));
     }
   }
+}
+
+bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) {
+  bool hitModel = false;
+  for (const auto& model : models) {
+    if (model.intersects(ray, hitRecord)) {
+      hitModel = true;
+    }
+  }
+  return hitModel;
 }
