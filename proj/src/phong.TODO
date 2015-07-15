@@ -18,3 +18,7 @@ If more time, for arbitary polygons:
   - Using those interpolated normals, interpolate once more to get an
     approximated normal at the intersection point (the intersection point will
     lie on the line between the two edge points).
+(3)
+  - Triangulate each polygon by picking a vertex and drawing an edge from it
+    to every other vertex (that it isn't already adjacent to).
+  - Proceed as normal.
