@@ -6,13 +6,18 @@
 #include "Ray.hpp"
 #include "xform.hpp"
 
-bool Mesh::interpolateNormals = false;
+bool Mesh::interpolateNormals = true;
 
 Mesh::Mesh(std::vector<Point3D>&& verts,
            std::vector<Vector3D>&& normals,
            const FaceInput& faces)
      : m_verts(std::move(verts)),
        m_normals(std::move(normals)), m_faces(getFaces(faces)) {
+
+  if (normals.size() == 0) {
+    // TODO
+    // interpolate for each vertex (totally rounded)
+  }
 
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
   Point3D largePoint(smallPoint);
@@ -123,9 +128,28 @@ Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) {
     return face.normal;
   }
 
-  // Okay, so we can... and we will!
-  // ... soon
-  return face.normal;
+  // Get the total area of this triangle
+  const auto& v1 = face.vertices[0];
+  const auto& v2 = face.vertices[1];
+  const auto& v3 = face.vertices[2];
+
+  auto v23 = v2.vertex() - v3.vertex();
+  auto v21 = v2.vertex() - v1.vertex();
+  auto v2p = v2.vertex() - pt;
+  auto v13 = v1.vertex() - v3.vertex();
+  auto v1p = v1.vertex() - pt;
+
+  // NOTE: Normally these areas should be halved, but we are only using them
+  // for ratios so they would cancel out
+  double totalArea = (v23).cross(v21).length() / 2;
+
+  double a1 = v23.cross(v2p).length() / 2;
+  double a2 = v13.cross(v1p).length() / 2;
+  double a3 = v21.cross(v2p).length() / 2;
+
+  return (a1 / totalArea) * v1.normal() +
+         (a2 / totalArea) * v2.normal() +
+         (a3 / totalArea) * v3.normal();
 }
 
 std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
