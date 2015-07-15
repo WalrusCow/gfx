@@ -1,21 +1,3 @@
-* Read vertex normals from .obj file
-* Phong shading for triangles
-* Phong shading for rectangles
-* Phong shading for arbitrary polygons
-
-Ideas:
-  - If no vertex normals, then average them from the faces incident with each
-    vertex.
-  - We can special case rectangles and triangles easily
-
-When intersecting...
-  - If flag set,
-    o Do triangle normal interpolation if a triangle
-    o Do rectangle normal interpolation if a rectangle
-    o Quadrilateral interpolation? How many special cases...
-    o Use face normal otherwise (fallback)
-  - Else use face normal
-
 If more time, for arbitary polygons:
 (1)
   - Rotate so that the polygon is on the xy plane (and thus discard z coord)

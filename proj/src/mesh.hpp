@@ -33,6 +33,8 @@ class Mesh : public Primitive {
     const Point3D& vertex() const;
     const Vector3D& normal() const;
 
+    int vertexId() const;
+
    private:
     const Mesh* const parent;
     const int m_vertex;
@@ -47,8 +49,8 @@ class Mesh : public Primitive {
   };
 
   const std::vector<Point3D> m_verts;
-  const std::vector<Vector3D> m_normals;
   const std::vector<Face> m_faces;
+  const std::vector<Vector3D> m_normals;
 
   Cube boundingCube;
   Matrix4x4 boundingCubeInverse;
@@ -60,6 +62,7 @@ class Mesh : public Primitive {
   bool withinBounds(const Ray& ray, HitRecord* hitRecord);
 
   std::vector<Face> getFaces(const FaceInput& faces) const;
+  std::vector<Vector3D> getNormals(std::vector<Vector3D>&& normals) const;
 
   Vector3D interpolatedNormal(const Face& face, const Point3D& pt);
 };

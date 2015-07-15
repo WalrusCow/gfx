@@ -1,6 +1,8 @@
 #include "mesh.hpp"
 
 #include <iostream>
+#include <map>
+#include <set>
 
 #include "HitRecord.hpp"
 #include "Ray.hpp"
@@ -12,12 +14,8 @@ Mesh::Mesh(std::vector<Point3D>&& verts,
            std::vector<Vector3D>&& normals,
            const FaceInput& faces)
      : m_verts(std::move(verts)),
-       m_normals(std::move(normals)), m_faces(getFaces(faces)) {
-
-  if (normals.size() == 0) {
-    // TODO
-    // interpolate for each vertex (totally rounded)
-  }
+       m_faces(getFaces(faces)),
+       m_normals(getNormals(std::move(normals))) {
 
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
   Point3D largePoint(smallPoint);
@@ -124,7 +122,7 @@ bool Mesh::intersects(const Ray& ray,
 Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) {
   // Get the normal interpolated across the face
   if (face.vertices.size() != 3) {
-    // Cannot
+    // Cannot do this
     return face.normal;
   }
 
@@ -154,11 +152,22 @@ Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) {
 
 std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
   std::vector<Mesh::Face> faces;
+  size_t sz = 0;
   for (const auto& face : faceInput) {
     std::vector<FaceVertex> vertices;
     for (const auto& vertex : face) {
+      // Sanity checking
+      if (sz == 0) {
+        sz = vertex.size();
+      }
+      else if (sz != vertex.size()) {
+        std::cerr << "ERROR: Mesh has inconsistent faces!" << std::endl;
+      }
+      // Done sanity checking
+
       if (vertex.size() == 1) {
-        vertices.emplace_back(this, vertex[0]);
+        // We will create a normal for each vertex in this case
+        vertices.emplace_back(this, vertex[0], vertex[0]);
       }
       else if (vertex.size() == 2) {
         vertices.emplace_back(this, vertex[0], vertex[1]);
@@ -180,12 +189,43 @@ std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
   return faces;
 }
 
+std::vector<Vector3D> Mesh::getNormals(std::vector<Vector3D>&& normals_) const {
+  if (normals_.size() > 0) {
+    return std::move(normals_);
+  }
+
+  // Map from vertex to set of faces it is adjacent to
+  std::map<int, std::set<const Mesh::Face*>> faceMap;
+  for (const auto& face : m_faces) {
+    for (const auto& fv : face.vertices) {
+      if (faceMap.find(fv.vertexId()) == faceMap.end()) {
+        faceMap[fv.vertexId()] = std::set<const Mesh::Face*>();
+      }
+      faceMap[fv.vertexId()].insert(&face);
+    }
+  }
+
+  std::vector<Vector3D> myNormals(faceMap.size(), Vector3D(0, 0, 0));
+  for (const auto& kvp : faceMap) {
+    Vector3D avg(0, 0, 0);
+    for (const auto& face : kvp.second) {
+      avg = avg + face->normal;
+    }
+    myNormals[kvp.first] = avg / (double) kvp.second.size();
+  }
+  return std::move(myNormals);
+}
+
 const Point3D& Mesh::FaceVertex::vertex() const {
   return parent->m_verts[m_vertex];
 }
 
 const Vector3D& Mesh::FaceVertex::normal() const {
   return parent->m_normals[m_normal];
+}
+
+int Mesh::FaceVertex::vertexId() const {
+  return m_vertex;
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
