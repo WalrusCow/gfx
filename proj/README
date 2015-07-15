@@ -14,3 +14,15 @@ I have created the following data files, which are in the data directory:
 There are two executables provided:
 
 My program assumes the following: Compiled with g++ >= 4.8
+
+Objectives:
+   1. Primitives: Cylinder + Torus
+   2. Specular Reflection
+   3. Refraction & transparency
+   4. Texture Mapping: Planes + Spheres; Functions + Bitmaps
+   5. Adaptive Supersampling
+   6. Uniform Grid Acceleration
+   7. Soft Shadows + Area Lights
+   8. Phong Shading + Normal Interpolation
+   9. Glossy reflection
+  10. Unique scene
