@@ -17,6 +17,7 @@ class RayTracer {
     uint32_t sampleRateX = 1;
     uint32_t sampleRateY = 1;
     uint32_t threadCount = 4;
+    bool phongInterpolation = false;
   };
 
   RayTracer(SceneNode* root_,

@@ -14,7 +14,8 @@ struct Argument {
 
 int main(int argc, char** argv) {
   auto printUsage = [&] () {
-    std::cerr << "Usage: " << argv[0] << " file [-t threads]" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " file [-t threads] [-p]" << std::endl
+              << "\t-p:  Include -p to use phong interpolation" << std::endl;
   };
 
   if (argc < 2) {
@@ -25,6 +26,7 @@ int main(int argc, char** argv) {
 
   std::map<char, Argument> argMap = {
     {'t', {true}},
+    {'p', {false}},
   };
 
   std::set<char> flags;
@@ -81,13 +83,15 @@ int main(int argc, char** argv) {
   // Now we have a set and a map of arguments
   for (const char c : flags) {
     switch (c) {
-      // Blank
+    case 'p':
+      rayTracerOptions.phongInterpolation = true;
     }
   }
 
   for (const auto& arg : args) {
     switch (arg.first) {
     case 't':
+      {
       int numThreads = std::stoi(arg.second);
       // Enforce reasonable limits
       if (numThreads <= 0 || numThreads >= 32) {
@@ -96,6 +100,7 @@ int main(int argc, char** argv) {
       }
       rayTracerOptions.threadCount = numThreads;
       break;
+      }
     }
   }
 

@@ -7,6 +7,7 @@
 #include "image.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include "mesh.hpp"
 #include "scene.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"
@@ -79,6 +80,9 @@ RayTracer::RayTracer(SceneNode* root,
     image(width_, height_, 3),
     options(std::move(options_)),
     pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
+
+  // This is such a horrible hack
+  Mesh::interpolateNormals = options_.phongInterpolation;
 
   // Initialize image data to black
   for (uint32_t y = 0; y < imageHeight; ++y) {
