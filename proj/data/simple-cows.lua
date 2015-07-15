@@ -49,6 +49,8 @@ for _, spec in pairs({
 			{'rrleg', {-.7, -.7, .7}, 0.3}
 		     }) do
    part = gr.sphere(unpack(spec))
+   part:translate(unpack(spec[2]))
+   part:scale(spec[3], spec[3], spec[3])
    part:set_material(hide)
    cow:add_child(part)
 end
@@ -67,7 +69,7 @@ plane = gr.mesh('plane', {
 		   {  1, 0, -1 }, 
 		   {  1,  0, 1 }, 
 		   { -1, 0, 1  }
-		}, {
+		}, {}, {
 		   {{3}, {2}, {1}, {0}}
 		})
 scene:add_child(plane)

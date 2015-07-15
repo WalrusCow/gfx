@@ -213,6 +213,7 @@ int gr_mesh_cmd(lua_State* L) {
 
   std::vector<Point3D> verts;
   std::vector<std::vector<std::vector<int>>> faces;
+  std::vector<Vector3D> normals;
 
   luaL_checktype(L, 2, LUA_TTABLE);
   int vert_count = luaL_getn(L, 2);
@@ -230,19 +231,34 @@ int gr_mesh_cmd(lua_State* L) {
   }
 
   luaL_checktype(L, 3, LUA_TTABLE);
-  int face_count = luaL_getn(L, 3);
+  int norm_count = luaL_getn(L, 3);
 
-  luaL_argcheck(L, face_count >= 1, 3, "Tuple of faces expected");
+  luaL_argcheck(L, norm_count >= 0, 3, "Tuple of normals expected");
+
+  for (int i = 1; i <= norm_count; i++) {
+    lua_rawgeti(L, 3, i);
+
+    Vector3D normal;
+    get_tuple(L, -1, &normal[0], 3);
+
+    normals.push_back(normal);
+    lua_pop(L, 1);
+  }
+
+  luaL_checktype(L, 4, LUA_TTABLE);
+  int face_count = luaL_getn(L, 4);
+
+  luaL_argcheck(L, face_count >= 1, 4, "Tuple of faces expected");
 
   faces.resize(face_count);
 
   for (int i = 1; i <= face_count; i++) {
-    lua_rawgeti(L, 3, i);
+    lua_rawgeti(L, 4, i);
 
     luaL_checktype(L, -1, LUA_TTABLE);
     int index_count = luaL_getn(L, -1);
 
-    luaL_argcheck(L, index_count >= 3, 3, "Tuple of tuples expected");
+    luaL_argcheck(L, index_count >= 3, 4, "Tuple of tuples expected");
 
     auto& f = faces[i - 1];
     f.resize(index_count);
@@ -263,7 +279,7 @@ int gr_mesh_cmd(lua_State* L) {
     lua_pop(L, 1);
   }
 
-  Mesh* mesh = new Mesh(verts, faces);
+  Mesh* mesh = new Mesh(verts, normals, faces);
   GRLUA_DEBUG(*mesh);
   data->node = new GeometryNode(name, mesh);
 

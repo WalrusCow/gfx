@@ -1,0 +1,38 @@
+* Read vertex normals from .obj file
+* Phong shading for triangles
+* Phong shading for rectangles
+* Phong shading for arbitrary polygons
+
+Ideas:
+  - If no vertex normals, then average them from the faces incident with each
+    vertex.
+  - We can special case rectangles and triangles easily
+
+When intersecting...
+  - If flag set,
+    o Do triangle normal interpolation if a triangle
+    o Do rectangle normal interpolation if a rectangle
+    o Quadrilateral interpolation? How many special cases...
+    o Use face normal otherwise (fallback)
+  - Else use face normal
+
+If more time, for arbitary polygons:
+(1)
+  - Rotate so that the polygon is on the xy plane (and thus discard z coord)
+  - Find intersections of polygon edges w/ horizontal line thru intersection pt
+  - Using these edge points, interpolate (linearly) the normals between the edge
+    ends.
+  - Using those interpolated normals, interpolate once more to get an
+    approximated normal at the intersection point (the intersection point will
+    lie on the line between the two edge points).
+  - Undo the two rotations (inverse transpose for the normal)
+(2)
+  - Construct a horizontal plane using the polygon normal and e.g. [1, 0, 0]
+    * If the polygon is horizontal (normal is epsilon close to [0, 1, 0]) then
+      we can treat this as a 2d problem by ignoring y. See (1).
+  - Using this plane, find the polygon edge intersections with it
+  - Using these edge points, interpolate (linearly) the normals between the edge
+    ends.
+  - Using those interpolated normals, interpolate once more to get an
+    approximated normal at the intersection point (the intersection point will
+    lie on the line between the two edge points).

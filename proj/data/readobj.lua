@@ -14,6 +14,7 @@ function readobj(filename)
 
   local verts = {}
   local faces = {}
+  local norms = {}
 
   for line in file:lines() do
     _, _, command, rest = string.find(line, "^(%w*)%s*(.*)")
@@ -34,10 +35,14 @@ function readobj(filename)
         table.insert(face, faceVertexTable)
       end
       table.insert(faces, face)
+    elseif command == 'vn' then
+      _, _, a, b, c = string.find(rest, "(%-?%d+%.?%d*)%s*(%-?%d+%.?%d*)%s*(%-?%d+%.?%d*)")
+
+      table.insert(norms, {tonumber(a), tonumber(b), tonumber(c)})
     end
   end
 
   file:close()
-  return verts, faces
+  return verts, norms, faces
 end
 

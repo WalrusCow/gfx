@@ -12,8 +12,6 @@ class HitRecord;
 class Mesh : public Primitive {
   typedef std::vector<std::vector<std::vector<int>>> FaceInput;
  public:
-  Mesh(const std::vector<Point3D>& verts, const FaceInput& faces);
-
   Mesh(const std::vector<Point3D>& verts,
        const std::vector<Vector3D>& normals,
        const FaceInput& faces);

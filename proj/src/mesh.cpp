@@ -8,11 +8,7 @@
 
 Mesh::Mesh(const std::vector<Point3D>& verts,
            const std::vector<Vector3D>& normals,
-           const FaceInput& faces) {
-  // TODO
-}
-
-Mesh::Mesh(const std::vector<Point3D>& verts, const Mesh::FaceInput& faces)
+           const FaceInput& faces)
      : m_verts(verts), m_faces(getFaces(faces)) {
 
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
