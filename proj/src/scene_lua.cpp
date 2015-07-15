@@ -45,8 +45,10 @@
 
 #include "lua488.hpp"
 #include "light.hpp"
-#include "mesh.hpp"
-
+#include "primitives/Cube.hpp"
+#include "primitives/Cylinder.hpp"
+#include "primitives/Mesh.hpp"
+#include "primitives/Sphere.hpp"
 #include "ViewConfig.hpp"
 
 // Global options switch

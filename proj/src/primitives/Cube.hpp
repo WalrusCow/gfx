@@ -1,34 +1,14 @@
 #pragma once
 
-#include <vector>
-
-#include "algebra.hpp"
-
-class Ray;
-class HitRecord;
-
-class Primitive {
- public:
-  virtual ~Primitive() = default;
-  virtual bool intersects(const Ray& ray,
-                          HitRecord* hitRecord,
-                          const Matrix4x4& inverseTransform) = 0;
-};
-
-class Sphere : public Primitive {
- public:
-  bool intersects(const Ray& ray,
-                  HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
- private:
-  double solveIntersection(const Point3D& p1, const Vector3D& dir);
-};
+#include "Primitive.hpp"
 
 class Cube : public Primitive {
  public:
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
+  Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
  private:
   // "back" face
   const Point3D p0 = Point3D(0, 0, 0);
@@ -51,13 +31,3 @@ class Cube : public Primitive {
   double solveIntersection(const Point3D& p1, const Vector3D& dir);
 };
 
-class Cylinder : public Primitive {
- public:
-  bool intersects(const Ray& ray,
-                  HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
- private:
-  double solveIntersection(const Point3D& p1, const Vector3D& dir);
-  double getCapT(const Point3D& p1, const Vector3D& dir);
-  double getWallT(const Point3D& p1, const Vector3D& dir);
-};

@@ -2,8 +2,10 @@
 
 #include <vector>
 #include <iosfwd>
-#include "Primitive.hpp"
+
 #include "algebra.hpp"
+#include "Cube.hpp"
+#include "Primitive.hpp"
 
 class Ray;
 class HitRecord;
@@ -19,6 +21,8 @@ class Mesh : public Primitive {
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
                   const Matrix4x4& inverseTransform) override;
+  Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
+  Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
 
   static bool interpolateNormals;
 

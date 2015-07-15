@@ -3,7 +3,7 @@
 #include "algebra.hpp"
 #include "material.hpp"
 #include "Ray.hpp"
-#include "Primitive.hpp"
+#include "primitives/Primitive.hpp"
 
 class HitRecord;
 

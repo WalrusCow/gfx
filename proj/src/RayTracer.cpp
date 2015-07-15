@@ -7,10 +7,10 @@
 #include "image.hpp"
 #include "light.hpp"
 #include "material.hpp"
-#include "mesh.hpp"
 #include "scene.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"
+#include "primitives/Mesh.hpp"
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
 
@@ -51,34 +51,6 @@ Colour RayTracer::backgroundColour(uint32_t x, uint32_t y) {
 
   // Upside down, because png starts top left, I guess
   return bottom + yp * (top + (-1 * bottom));
-}
-
-RayTracer::RayTracer(SceneNode* root,
-                     uint32_t width_, uint32_t height_,
-                     ViewConfig viewConfig_,
-                     Colour ambient_,
-                     std::list<Light*> lights_,
-                     RayTracer::Options options_) :
-    imageWidth(width_), imageHeight(height_),
-    viewConfig(std::move(viewConfig_)),
-    ambientColour(std::move(ambient_)),
-    lights(std::move(lights_)),
-    image(width_, height_, 3),
-    options(std::move(options_)),
-    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
-
-  // This is such a horrible hack
-  Mesh::interpolateNormals = options_.phongInterpolation;
-
-  // Initialize image data to black
-  for (uint32_t y = 0; y < imageHeight; ++y) {
-    for (uint32_t x = 0; x < imageWidth; ++x) {
-      for (auto i = 0; i < 3; ++i)
-        image(x, y, i) = 0;
-    }
-  }
-
-  extractModels(root);
 }
 
 void RayTracer::extractModels(SceneNode* root) {
@@ -144,4 +116,32 @@ bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) {
     }
   }
   return hitModel;
+}
+
+RayTracer::RayTracer(SceneNode* root,
+                     uint32_t width_, uint32_t height_,
+                     ViewConfig viewConfig_,
+                     Colour ambient_,
+                     std::list<Light*> lights_,
+                     RayTracer::Options options_) :
+    imageWidth(width_), imageHeight(height_),
+    viewConfig(std::move(viewConfig_)),
+    ambientColour(std::move(ambient_)),
+    lights(std::move(lights_)),
+    image(width_, height_, 3),
+    options(std::move(options_)),
+    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
+
+  // This is such a horrible hack
+  Mesh::interpolateNormals = options_.phongInterpolation;
+
+  // Initialize image data to black
+  for (uint32_t y = 0; y < imageHeight; ++y) {
+    for (uint32_t x = 0; x < imageWidth; ++x) {
+      for (auto i = 0; i < 3; ++i)
+        image(x, y, i) = 0;
+    }
+  }
+
+  extractModels(root);
 }

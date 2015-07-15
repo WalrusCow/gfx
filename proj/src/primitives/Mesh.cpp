@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "Mesh.hpp"
 
 #include <iostream>
 #include <map>
@@ -255,4 +255,12 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
 
   out << "});" << std::endl;
   return out;
+}
+
+Point3D Mesh::getMinPoint(const Matrix4x4& inverseTransform) const {
+  return boundingCube.getMinPoint(boundingCubeInverse * inverseTransform);
+}
+
+Point3D Mesh::getMaxPoint(const Matrix4x4& inverseTransform) const {
+  return boundingCube.getMaxPoint(boundingCubeInverse * inverseTransform);
 }
