@@ -45,7 +45,7 @@ plane = gr.mesh('plane', {
 		   {  1,  0, 1 }, 
 		   { -1, 0, 1  }
 		}, {
-		   {3, 2, 1, 0}
+		   {{3}, {2}, {1}, {0}}
 		})
 scene:add_child(plane)
 plane:set_material(grass)

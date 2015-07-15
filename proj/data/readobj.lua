@@ -28,7 +28,7 @@ function readobj(filename)
         -- to use texture coordinates or normals you will need to fetch _all_ indices here
         local faceVertexTable = {}
         for num in string.gmatch(list, "(%d+)/?") do
-          faceVertexTable:insert(tonumber(num) - 1)
+          table.insert(faceVertexTable, tonumber(num) - 1)
         end
 
         table.insert(face, faceVertexTable)

@@ -7,8 +7,13 @@
 #include "xform.hpp"
 
 Mesh::Mesh(const std::vector<Point3D>& verts,
-           const std::vector<std::vector<int>>& faces)
-           : m_verts(verts), m_faces(getFaces(verts, faces)) {
+           const std::vector<Vector3D>& normals,
+           const FaceInput& faces) {
+  // TODO
+}
+
+Mesh::Mesh(const std::vector<Point3D>& verts, const Mesh::FaceInput& faces)
+     : m_verts(verts), m_faces(getFaces(faces)) {
 
   Point3D smallPoint(m_verts[0][0], m_verts[0][1], m_verts[0][2]);
   Point3D largePoint(smallPoint);
@@ -22,6 +27,7 @@ Mesh::Mesh(const std::vector<Point3D>& verts,
   }
   Vector3D boundsRange = largePoint - smallPoint;
   // Enforce a minimum size (e.g. for planes)
+  // TODO: Epsilon?
   double MIN_SIZE = 0.2;
   for (auto i = 0; i < 3; ++i) {
     boundsRange[i] = std::max(boundsRange[i], MIN_SIZE);
@@ -46,7 +52,7 @@ bool Mesh::faceIntersection(
   // Parallel
   if (isZero(rayNorm)) return false;
 
-  const auto& p0 = m_verts[face.vertices.front()];
+  const auto& p0 = face.vertices.front().vertex();
   const double t = (p0 - ray.start).dot(norm) / rayNorm;
   // No intersection
   if (t < 0 || isZero(t)) {
@@ -58,8 +64,8 @@ bool Mesh::faceIntersection(
   // Now check if planePt is "left" of everything
   for (size_t i = 0; i < face.vertices.size(); ++i) {
     // Go over points in order
-    const auto& p1 = m_verts[face.vertices[i]];
-    const auto& p2 = m_verts[face.vertices[(i + 1) % face.vertices.size()]];
+    const auto& p1 = face.vertices[i].vertex();
+    const auto& p2 = face.vertices[(i + 1) % face.vertices.size()].vertex();
     // from p1 to p2
     const auto side = p2 - p1;
     // cross from p1 to plane pt and dot against normal
@@ -75,8 +81,8 @@ bool Mesh::faceIntersection(
 }
 
 bool Mesh::intersects(const Ray& ray,
-                HitRecord* hitRecord,
-                const Matrix4x4& inverseTransform) {
+                      HitRecord* hitRecord,
+                      const Matrix4x4& inverseTransform) {
   // New ray
   const auto a = inverseTransform * ray.start;
   const auto b = inverseTransform * ray.other;
@@ -127,7 +133,7 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
     for (const auto& val : face.vertices) {
       if (j++)
         out << ", ";
-      out << val;
+      out << val.vertex();
     }
     out << "]";
   }
@@ -136,18 +142,38 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
   return out;
 }
 
-std::vector<Mesh::Face> Mesh::getFaces(
-    const std::vector<Point3D>& verts,
-    const std::vector<std::vector<int>>& faceVertices) {
-
+std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
   std::vector<Mesh::Face> faces;
-  for (const auto& vertices : faceVertices) {
-    const auto& p0 = verts[vertices.front()];
-    const auto& p1 = verts[vertices[1]];
-    const auto& p2 = verts[vertices.back()];
+  for (const auto& face : faceInput) {
+    std::vector<FaceVertex> vertices;
+    for (const auto& vertex : face) {
+      if (vertex.size() == 1) {
+        vertices.emplace_back(this, vertex[0]);
+      }
+      else if (vertex.size() == 2) {
+        vertices.emplace_back(this, vertex[0], vertex[1]);
+      }
+      else {
+        std::cerr << "ERROR: Mesh has a bad face!" << std::endl;
+      }
+    }
+
+    const auto& p0 = vertices.front().vertex();
+    const auto& p1 = vertices[1].vertex();
+    const auto& p2 = vertices.back().vertex();
+    // Norm for whole face (used sometimes)
     const auto norm = (p1 - p0).cross(p2 - p0);
-    faces.emplace_back(vertices, norm);
+
+    faces.emplace_back(std::move(vertices), norm);
   }
 
   return faces;
+}
+
+const Point3D& Mesh::FaceVertex::vertex() const {
+  return parent->m_verts[m_vertex];
+}
+
+const Vector3D& Mesh::FaceVertex::normal() const {
+  return parent->m_normals[m_normal];
 }
