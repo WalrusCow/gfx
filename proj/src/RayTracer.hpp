@@ -1,7 +1,9 @@
 #pragma once
 
+#include <functional>
 #include <list>
 #include <string>
+
 #include "algebra.hpp"
 #include "image.hpp"
 #include "light.hpp"
@@ -27,7 +29,7 @@ class RayTracer {
             ViewConfig viewConfig_,
             Colour ambient_,
             std::list<Light*> lights_,
-            Options options_);
+            const Options& options_);
 
   void render(const std::string& filename);
 
@@ -42,6 +44,10 @@ class RayTracer {
 
   std::list<Model> models;
 
+  // Used to create a bounding box for the scene
+  Point3D minPoint;
+  Point3D maxPoint;
+
   // Account for supersampling
   uint32_t rayHeight() const { return imageHeight * options.sampleRateY; }
   uint32_t rayWidth() const { return imageWidth * options.sampleRateX; }
@@ -55,4 +61,9 @@ class RayTracer {
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   bool getIntersection(const Ray& ray, HitRecord* hitRecord);
+
+  // Make dest extreme regarding data. Extremize the coords individually,
+  // according to the given function
+  void extremize(Point3D* dest, const Point3D& data,
+                 std::function<double(double, double)> extreme);
 };

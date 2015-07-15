@@ -1,5 +1,6 @@
 #include "RayTracer.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <thread>
@@ -65,6 +66,12 @@ void RayTracer::extractModels(SceneNode* root, const Matrix4x4& inverse) {
 
   if (auto* node = dynamic_cast<GeometryNode*>(root)) {
     models.emplace_back(node->primitive, node->material, inv);
+
+    // While we're at it, let's also get the extreme points of the scene
+    extremize(&minPoint, node->primitive->getMinPoint(inv),
+              [] (double a, double b) { return std::min(a,b); });
+    extremize(&maxPoint, node->primitive->getMaxPoint(inv),
+              [] (double a, double b) { return std::max(a,b); });
   }
 }
 
@@ -118,18 +125,25 @@ bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) {
   return hitModel;
 }
 
+void RayTracer::extremize(Point3D* dest, const Point3D& data,
+                          std::function<double(double, double)> extreme) {
+  (*dest)[0] = extreme((*dest)[0], data[0]);
+  (*dest)[1] = extreme((*dest)[1], data[1]);
+  (*dest)[2] = extreme((*dest)[2], data[2]);
+}
+
 RayTracer::RayTracer(SceneNode* root,
                      uint32_t width_, uint32_t height_,
                      ViewConfig viewConfig_,
                      Colour ambient_,
                      std::list<Light*> lights_,
-                     RayTracer::Options options_) :
+                     const RayTracer::Options& options_) :
     imageWidth(width_), imageHeight(height_),
     viewConfig(std::move(viewConfig_)),
     ambientColour(std::move(ambient_)),
     lights(std::move(lights_)),
     image(width_, height_, 3),
-    options(std::move(options_)),
+    options(options_),
     pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
 
   // This is such a horrible hack
@@ -144,4 +158,5 @@ RayTracer::RayTracer(SceneNode* root,
   }
 
   extractModels(root);
+  std::cerr << minPoint << " to " << maxPoint << std::endl;
 }
