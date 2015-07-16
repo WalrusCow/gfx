@@ -14,8 +14,11 @@ struct Argument {
 
 int main(int argc, char** argv) {
   auto printUsage = [&] () {
-    std::cerr << "Usage: " << argv[0] << " file [-t threads] [-p]" << std::endl
-              << "\t-p:  Include -p to use phong interpolation" << std::endl;
+    std::cerr
+      << "Usage: " << argv[0] << " file [-t threads] [-p] [-g]"
+      << std::endl
+      << "\t-p:  Use phong interpolation" << std::endl
+      << "\t-g:  Use a uniform grid structure" << std::endl;
   };
 
   if (argc < 2) {
@@ -27,6 +30,7 @@ int main(int argc, char** argv) {
   std::map<char, Argument> argMap = {
     {'t', {true}},
     {'p', {false}},
+    {'g', {false}},
   };
 
   std::set<char> flags;
@@ -85,6 +89,8 @@ int main(int argc, char** argv) {
     switch (c) {
     case 'p':
       rayTracerOptions.phongInterpolation = true;
+    case 'g':
+      rayTracerOptions.uniformGrid = true;
     }
   }
 

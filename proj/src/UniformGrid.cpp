@@ -10,8 +10,10 @@
 namespace {
 
 // Check if p is between planes with vectors n1 and n2
-bool betweenPlanes(const Vector3D& n1, const Vector3D& n2, const Point3D& p) {
-  return (n1.dot(p) * n2.dot(p)) <= 0;
+bool betweenPlanes(const Vector3D& n1, const Point3D& p1,
+                   const Vector3D& n2, const Point3D& p2,
+                   const Point3D& p) {
+  return (n1.dot(p - p1) * n2.dot(p - p2)) <= 0;
 }
 
 }
@@ -19,6 +21,7 @@ bool betweenPlanes(const Vector3D& n1, const Vector3D& n2, const Point3D& p) {
 UniformGrid::UniformGrid(const std::list<Model>& models,
                          const Point3D& minPoint, const Point3D& maxPoint,
                          uint32_t sizeFactor) {
+  //std::cerr << "Got " << models.size() << " models." << std::endl;
   sideLength = (int) std::cbrt((double) sizeFactor * models.size());
 
   // Add some padding to avoid edge points
@@ -74,6 +77,12 @@ void UniformGrid::populateCells(const std::list<Model>& models) {
     }
   }
   std::cerr << "Done populating cells" << std::endl;
+  for (size_t i = 0; i < cells.size(); ++i) {
+    if (cells[i].models.size() > 0) {
+      auto c = coordAt(i);
+      //std::cerr << "Cell "<<c.x<<','<<c.y<<','<<c.z<< " has " << cells[i].models.size() << " models" << std::endl;
+    }
+  }
 }
 
 Point3D UniformGrid::pointAt(const UniformGrid::CellCoord& coord) const {
@@ -87,17 +96,17 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   //std::cerr<<"Hello"<<std::endl;
   // Bottom left point
   Point3D p0 = pointAt(coord);
-  Point3D p1(p0[0], p0[1], p0[2] + cellSize);
+  Point3D p1(p0[0], p0[1] + cellSize, p0[2]);
   Point3D p2(p0[0], p0[1] + cellSize, p0[2] + cellSize);
   Point3D p3(p0[0], p0[1], p0[2] + cellSize);
 
   // Right side
   Point3D p4(p0[0] + cellSize, p0[1], p0[2]);
-  Point3D p5(p0[0] + cellSize, p0[1], p0[2] + cellSize);
+  Point3D p5(p0[0] + cellSize, p0[1] + cellSize, p0[2]);
   Point3D p6(p0[0] + cellSize, p0[1] + cellSize, p0[2] + cellSize);
   Point3D p7(p0[0] + cellSize, p0[1], p0[2] + cellSize);
 
-  const std::vector<Point3D> pts = {p1, p2, p3, p4, p5, p6, p7};
+  const std::vector<Point3D> pts = {p0, p1, p2, p3, p4, p5, p6, p7};
 
   Cube cellCube;
   auto cellMat = translationMatrix(p0[0], p0[1], p0[2]) *
@@ -123,6 +132,17 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   // First, we need to get the 8 points of the bounding box
   auto bbox = model.getBoundingBox();
 
+  //std::cerr << "Cell points: ";
+  for (auto p : pts) {
+    //std::cerr << p << ' ';
+  }
+  //std::cerr<<std::endl;
+  //std::cerr << "Bounding box points: ";
+  for (auto p : bbox) {
+    //std::cerr << p << ' ';
+  }
+  //std::cerr<<std::endl;
+
   auto inBoundingBox = [&bbox] (const Point3D& pt) -> bool {
     // We are in the box if we are in between all the opposite parallel planes
     static const auto& c1 = bbox[0]; // Bottom back left corner
@@ -136,22 +156,41 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     static const auto& c2 = bbox[6]; // Top front right corner
     static const auto v2a = bbox[5] - c2; // Top front right to bottom front right
     static const auto v2b = bbox[7] - c2; // Top front right to top front left
-    static const auto v2c = bbox[1] - c2; // Top front right to top back right
-    static const auto n4 = v2a.cross(v2b); // Front face
-    static const auto n5 = v2b.cross(v2c); // Top face
-    static const auto n6 = v2c.cross(v2a); // Right face
+    static const auto v2c = bbox[2] - c2; // Top front right to top back right
+    // We want this to be opposite sign (i.e. not pointing inwards)
+    // so we do the opposite cross as above
+    static const auto n4 = v2b.cross(v2a); // Front face
+    static const auto n5 = v2c.cross(v2b); // Top face
+    static const auto n6 = v2a.cross(v2c); // Right face
 
     // So the parallel planes are:
     // (n1, n4), (n2, n6), (n3, n5)
-    return betweenPlanes(n1, n4, pt) &&
-           betweenPlanes(n2, n6, pt) &&
-           betweenPlanes(n3, n5, pt);
+    if (betweenPlanes(n1, c1, n4, c2, pt)) {
+      //std::cerr << "Point " << pt << " is between front and back" << std::endl;
+      //std::cerr << n1 << " " << n4 << std::endl;
+      //std::cerr << n1.dot(pt - c1) << " * " << n4.dot(pt - c2) << " <= 0" << std::endl;
+    }
+    if (betweenPlanes(n2, c1, n6, c2, pt)) {
+      //std::cerr << "Point " << pt << " is between left and right" << std::endl;
+      //std::cerr << n2 << " " << n6 << std::endl;
+      //std::cerr << n2.dot(pt - c1) << " * " << n6.dot(pt - c2) << " <= 0" << std::endl;
+    }
+    if (betweenPlanes(n3, c1, n5, c2, pt)) {
+      //std::cerr << "Point " << pt << " is between top and bottom" << std::endl;
+      //std::cerr << n3 << " " << n5 << std::endl;
+      //std::cerr << n3.dot(pt - c1) << " * " << n5.dot(pt - c2) << " <= 0" << std::endl;
+    }
+
+    return betweenPlanes(n1, c1, n4, c2, pt) &&
+           betweenPlanes(n2, c1, n6, c2, pt) &&
+           betweenPlanes(n3, c1, n5, c2, pt);
   };
 
   // A corner of the bbox being inside the cell implies an intersection
   // between the bbox and the cell.
   for (const auto& pt : bbox) {
     if (inCell(pt)) {
+      //std::cerr << "The point " << pt << " is in the cell" << std::endl;
       return true;
     }
   }
@@ -159,6 +198,7 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   // Similarly, a corner of cell inside bbox implies intersection
   for (const auto& pt : pts) {
     if (inBoundingBox(pt)) {
+      //std::cerr << "The point " << pt << " is in the bounding box" << std::endl;
       return true;
     }
   }
@@ -284,5 +324,6 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
     }
   }
 
+  //std::cerr << "Got " << models.size() << " models" << std::endl;
   return models;
 }

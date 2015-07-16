@@ -124,5 +124,7 @@ Point3D Cylinder::getMaxPoint(const Matrix4x4& inverseTransform) const {
 
 std::vector<Point3D>
 Cylinder::getBoundingBox(const Matrix4x4& inverseTransform) const {
-  return boundingCube.getBoundingBox(inverseTransform);
+  auto cubeInv = translationMatrix(-1, -1, -1) * scaleMatrix(2, 2, 2);
+  cubeInv = cubeInv.invert();
+  return boundingCube.getBoundingBox(cubeInv * inverseTransform);
 }

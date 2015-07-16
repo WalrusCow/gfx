@@ -24,7 +24,7 @@ class RayTracer {
     uint32_t sampleRateY = 1;
     uint32_t threadCount = 4;
     bool phongInterpolation = false;
-    bool uniformGrid = true;
+    bool uniformGrid = false;
     uint32_t uniformGridSizeFactor = 8;
   };
 
