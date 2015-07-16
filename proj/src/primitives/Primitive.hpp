@@ -12,7 +12,7 @@ class Primitive {
   virtual ~Primitive() = default;
   virtual bool intersects(const Ray& ray,
                           HitRecord* hitRecord,
-                          const Matrix4x4& inverseTransform) = 0;
+                          const Matrix4x4& inverseTransform) const = 0;
   virtual Point3D getMinPoint(const Matrix4x4& inverseTransform) const = 0;
   virtual Point3D getMaxPoint(const Matrix4x4& inverseTransform) const = 0;
 };

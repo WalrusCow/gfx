@@ -20,7 +20,7 @@ class Mesh : public Primitive {
 
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
+                  const Matrix4x4& inverseTransform) const override;
   Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
   Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
 
@@ -61,12 +61,10 @@ class Mesh : public Primitive {
 
   friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
   bool faceIntersection(
-      const Ray& ray, HitRecord* hitRecord, const Face& face);
-  // Take as input a ray transformed into our model space
-  bool withinBounds(const Ray& ray, HitRecord* hitRecord);
+      const Ray& ray, HitRecord* hitRecord, const Face& face) const;
 
   std::vector<Face> getFaces(const FaceInput& faces) const;
   std::vector<Vector3D> getNormals(std::vector<Vector3D>&& normals) const;
 
-  Vector3D interpolatedNormal(const Face& face, const Point3D& pt);
+  Vector3D interpolatedNormal(const Face& face, const Point3D& pt) const;
 };

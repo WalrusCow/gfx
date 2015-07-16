@@ -10,8 +10,9 @@
 
 using namespace primitives;
 
-bool Sphere::intersects(
-    const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
+bool Sphere::intersects(const Ray& ray,
+                        HitRecord* hitRecord,
+                        const Matrix4x4& inverseTransform) const {
   // New ray
   const auto p1 = inverseTransform * ray.start;
   const auto p2 = inverseTransform * ray.other;
@@ -38,7 +39,7 @@ bool Sphere::intersects(
   return hitRecord->update(norm, point, t);
 }
 
-double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) {
+double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) const {
   // Now do intersection against unit sphere centred at origin
   // x^2 + y^2 + z^2 = 1
   // We want to check whether or not p.dot(p) == 1 for some p on the line

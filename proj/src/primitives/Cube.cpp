@@ -7,8 +7,9 @@
 
 using namespace primitives;
 
-bool Cube::intersects(
-    const Ray& ray, HitRecord* hitRecord, const Matrix4x4& inverseTransform) {
+bool Cube::intersects(const Ray& ray,
+                      HitRecord* hitRecord,
+                      const Matrix4x4& inverseTransform) const {
   // New ray
   const auto a = inverseTransform * ray.start;
   const auto b = inverseTransform * ray.other;
@@ -46,7 +47,7 @@ bool Cube::intersects(
   return hitRecord->update(norm, point, t);
 }
 
-double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) {
+double Cube::solveIntersection(const Point3D& a, const Vector3D& dir) const {
   int count = 0;
   double minT = -1;
   for (const auto& face : {f1, f2, f3, f4, f5, f6}) {

@@ -6,7 +6,7 @@ class Cube : public Primitive {
  public:
   bool intersects(const Ray& ray,
                   HitRecord* hitRecord,
-                  const Matrix4x4& inverseTransform) override;
+                  const Matrix4x4& inverseTransform) const override;
   Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
   Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
  private:
@@ -28,6 +28,6 @@ class Cube : public Primitive {
   const std::vector<Point3D> f5 = {p7, p6, p2, p3};
   const std::vector<Point3D> f6 = {p4, p5, p1, p0};
 
-  double solveIntersection(const Point3D& p1, const Vector3D& dir);
+  double solveIntersection(const Point3D& p1, const Vector3D& dir) const;
 };
 

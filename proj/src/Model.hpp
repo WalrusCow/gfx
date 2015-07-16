@@ -16,7 +16,7 @@ class Model {
   bool intersects(const Ray& ray, HitRecord* hitRecord) const;
 
  private:
-  Primitive* primitive;
-  Material* material;
-  Matrix4x4 xform;
+  const Primitive* primitive;
+  const Material* material;
+  const Matrix4x4 xform;
 };

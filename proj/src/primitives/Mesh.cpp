@@ -45,7 +45,7 @@ Mesh::Mesh(std::vector<Point3D>&& verts,
 }
 
 bool Mesh::faceIntersection(
-    const Ray& ray, HitRecord* hitRecord, const Mesh::Face& face) {
+    const Ray& ray, HitRecord* hitRecord, const Mesh::Face& face) const {
   // Get a point on the plane
   Vector3D norm = face.normal;
 
@@ -88,7 +88,7 @@ bool Mesh::faceIntersection(
 
 bool Mesh::intersects(const Ray& ray,
                       HitRecord* hitRecord,
-                      const Matrix4x4& inverseTransform) {
+                      const Matrix4x4& inverseTransform) const {
   // New ray
   const auto a = inverseTransform * ray.start;
   const auto b = inverseTransform * ray.other;
@@ -119,7 +119,7 @@ bool Mesh::intersects(const Ray& ray,
   return hit;
 }
 
-Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) {
+Vector3D Mesh::interpolatedNormal(const Face& face, const Point3D& pt) const {
   // Get the normal interpolated across the face
   if (face.vertices.size() != 3) {
     // Cannot do this

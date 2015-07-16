@@ -10,7 +10,7 @@ using namespace primitives;
 
 bool Cylinder::intersects(const Ray& ray,
                           HitRecord* hitRecord,
-                          const Matrix4x4& inverseTransform) {
+                          const Matrix4x4& inverseTransform) const {
   // New ray
   const auto p1 = inverseTransform * ray.start;
   const auto p2 = inverseTransform * ray.other;
@@ -46,12 +46,13 @@ bool Cylinder::intersects(const Ray& ray,
   return hitRecord->update(norm, point, t);
 }
 
-double Cylinder::solveIntersection(const Point3D& p1, const Vector3D& dir) {
+double Cylinder::solveIntersection(const Point3D& p1, const Vector3D& dir)
+const {
   auto t = mostValid(getCapT(p1, dir), getWallT(p1, dir));
   return isValid(t) ? t : -1;
 }
 
-double Cylinder::getCapT(const Point3D& p1, const Vector3D& dir) {
+double Cylinder::getCapT(const Point3D& p1, const Vector3D& dir) const {
   // Get the best t for the intersection with the cylinder caps
   double cap1 = -1;
   double cap2 = -1;
@@ -76,7 +77,7 @@ double Cylinder::getCapT(const Point3D& p1, const Vector3D& dir) {
   return mostValid(cap1, cap2);
 }
 
-double Cylinder::getWallT(const Point3D& p1, const Vector3D& dir) {
+double Cylinder::getWallT(const Point3D& p1, const Vector3D& dir) const {
   // Get the best t for the intersection with cylinder walls
   double a = dir[0] * dir[0] + dir[1] * dir[1];
   double b = 2 * (p1[0] * dir[0] + p1[1] * dir[1]);
