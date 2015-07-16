@@ -160,6 +160,23 @@ void RayTracer::threadWork(uint32_t id) {
 }
 
 bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) {
+  if (options.uniformGrid) {
+    return uniformGridIntersection(ray, hitRecord);
+  }
+  return basicIntersection(ray, hitRecord);
+}
+
+bool RayTracer::uniformGridIntersection(const Ray& ray, HitRecord* hitRecord) {
+  bool hitModel = false;
+  for (const auto* model : uniformGrid->getModels(ray)) {
+    if (model->intersects(ray, hitRecord)) {
+      hitModel = true;
+    }
+  }
+  return hitModel;
+}
+
+bool RayTracer::basicIntersection(const Ray& ray, HitRecord* hitRecord) {
   bool hitModel = false;
   for (const auto& model : models) {
     if (model.intersects(ray, hitRecord)) {

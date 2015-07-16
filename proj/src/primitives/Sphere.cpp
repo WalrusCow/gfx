@@ -83,3 +83,8 @@ Point3D Sphere::getMaxPoint(const Matrix4x4& inverseTransform) const {
   cubeInv = cubeInv.invert();
   return boundingCube.getMaxPoint(cubeInv * inverseTransform);
 }
+
+std::vector<Point3D>
+Sphere::getBoundingBox(const Matrix4x4& inverseTransform) const {
+  return boundingCube.getBoundingBox(inverseTransform);
+}

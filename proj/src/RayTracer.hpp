@@ -24,7 +24,7 @@ class RayTracer {
     uint32_t sampleRateY = 1;
     uint32_t threadCount = 4;
     bool phongInterpolation = false;
-    bool uniformGrid = false;
+    bool uniformGrid = true;
     uint32_t uniformGridSizeFactor = 8;
   };
 
@@ -66,7 +66,12 @@ class RayTracer {
   Colour backgroundColour(uint32_t x, uint32_t y);
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
+  // Get the intersection of ray with models. Uses a particular implementation.
   bool getIntersection(const Ray& ray, HitRecord* hitRecord);
+
+  // Particular implementations of the intersection component
+  bool uniformGridIntersection(const Ray& ray, HitRecord* hitRecord);
+  bool basicIntersection(const Ray& ray, HitRecord* hitRecord);
 
   // Make dest extreme regarding data. Extremize the coords individually,
   // according to the given function

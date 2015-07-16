@@ -130,3 +130,13 @@ Point3D Cube::getMaxPoint(const Matrix4x4& inverseTransform) const {
   }
   return maxPoint;
 }
+
+std::vector<Point3D>
+Cube::getBoundingBox(const Matrix4x4& inverseTransform) const {
+  auto xform = inverseTransform.invert();
+  std::vector<Point3D> boxPoints;
+  for (const auto& p : {p0, p1, p2, p3, p4, p5, p6, p7}) {
+    boxPoints.push_back(xform * p);
+  }
+  return boxPoints;
+}

@@ -24,6 +24,9 @@ class Mesh : public Primitive {
   Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
   Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
 
+  std::vector<Point3D> getBoundingBox(const Matrix4x4& inverseTransform)
+      const override;
+
   static bool interpolateNormals;
 
  private:

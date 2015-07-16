@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "algebra.hpp"
 #include "material.hpp"
 #include "Ray.hpp"
@@ -14,6 +16,8 @@ class Model {
         const Matrix4x4& xform_);
 
   bool intersects(const Ray& ray, HitRecord* hitRecord) const;
+
+  std::vector<Point3D> getBoundingBox() const;
 
  private:
   const Primitive* primitive;

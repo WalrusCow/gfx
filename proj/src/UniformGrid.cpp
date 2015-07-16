@@ -4,18 +4,31 @@
 #include <iostream>
 
 #include "HitRecord.hpp"
+#include "primitives/Cube.hpp"
+#include "xform.hpp"
+
+namespace {
+
+// Check if p is between planes with vectors n1 and n2
+bool betweenPlanes(const Vector3D& n1, const Vector3D& n2, const Point3D& p) {
+  return (n1.dot(p) * n2.dot(p)) <= 0;
+}
+
+}
 
 UniformGrid::UniformGrid(const std::list<Model>& models,
                          const Point3D& minPoint, const Point3D& maxPoint,
                          uint32_t sizeFactor) {
   sideLength = (int) std::cbrt((double) sizeFactor * models.size());
 
-  double minCoord = std::min({minPoint[0], minPoint[1], minPoint[2]});
-  double maxCoord = std::max({maxPoint[0], maxPoint[1], maxPoint[2]});
+  // Add some padding to avoid edge points
+  double PADDING = 0.1;
+  double minCoord = std::min({minPoint[0], minPoint[1], minPoint[2]}) - PADDING;
+  double maxCoord = std::max({maxPoint[0], maxPoint[1], maxPoint[2]}) + PADDING;
 
   startPoint = Point3D(minCoord, minCoord, minCoord);
 
-  double distance = minCoord - maxCoord;
+  double distance = maxCoord - minCoord;
   cellSize = distance / sideLength;
   cells.resize(sideLength * sideLength * sideLength);
 
@@ -29,12 +42,14 @@ int UniformGrid::indexFor(const UniformGrid::CellCoord& coord) const {
 
 UniformGrid::CellCoord UniformGrid::coordAt(const Point3D& pt) const {
   // Adjust so that the minimum will be at (0, 0, 0)
-  Point3D p(pt[0] - cellSize, pt[1] - cellSize, pt[2] - cellSize);
-  return CellCoord(
+  Point3D p(pt[0] - startPoint[0], pt[1] - startPoint[1], pt[2] - startPoint[2]);
+  auto c= CellCoord(
+
     (int) (p[0] / cellSize),
     (int) (p[1] / cellSize),
     (int) (p[2] / cellSize)
   );
+  return c;
 }
 
 UniformGrid::CellCoord UniformGrid::coordAt(int index) const {
@@ -48,13 +63,17 @@ UniformGrid::CellCoord UniformGrid::coordAt(int index) const {
 
 void UniformGrid::populateCells(const std::list<Model>& models) {
   // Populate the cells with the models
+  std::cerr << "Populating the cells: " << cells.size() << std::endl;
+  std::cerr << "have cell size: " << cellSize << " and start point " << startPoint << std::endl;
   for (size_t i = 0; i < cells.size(); ++i) {
     for (const auto& model : models) {
       if (intersectsCell(model, coordAt(i))) {
+        //std::cerr << "Putting model into " << c.x <<','<<c.y<<','<<c.z<<'\n';
         cells[i].models.push_back(&model);
       }
     }
   }
+  std::cerr << "Done populating cells" << std::endl;
 }
 
 Point3D UniformGrid::pointAt(const UniformGrid::CellCoord& coord) const {
@@ -65,6 +84,8 @@ Point3D UniformGrid::pointAt(const UniformGrid::CellCoord& coord) const {
 
 bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   // Left side
+  //std::cerr<<"Hello"<<std::endl;
+  // Bottom left point
   Point3D p0 = pointAt(coord);
   Point3D p1(p0[0], p0[1], p0[2] + cellSize);
   Point3D p2(p0[0], p0[1] + cellSize, p0[2] + cellSize);
@@ -76,8 +97,93 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   Point3D p6(p0[0] + cellSize, p0[1] + cellSize, p0[2] + cellSize);
   Point3D p7(p0[0] + cellSize, p0[1], p0[2] + cellSize);
 
-  HitRecord r;
   const std::vector<Point3D> pts = {p1, p2, p3, p4, p5, p6, p7};
+
+  Cube cellCube;
+  auto cellMat = translationMatrix(p0[0], p0[1], p0[2]) *
+                 scaleMatrix(cellSize, cellSize, cellSize);
+  // But we need the inverse of course
+  cellMat = cellMat.invert();
+
+  // Check if a pt is in the cell
+  auto inCell = [&] (const Point3D& pt) -> bool {
+    return p0[0] <= pt[0] && pt[0] <= (p0[0] + cellSize) &&
+           p0[1] <= pt[1] && pt[1] <= (p0[1] + cellSize) &&
+           p0[2] <= pt[2] && pt[2] <= (p0[2] + cellSize);
+  };
+
+  // We want to do line-rectangle intersection on a lot of things...
+  // So basically we want to check if ANY OF:
+  // (1) A face of bounding box (not axis aligned) intersects a face of our cell
+  // (2) OR the bounding box has a corner in our cell
+  // (3) OR our cell has a corner in the bounding box
+  // Idea is that (2) and (3) are ez to check, but (1) is harder. So we will do
+  // them first.
+
+  // First, we need to get the 8 points of the bounding box
+  auto bbox = model.getBoundingBox();
+
+  auto inBoundingBox = [&bbox] (const Point3D& pt) -> bool {
+    // We are in the box if we are in between all the opposite parallel planes
+    static const auto& c1 = bbox[0]; // Bottom back left corner
+    static const auto v1a = bbox[1] - c1; // Bottom back left to bottom back right
+    static const auto v1b = bbox[3] - c1; // Bottom back left to top back left
+    static const auto v1c = bbox[4] - c1; // Bottom back left to bottom front left
+    static const auto n1 = v1a.cross(v1b); // Back face
+    static const auto n2 = v1b.cross(v1c); // Left face
+    static const auto n3 = v1c.cross(v1a); // Bottom face
+
+    static const auto& c2 = bbox[6]; // Top front right corner
+    static const auto v2a = bbox[5] - c2; // Top front right to bottom front right
+    static const auto v2b = bbox[7] - c2; // Top front right to top front left
+    static const auto v2c = bbox[1] - c2; // Top front right to top back right
+    static const auto n4 = v2a.cross(v2b); // Front face
+    static const auto n5 = v2b.cross(v2c); // Top face
+    static const auto n6 = v2c.cross(v2a); // Right face
+
+    // So the parallel planes are:
+    // (n1, n4), (n2, n6), (n3, n5)
+    return betweenPlanes(n1, n4, pt) &&
+           betweenPlanes(n2, n6, pt) &&
+           betweenPlanes(n3, n5, pt);
+  };
+
+  // A corner of the bbox being inside the cell implies an intersection
+  // between the bbox and the cell.
+  for (const auto& pt : bbox) {
+    if (inCell(pt)) {
+      return true;
+    }
+  }
+
+  // Similarly, a corner of cell inside bbox implies intersection
+  for (const auto& pt : pts) {
+    if (inBoundingBox(pt)) {
+      return true;
+    }
+  }
+
+  // Check if any of the 12 lines from bbox intersect this cell
+  HitRecord hr;
+  for (size_t i = 0; i < 8; ++i) {
+    // This is the vector of one edge
+    Vector3D v = bbox[(i % 4 == 0) ? i + 3 : i - 1] - bbox[i];
+    Ray ray(bbox[i] - v, bbox[i]);
+    if (cellCube.intersects(ray, &hr, cellMat) && 1 <= hr.t && hr.t <= 2) {
+      // This edge of the bounding box intersects our cell cube.
+      return true;
+    }
+  }
+  for (size_t i = 0; i < 4; ++i) {
+    Vector3D v = bbox[i + 4] - bbox[i];
+    Ray ray(bbox[i] - v, bbox[i]);
+    if (cellCube.intersects(ray, &hr, cellMat) && 1 <= hr.t && hr.t <= 2) {
+      // This edge of the bounding box intersects our cell cube.
+      return true;
+    }
+  }
+
+  // Now check if any of the 12 lines from this cell intersect the model
   for (size_t i = 0; i < pts.size(); ++i) {
     Vector3D v = pts[(i % 4 == 0) ? i + 3 : i - 1] - pts[i];
     // Note: We are doing pts[i] - v and checking for t between 1 and 2.
@@ -88,16 +194,24 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     // Note also that in the case of a grid cell being entirely inside an
     // object this will *not* be true.  That is ok, since a ray can only
     // intersect an object at its edges.
-    if (model.intersects(Ray(pts[i] - v, pts[i]), &r) && 1 <= r.t && r.t <= 2) {
-      return true;
+    if (model.intersects(Ray(pts[i] - v, pts[i]), &hr)) {
+      //std::cerr << "Intersected..." << std::endl;
+      if (1 <= hr.t && hr.t <= 2) {
+        //std::cerr << "Good t value" << std::endl;
+        return true;
+      }
     }
   }
 
   // Now we have to check the struts between the two sides
   for (size_t i = 0; i < 4; ++i) {
     Vector3D v = pts[i + 4] - pts[i];
-    if (model.intersects(Ray(pts[i] - v, pts[i]), &r) && 1 <= r.t && r.t <= 2) {
-      return true;
+    if (model.intersects(Ray(pts[i] - v, pts[i]), &hr)) {
+      //std::cerr << "Intersected..." << std::endl;
+      if (1 <= hr.t && hr.t <= 2) {
+        //std::cerr << "Good t value" << std::endl;
+        return true;
+      }
     }
   }
 
@@ -123,40 +237,51 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
 
   // We need to find the minimum t that is non-negative
   double nextX = isZero(dir[0]) ? -1 :
-    (gridStartPoint[0] + cellSize - ray.start[0]) / ray.dir[0];
+    (gridStartPoint[0] + cellSize - ray.start[0]) / dir[0];
   double nextY = isZero(dir[1]) ? -1 :
-    (gridStartPoint[1] + cellSize - ray.start[1]) / ray.dir[1];
+    (gridStartPoint[1] + cellSize - ray.start[1]) / dir[1];
   double nextZ = isZero(dir[2]) ? -1 :
-    (gridStartPoint[2] + cellSize - ray.start[2]) / ray.dir[2];
+    (gridStartPoint[2] + cellSize - ray.start[2]) / dir[2];
 
   // How to change the cells each time we hit "nextX" or "nextY"
   int xInc = (ray.dir[0] > 0) ? 1 : -1;
-  int yInc = (ray.dir[0] > 0) ? 1 : -1;
-  int zInc = (ray.dir[0] > 0) ? 1 : -1;
+  int yInc = (ray.dir[1] > 0) ? 1 : -1;
+  int zInc = (ray.dir[2] > 0) ? 1 : -1;
 
   // Check if a coord is still valid
   auto coordOk = [&] (int coord) -> bool {
     return 0 <= coord && coord < sideLength;
   };
+  auto smaller = [] (double a, double b) -> bool {
+    return (b < 0) || a <= b;
+  };
 
+  //std::cerr << "before Processing at "<<rayCoord.x<<','<<rayCoord.y<<','<<rayCoord.z<<'\n';
   while (coordOk(rayCoord.x) && coordOk(rayCoord.y) && coordOk(rayCoord.z)) {
+    //std::cerr << "Processing at "<<rayCoord.x<<','<<rayCoord.y<<','<<rayCoord.z
+              //<< " with nexts: " << nextX << ' '<<nextY<<' '<<nextZ<<std::endl;
     for (const Model* model : cells[indexFor(rayCoord)].models) {
       models.insert(model);
     }
 
-    if ((nextX > 0) && nextX <= nextY && nextX <= nextZ) {
+    if ((nextX > 0) && smaller(nextX, nextY) && smaller(nextX, nextZ)) {
+      ////std::cerr<<"X"<<std::endl;
       nextX += dx;
       rayCoord.x += xInc;
     }
-    else if ((nextY > 0) && nextY <= nextX && nextY <= nextZ) {
+    else if ((nextY > 0) && smaller(nextY, nextX) && smaller(nextY, nextZ)) {
+      //std::cerr<<"Y"<<std::endl;
       nextY += dy;
       rayCoord.y += yInc;
     }
-    else if ((nextZ > 0) && nextZ <= nextY && nextZ <= nextX) {
+    else if ((nextZ > 0) && smaller(nextZ, nextY) && smaller(nextZ, nextX)) {
+      //std::cerr<<"Z"<<std::endl;
       nextZ += dz;
       rayCoord.z += zInc;
     }
-    std::cerr << "Processing grid at "<<nextX<<' '<<nextY<<' '<<nextZ<<std::endl;
+    else {
+      //std::cerr << "None..." << std::endl;
+    }
   }
 
   return models;

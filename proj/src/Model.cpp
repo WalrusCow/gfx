@@ -14,3 +14,7 @@ bool Model::intersects(const Ray& ray, HitRecord* hitRecord) const {
   }
   return false;
 }
+
+std::vector<Point3D> Model::getBoundingBox() const {
+  return primitive->getBoundingBox(xform);
+}

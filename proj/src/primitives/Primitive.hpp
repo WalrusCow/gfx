@@ -15,6 +15,8 @@ class Primitive {
                           const Matrix4x4& inverseTransform) const = 0;
   virtual Point3D getMinPoint(const Matrix4x4& inverseTransform) const = 0;
   virtual Point3D getMaxPoint(const Matrix4x4& inverseTransform) const = 0;
+  virtual std::vector<Point3D> getBoundingBox(const Matrix4x4& inverseTransform)
+      const = 0;
 };
 
 namespace primitives {

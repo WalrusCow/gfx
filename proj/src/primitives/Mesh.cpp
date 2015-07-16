@@ -264,3 +264,8 @@ Point3D Mesh::getMinPoint(const Matrix4x4& inverseTransform) const {
 Point3D Mesh::getMaxPoint(const Matrix4x4& inverseTransform) const {
   return boundingCube.getMaxPoint(boundingCubeInverse * inverseTransform);
 }
+
+std::vector<Point3D>
+Mesh::getBoundingBox(const Matrix4x4& inverseTransform) const {
+  return boundingCube.getBoundingBox(boundingCubeInverse * inverseTransform);
+}
