@@ -5,6 +5,7 @@
 
 #include "algebra.hpp"
 #include "Model.hpp"
+#include "primitives/Cube.hpp"
 #include "Ray.hpp"
 
 class UniformGrid {
@@ -24,6 +25,16 @@ class UniformGrid {
   struct CellCoord {
     CellCoord(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {}
     int x, y, z;
+    int& operator[](size_t idx) {
+      if (idx == 0) return x;
+      if (idx == 1) return y;
+      if (idx == 2) return z;
+    }
+    int operator[](size_t idx) const {
+      if (idx == 0) return x;
+      if (idx == 1) return y;
+      if (idx == 2) return z;
+    }
   };
 
   std::vector<GridCell> cells;
@@ -33,6 +44,11 @@ class UniformGrid {
   int sideLength;
   Point3D startPoint;
 
+  // Used for a variety of cube intersections
+  Cube utilityCube;
+  Matrix4x4 cellSizeScaleMatrix;
+  Matrix4x4 gridSizeScaleMatrix;
+
   // Get index in the vector
   int indexFor(const CellCoord& coord) const;
   // The corresponding cell coordinate
@@ -41,6 +57,7 @@ class UniformGrid {
   CellCoord coordAt(int index) const;
   // Point in space a cell coordinate corresponds to (bottom left corner)
   Point3D pointAt(const CellCoord& coord) const;
+  bool inGrid(const Point3D& pt) const;
 
   bool intersectsCell(const Model& model, const CellCoord& coord);
   void populateCells(const std::list<Model>& models);
