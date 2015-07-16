@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <string>
 
 #include "algebra.hpp"
@@ -11,6 +12,7 @@
 #include "PixelTransformer.hpp"
 #include "Ray.hpp"
 #include "scene.hpp"
+#include "UniformGrid.hpp"
 #include "ViewConfig.hpp"
 
 class HitRecord;
@@ -22,6 +24,8 @@ class RayTracer {
     uint32_t sampleRateY = 1;
     uint32_t threadCount = 4;
     bool phongInterpolation = false;
+    bool uniformGrid = false;
+    uint32_t uniformGridSizeFactor = 8;
   };
 
   RayTracer(SceneNode* root_,
@@ -47,6 +51,8 @@ class RayTracer {
   // Used to create a bounding box for the scene
   Point3D minPoint;
   Point3D maxPoint;
+
+  std::unique_ptr<UniformGrid> uniformGrid = nullptr;
 
   // Account for supersampling
   uint32_t rayHeight() const { return imageHeight * options.sampleRateY; }

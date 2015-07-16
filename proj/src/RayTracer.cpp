@@ -15,6 +15,50 @@
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
 
+RayTracer::RayTracer(SceneNode* root,
+                     uint32_t width_, uint32_t height_,
+                     ViewConfig viewConfig_,
+                     Colour ambient_,
+                     std::list<Light*> lights_,
+                     const RayTracer::Options& options_) :
+    imageWidth(width_), imageHeight(height_),
+    viewConfig(std::move(viewConfig_)),
+    ambientColour(std::move(ambient_)),
+    lights(std::move(lights_)),
+    image(width_, height_, 3),
+    options(options_),
+    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
+
+  // This is such a horrible hack
+  Mesh::interpolateNormals = options_.phongInterpolation;
+
+  // Initialize image data to black
+  for (uint32_t y = 0; y < imageHeight; ++y) {
+    for (uint32_t x = 0; x < imageWidth; ++x) {
+      for (auto i = 0; i < 3; ++i)
+        image(x, y, i) = 0;
+    }
+  }
+
+  // TODO: It would actually be great if we could have this not include
+  // the eye, and instead handle that case in the UniformGrid.
+  minPoint = viewConfig.eye;
+  maxPoint = minPoint;
+  extractModels(root);
+
+  for (Light* light : lights) {
+    extremize(&minPoint, light->position,
+              [] (double a, double b) { return std::min(a,b); });
+    extremize(&maxPoint, light->position,
+              [] (double a, double b) { return std::max(a,b); });
+  }
+
+  if (options.uniformGrid) {
+    uniformGrid = std::make_unique<UniformGrid>(
+        models, minPoint, maxPoint, options.uniformGridSizeFactor);
+  }
+}
+
 Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   HitRecord hitRecord;
   if (!getIntersection(ray, &hitRecord)) {
@@ -130,33 +174,4 @@ void RayTracer::extremize(Point3D* dest, const Point3D& data,
   (*dest)[0] = extreme((*dest)[0], data[0]);
   (*dest)[1] = extreme((*dest)[1], data[1]);
   (*dest)[2] = extreme((*dest)[2], data[2]);
-}
-
-RayTracer::RayTracer(SceneNode* root,
-                     uint32_t width_, uint32_t height_,
-                     ViewConfig viewConfig_,
-                     Colour ambient_,
-                     std::list<Light*> lights_,
-                     const RayTracer::Options& options_) :
-    imageWidth(width_), imageHeight(height_),
-    viewConfig(std::move(viewConfig_)),
-    ambientColour(std::move(ambient_)),
-    lights(std::move(lights_)),
-    image(width_, height_, 3),
-    options(options_),
-    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
-
-  // This is such a horrible hack
-  Mesh::interpolateNormals = options_.phongInterpolation;
-
-  // Initialize image data to black
-  for (uint32_t y = 0; y < imageHeight; ++y) {
-    for (uint32_t x = 0; x < imageWidth; ++x) {
-      for (auto i = 0; i < 3; ++i)
-        image(x, y, i) = 0;
-    }
-  }
-
-  extractModels(root);
-  std::cerr << minPoint << " to " << maxPoint << std::endl;
 }
