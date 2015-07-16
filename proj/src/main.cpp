@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
       << "Usage: " << argv[0] << " file [-t threads] [-p] [-g]"
       << std::endl
       << "\t-p:  Use phong interpolation" << std::endl
-      << "\t-g:  Use a uniform grid structure" << std::endl;
+      << "\t-g:  Use a uniform grid structure" << std::endl
+      << "\t-u:  SeSet uniform grid size factor. Default 8." << std::endl;
   };
 
   if (argc < 2) {
@@ -31,6 +32,7 @@ int main(int argc, char** argv) {
     {'t', {true}},
     {'p', {false}},
     {'g', {false}},
+    {'u', {true}},
   };
 
   std::set<char> flags;
@@ -105,6 +107,17 @@ int main(int argc, char** argv) {
         printUsage();
       }
       rayTracerOptions.threadCount = numThreads;
+      break;
+      }
+    case 'u':
+      {
+      int constant = std::stoi(arg.second);
+      // Enforce reasonable limits
+      if (constant <= 0) {
+        std::cerr << "Invalid grid constant: " << constant << std::endl;
+        printUsage();
+      }
+      rayTracerOptions.uniformGridSizeFactor = constant;
       break;
       }
     }

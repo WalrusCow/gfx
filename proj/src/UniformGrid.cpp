@@ -1,6 +1,7 @@
 #include "UniformGrid.hpp"
 
 #include <cmath>
+#include <ctime>
 #include <iostream>
 
 #include "HitRecord.hpp"
@@ -35,8 +36,10 @@ UniformGrid::UniformGrid(const std::list<Model>& models,
   cellSize = distance / sideLength;
   cells.resize(sideLength * sideLength * sideLength);
 
+  std::clock_t start = std::clock();
   // Now we must populate the cells
   populateCells(models);
+  std::cerr << "Populating time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
 int UniformGrid::indexFor(const UniformGrid::CellCoord& coord) const {
