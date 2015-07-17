@@ -71,17 +71,20 @@ Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   Vector3D direction = ray.dir;
   direction.normalize();
 
+  const Material* material = hitRecord.material;
+  Colour materialColour(material->getColour(hitRecord));
+
   for (const auto light : lights) {
     Ray shadowRay(hitRecord.point, light->position);
     HitRecord r;
     if (!getIntersection(shadowRay, &r)) {
       // Only add from light source if nothing is hit first
-      colour = colour + hitRecord.material->getColour(
-          *light, hitRecord.point, hitRecord.norm, direction);
+      colour = colour + material->lightColour(
+          materialColour, direction, *light, hitRecord);
     }
   }
 
-  return colour + hitRecord.material->getMainColour() * ambientColour;
+  return colour + materialColour * ambientColour;
 }
 
 Colour RayTracer::backgroundColour(uint32_t x, uint32_t y) {

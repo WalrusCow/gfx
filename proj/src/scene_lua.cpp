@@ -45,13 +45,14 @@
 
 #include "lua488.hpp"
 #include "light.hpp"
+#include "materials/ColourMaterial.hpp"
 #include "primitives/Cube.hpp"
 #include "primitives/Cylinder.hpp"
 #include "primitives/Mesh.hpp"
 #include "primitives/Sphere.hpp"
 #include "ViewConfig.hpp"
 
-// Global options switch
+// Global options switch (lol)
 RayTracer::Options rayTracerOptions;
 
 // Uncomment the following line to enable debugging messages
@@ -379,9 +380,9 @@ int gr_material_cmd(lua_State* L) {
 
   double shininess = luaL_checknumber(L, 3);
 
-  data->material = new PhongMaterial(Colour(kd[0], kd[1], kd[2]),
-                                     Colour(ks[0], ks[1], ks[2]),
-                                     shininess);
+  data->material = new ColourMaterial(Colour(kd[0], kd[1], kd[2]),
+                                      Colour(ks[0], ks[1], ks[2]),
+                                      shininess);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);

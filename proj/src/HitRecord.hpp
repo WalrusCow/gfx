@@ -25,7 +25,8 @@ class HitRecord {
 
   // Try to update hitrecord with new hit data.
   // Return whether or not we did update (i.e. is the new t better?)
-  bool update(const Vector3D& norm, const Point3D& point, double t);
+  bool update(const Vector3D& n, const Point3D& pt, double newT,
+              double xp = -1, double yp = -1);
 
   // What the normal vector was at the point hit
   Vector3D norm;
@@ -35,4 +36,8 @@ class HitRecord {
   const Material* material;
   // t for Ray where we hit
   double t = -1;
+
+  // Percentages used in texture mapping
+  double xPercent = -1;
+  double yPercent = -1;
 };

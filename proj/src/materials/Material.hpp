@@ -2,36 +2,26 @@
 
 #include "algebra.hpp"
 
+class HitRecord;
 class Light;
 
+// It's a phong material kind of world
 class Material {
  public:
+  Material(const Colour& ks, double shininess);
   virtual ~Material() = default;
 
-  virtual Colour getColour(const Light& light,
-                           const Point3D& pt,
-                           const Vector3D& norm,
-                           Vector3D dir) const = 0;
-  virtual Colour getMainColour() const = 0;
+  Colour getColour(const HitRecord& hitRecord) const;
+
+  Colour lightColour(const Colour& colour, // Colour at point
+                     const Vector3D& dir, // View direction
+                     const Light& light, // Light to light with
+                     const HitRecord& hitRecord) const;
 
  protected:
-  Material() {}
-};
+  virtual Colour getKd(const HitRecord& hitRecord) const = 0;
 
-class PhongMaterial : public Material {
- public:
-  PhongMaterial(const Colour& kd, const Colour& ks, double shininess);
-
-  Colour getColour(const Light& light,
-                   const Point3D& pt,
-                   const Vector3D& norm,
-                   Vector3D dir) const override;
-  Colour getMainColour() const override {
-    return m_kd;
-  }
-
-  Colour m_kd;
-  Colour m_ks;
-
-  double m_shininess;
+ private:
+  Colour ks;
+  double shininess;
 };

@@ -77,4 +77,9 @@ class RayTracer {
   // according to the given function
   void extremize(Point3D* dest, const Point3D& data,
                  std::function<double(double, double)> extreme);
+
+  Colour phongColour(const Light& light,
+                     const Point3D& pt,
+                     const Vector3D& norm,
+                     const Vector3D& dir);
 };
