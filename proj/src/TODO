@@ -48,5 +48,9 @@ If more time, for arbitary polygons:
 Grid Acceleration
 =================
 
-Split meshes into polygons.
-Perform actual sphere / cylinder / torus intersection with cube
+- Use different sizes for x, y, z.
+- When constructing the grid, only check cells within the bounding box. Get the
+  min and max coordinates in all of (x, y, z) then check all cells in between
+  those.
+- Split meshes into polygons.
+- Perform actual sphere / cylinder / torus intersection with cube
