@@ -1,3 +1,23 @@
+================================================================================
+=============================== Main Objectives ================================
+================================================================================
+
+- Torus primitive
+- Reflection
+- Refraction
+- Texture mapping *
+- Adaptive supersampling *
+- Soft shadows + area lights
+- Glossy reflection
+- Unique scene
+
+================================================================================
+============================= Completed Objectives =============================
+================================================================================
+
+Phong Interpolation
+===================
+
 If more time, for arbitary polygons:
 (1)
   - Rotate so that the polygon is on the xy plane (and thus discard z coord)
@@ -22,3 +42,9 @@ If more time, for arbitary polygons:
   - Triangulate each polygon by picking a vertex and drawing an edge from it
     to every other vertex (that it isn't already adjacent to).
   - Proceed as normal.
+
+Grid Acceleration
+=================
+
+Split meshes into polygons.
+Perform actual sphere / cylinder / torus intersection with cube
