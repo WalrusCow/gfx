@@ -50,7 +50,7 @@ fractals = {
   {{-12, 12, -5}, 78}
 }
 
-fractalSphere = makeFractalSphere(3, 4, 1)
+fractalSphere = makeFractalSphere(2, 4, 1)
 
 for k,l in pairs(fractals) do
   parent = gr.node('hello')

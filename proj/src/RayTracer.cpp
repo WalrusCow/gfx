@@ -42,8 +42,8 @@ RayTracer::RayTracer(SceneNode* root,
 
   // TODO: It would actually be great if we could have this not include
   // the eye, and instead handle that case in the UniformGrid.
-  minPoint = viewConfig.eye;
-  maxPoint = minPoint;
+  minPoint = Point3D(1e20, 1e20, 1e20);
+  maxPoint = Point3D(-1e20, -1e20, -1e20);
   extractModels(root);
 
   for (Light* light : lights) {

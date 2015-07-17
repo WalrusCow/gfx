@@ -29,11 +29,13 @@ class UniformGrid {
       if (idx == 0) return x;
       if (idx == 1) return y;
       if (idx == 2) return z;
+      throw "Hello";
     }
     int operator[](size_t idx) const {
       if (idx == 0) return x;
       if (idx == 1) return y;
       if (idx == 2) return z;
+      throw "Hello";
     }
   };
 

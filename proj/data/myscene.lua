@@ -14,6 +14,18 @@ s:set_material(blue)
 s:translate(2, 2, 0)
 s:scale(0.4, 0.4, 0.4)
 
+s2 = gr.sphere('sphere2')
+scene:add_child(s2)
+s2:set_material(blue)
+s2:translate(-2, 2, 0)
+s2:scale(0.4, 0.4, 0.4)
+
+s3 = gr.sphere('sphere3')
+scene:add_child(s3)
+s3:set_material(blue)
+s3:translate(2, -2, 0)
+s3:scale(0.4, 0.4, 0.4)
+
 s4 = gr.sphere('sphere4')
 scene:add_child(s4)
 s4:set_material(blue)
