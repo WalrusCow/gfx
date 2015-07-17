@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "algebra.hpp"
-#include "material.hpp"
+#include "materials/Material.hpp"
 #include "Ray.hpp"
 #include "primitives/Primitive.hpp"
 

@@ -3,7 +3,7 @@
 #include <list>
 
 #include "algebra.hpp"
-#include "material.hpp"
+#include "materials/Material.hpp"
 #include "primitives/Primitive.hpp"
 
 class SceneNode {

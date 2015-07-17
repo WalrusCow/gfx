@@ -41,6 +41,8 @@ If more time, for arbitary polygons:
 (3)
   - Triangulate each polygon by picking a vertex and drawing an edge from it
     to every other vertex (that it isn't already adjacent to).
+    * Or triangulate by calculating the barycentre of the vertices, make a new
+      vertex there and draw edges to other vertices on the polygon.
   - Proceed as normal.
 
 Grid Acceleration

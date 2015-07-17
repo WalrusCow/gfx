@@ -7,7 +7,6 @@
 
 #include "image.hpp"
 #include "light.hpp"
-#include "material.hpp"
 #include "scene.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"
