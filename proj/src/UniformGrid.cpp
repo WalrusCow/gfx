@@ -95,8 +95,6 @@ Point3D UniformGrid::pointAt(const UniformGrid::CellCoord& coord) const {
 }
 
 bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
-  //std::cerr<<std::endl<<std::endl<<std::endl;
-  //std::cerr << "Checking coord " << coord.x << ','<<coord.y<<','<<coord.z<<std::endl;
   // Left side
   // Bottom left point
   Point3D p0 = pointAt(coord);
@@ -111,11 +109,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   Point3D p7(p0[0] + cellSize, p0[1], p0[2] + cellSize);
 
   const std::vector<Point3D> pts = {p0, p1, p2, p3, p4, p5, p6, p7};
-  //std::cerr<<"Cell points are ";
-  for (const auto& pt:pts) {
-    //std::cerr<<pt<<' ';
-  }
-  //std::cerr<<std::endl;
 
   auto cellMat = translationMatrix(p0[0], p0[1], p0[2]) * cellSizeScaleMatrix;
   // But we need the inverse of course
@@ -130,11 +123,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
 
   // First, we need to get the 8 points of the bounding box
   auto bbox = model.getBoundingBox();
-  //std::cerr<<"bbox points are ";
-  for (const auto& pt:bbox) {
-    //std::cerr<<pt<<' ';
-  }
-  //std::cerr<<std::endl;
 
   auto inBoundingBox = [&bbox] (const Point3D& pt) -> bool {
     // We are in the box if we are in between all the opposite parallel planes
@@ -156,30 +144,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     const auto n5 = v2c.cross(v2b); // Top face
     const auto n6 = v2a.cross(v2c); // Right face
 
-    //std::cerr << "planes " << n1 <<"||"<<c1<<"  "<<n4<<"||"<<c2;
-    if (betweenPlanes(n1, c1, n4, c2, pt)) {
-      //std::cerr << " pt " << pt << " is between them!" << std::endl;
-    }
-    else {
-      //std::cerr << " pt " << pt << " not between them!" << std::endl;
-    }
-
-    //std::cerr << "planes " << n2 <<"||"<<c1<<"  "<<n6<<"||"<<c2;
-    if (betweenPlanes(n2, c1, n6, c2, pt)) {
-      //std::cerr << " pt " << pt << " is between them!" << std::endl;
-    }
-    else {
-      //std::cerr << " pt " << pt << " not between them!" << std::endl;
-    }
-
-    //std::cerr << "planes " << n3 <<"||"<<c1<<"  "<<n5<<"||"<<c2;
-    if (betweenPlanes(n3, c1, n5, c2, pt)) {
-      //std::cerr << " pt " << pt << " is between them!" << std::endl;
-    }
-    else {
-      //std::cerr << " pt " << pt << " not between them!" << std::endl;
-    }
-
     return betweenPlanes(n1, c1, n4, c2, pt) &&
            betweenPlanes(n2, c1, n6, c2, pt) &&
            betweenPlanes(n3, c1, n5, c2, pt);
@@ -189,7 +153,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   // between the bbox and the cell.
   for (const auto& pt : bbox) {
     if (inCell(pt)) {
-      //std::cerr << "pt " << pt << " is inside the cell!" << std::endl;
       return true;
     }
   }
@@ -197,7 +160,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
   // Similarly, a corner of cell inside bbox implies intersection
   for (const auto& pt : pts) {
     if (inBoundingBox(pt)) {
-      //std::cerr << "pt " << pt << " is in the bounding box" << std::endl;
       return true;
     }
   }
@@ -210,7 +172,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     Ray ray(bbox[i] - v, bbox[i]);
     if (utilityCube.intersects(ray, &hr, cellMat) && 1 <= hr.t && hr.t <= 2) {
       // This edge of the bounding box intersects our cell cube.
-      //std::cerr << "the ray from " << ray.start << " to " << ray.dir << " intersects the cell" << std::endl;
       return true;
     }
   }
@@ -219,7 +180,6 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     Ray ray(bbox[i] - v, bbox[i]);
     if (utilityCube.intersects(ray, &hr, cellMat) && 1 <= hr.t && hr.t <= 2) {
       // This edge of the bounding box intersects our cell cube.
-      //std::cerr << "the ray from " << ray.start << " to " << ray.dir << " intersects the cell" << std::endl;
       return true;
     }
   }
@@ -232,12 +192,8 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     // subtraction, *but* we have an epsilon check in the intersects code.
     // For this case, we do *not* want to bother with epsilon check, so we
     // will check from 1 to 2 to avoid it.
-    // Note also that in the case of a grid cell being entirely inside an
-    // object this will *not* be true.  That is ok, since a ray can only
-    // intersect an object at its edges.
     if (model.intersects(Ray(pts[i] - v, pts[i]), &hr)) {
       if (1 <= hr.t && hr.t <= 2) {
-        //std::cerr << "the ray from " << pts[i] << " to " << v << " intersects the cell" << std::endl;
         return true;
       }
     }
@@ -248,42 +204,26 @@ bool UniformGrid::intersectsCell(const Model& model, const CellCoord& coord) {
     Vector3D v = pts[i + 4] - pts[i];
     if (model.intersects(Ray(pts[i] - v, pts[i]), &hr)) {
       if (1 <= hr.t && hr.t <= 2) {
-        //std::cerr << "the ray from " << pts[i] << " to " << v << " intersects the cell" << std::endl;
         return true;
       }
     }
   }
 
-  //std::cerr << "NOT INTERSECTED" << std::endl;
   return false;
 }
 
-int count = 0;
-
 std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
-  //1std::cerr<<std::endl<<std::endl<<std::endl;
-  //1std::cerr << "Coordinate is " << count / 8 << ','<<count%8<<std::endl;
-  //1std::cerr << "This is the " << count << " call" << std::endl;
-  //1if (count == 10) {
-    //1std::cerr << "This is the one!!" << std::endl;
-  //1}
-  //1count += 1;
-  //1std::cerr << "Getting models for ray " << ray.start << " " << ray.other << std::endl;
   std::set<const Model*> models;
 
-  // TODO: And if the ray does not begin in the thingy?
-  // ... then use a Cube the size of the whole grid to determine the
-  // intersection t value. That is where the ray will have entered the
-  // grid, and we can then use other nice things.
   Point3D nextT(0, 0, 0);
 
   // The point *within* the grid where the ray first intersected it
   Point3D rayStartPoint(0, 0, 0);
 
   if (!inGrid(ray.start)) {
-    //std::cerr << "Not in the grid?"<<std::endl;
     const auto& sp = startPoint;
-    // Not in the grid: We must compute fancy shit!
+    // Not in the grid: We will use a cube the sz of whole grid to find
+    // the point of entry into the grid
     auto gridCubeInverse = (translationMatrix(sp[0], sp[0], sp[0]) *
                            gridSizeScaleMatrix).invert();
     HitRecord hr;
@@ -297,7 +237,6 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
     rayStartPoint = ray.at(hr.t);
   }
   else {
-    //std::cerr << "It was in the grid." << std::endl;
     rayStartPoint = ray.start;
   }
 
@@ -309,23 +248,30 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
 
   // These values are in units of t: how far we must go to travel a whole cell
   Vector3D dt(
-    isZero(dir[0]) ? -1 : cellSize / dir[0],
-    isZero(dir[1]) ? -1 : cellSize / dir[1],
-    isZero(dir[2]) ? -1 : cellSize / dir[2]
+    isZero(dir[0]) ? 0 : cellSize / dir[0],
+    isZero(dir[1]) ? 0 : cellSize / dir[1],
+    isZero(dir[2]) ? 0 : cellSize / dir[2]
   );
   {
     // The bottom left corner of the cell we are starting in
-    Point3D gridStartPoint = pointAt(gridCoord);
-    Point3D cellSzPt(cellSize, cellSize, cellSize);
-    // We must go to (gridStartPoint + cellVec) in each dir, and we have
-    // already travelled by rayStartPoint.
-    auto distToTravel = cellSzPt + (gridStartPoint - rayStartPoint);
+    Point3D gsp = pointAt(gridCoord); // "Grid start point"
 
     // Determine how far, in units of t, we have to go in any direction
     // to reach the next cell
+    // If we are going "forwards" in a coordinate then we need to travel to
+    // gsp + cellSize. If we are going "backwards" in a coordinate then we need
+    // to travel to only gsp.
     for (int i = 0; i < 3; ++i) {
-      if (isZero(dir[i])) nextT[i] = -1;
-      else nextT[i] += distToTravel[i] / dir[i];
+      if (isZero(dir[i])) {
+        nextT[i] = -1;
+        continue;
+      }
+      if (ray.dir[i] < 0) {
+        nextT[i] += (rayStartPoint[i] - gsp[i]) / dir[i];
+      }
+      else {
+        nextT[i] += (gsp[i] + cellSize - rayStartPoint[i]) / dir[i];
+      }
     }
   }
 
@@ -344,12 +290,8 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
     return (b < 0) || a <= b;
   };
 
-    //1std::cerr << "Original grid coords " << gridCoord.x<<','<<gridCoord.y<<','<<gridCoord.z<<std::endl;
   while (coordOk(gridCoord.x) && coordOk(gridCoord.y) && coordOk(gridCoord.z)) {
-    //1std::cerr<<std::endl;
-    //1std::cerr << "Processing " << gridCoord.x<<','<<gridCoord.y<<','<<gridCoord.z<<std::endl;
     for (const Model* model : cells[indexFor(gridCoord)].models) {
-      //1std::cerr << "Inserting model hehe" << std::endl;
       models.insert(model);
     }
 
@@ -360,16 +302,11 @@ std::set<const Model*> UniformGrid::getModels(const Ray& ray) const {
       if (smaller(nextT[i], a) && smaller(nextT[i], b)) {
         nextT[i] += dt[i];
         gridCoord[i] += incs[i];
-        //1std::cerr << "We got " << i << " as the next one " << nextT[i] -dt[i]<< std::endl;
         break;
-      }
-      if (i == 2) {
-        //1std::cerr << "We should never see this!" << std::endl;
       }
     }
   }
 
-  //1std::cerr << "Returning " << models.size() << " models" <<std::endl;
   return models;
 }
 

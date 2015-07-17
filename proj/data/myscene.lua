@@ -32,6 +32,32 @@ s4:set_material(blue)
 s4:translate(-2, -2, 0)
 s4:scale(0.4, 0.4, 0.4)
 
+s5 = gr.sphere('sphere5')
+scene:add_child(s5)
+s5:set_material(blue)
+s5:translate(2, 2, -2)
+s5:scale(0.4, 0.4, 0.4)
+
+s6 = gr.sphere('sphere6')
+scene:add_child(s6)
+s6:set_material(blue)
+s6:translate(-2, 2, -2)
+s6:scale(0.4, 0.4, 0.4)
+
+s7 = gr.sphere('sphere7')
+scene:add_child(s7)
+s7:set_material(blue)
+s7:translate(2, -2, -2)
+s7:scale(0.4, 0.4, 0.4)
+
+s8 = gr.sphere('sphere8')
+scene:add_child(s8)
+s8:set_material(blue)
+s8:translate(-2, -2, -2)
+s8:scale(0.4, 0.4, 0.4)
+
+
+
 l1 = gr.light({0, 0, 2}, {0.8, 0.8, 0.8}, {1, 0, 0})
 
 SIZE = 128

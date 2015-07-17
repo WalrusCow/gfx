@@ -98,7 +98,7 @@ plane:set_material(planeMat)
 plane:translate(0, -25, 0)
 root:add_child(plane)
 
-SIZE = 128
+SIZE = 512
 gr.render(root, 'sample.png', SIZE, SIZE,
 	  {0, 0, 40}, {0, 0, -1}, {0, 1, 0}, 50,
 	  {0.4, 0.4, 0.4}, lights)
