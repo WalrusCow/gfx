@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <map>
+#include <string>
 
 #include "Material.hpp"
 
@@ -11,10 +13,15 @@ class FunctionMaterial : public Material {
   FunctionMaterial(const ColourMap& mapFunction_,
                    const Colour& ks_,
                    double shininess_);
+
+  static Colour bwSquares(double xPercent, double yPercent);
+  static std::map<std::string, ColourMap> functions;
+
  protected:
-  Colour getKd(const HitRecord& hitRecord);
+  Colour getKd(const HitRecord& hitRecord) const override;
 
  private:
   // Function to use
   ColourMap mapFunction;
 };
+

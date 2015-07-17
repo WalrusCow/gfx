@@ -46,6 +46,7 @@
 #include "lua488.hpp"
 #include "light.hpp"
 #include "materials/ColourMaterial.hpp"
+#include "materials/FunctionMaterial.hpp"
 #include "primitives/Cube.hpp"
 #include "primitives/Cylinder.hpp"
 #include "primitives/Mesh.hpp"
@@ -390,6 +391,32 @@ int gr_material_cmd(lua_State* L) {
   return 1;
 }
 
+// Create a material
+extern "C"
+int gr_function_material_cmd(lua_State* L) {
+  GRLUA_DEBUG_CALL;
+
+  gr_material_ud* data = (gr_material_ud*)lua_newuserdata(L, sizeof(gr_material_ud));
+  data->material = 0;
+
+  std::string functionName = luaL_checkstring(L, 1);
+
+  double ks[3];
+  get_tuple(L, 2, ks, 3);
+
+  double shininess = luaL_checknumber(L, 3);
+
+  data->material = new FunctionMaterial(
+        FunctionMaterial::functions[functionName],
+        Colour(ks[0], ks[1], ks[2]),
+        shininess);
+
+  luaL_newmetatable(L, "gr.material");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
 // Add a child to a node
 extern "C"
 int gr_node_add_child_cmd(lua_State* L) {
@@ -524,13 +551,16 @@ int gr_node_gc_cmd(lua_State* L) {
 // If you want to add a new non-member function, add it here.
 static const luaL_reg grlib_functions[] = {
   {"node", gr_node_cmd},
-  {"sphere", gr_sphere_cmd},
-  {"cylinder", gr_cylinder_cmd},
   {"joint", gr_joint_cmd},
+
   {"material", gr_material_cmd},
-  // New for assignment 4
+  {"function_material", gr_function_material_cmd},
+
   {"cube", gr_cube_cmd},
+  {"cylinder", gr_cylinder_cmd},
   {"mesh", gr_mesh_cmd},
+  {"sphere", gr_sphere_cmd},
+
   {"light", gr_light_cmd},
   {"render", gr_render_cmd},
   {0, 0}

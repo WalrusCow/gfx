@@ -3,6 +3,7 @@ require('readobj')
 scene = gr.node('scene')
 
 blue = gr.material({0.25, 0.33, 0.88}, {0.5, 0.4, 0.8}, 25)
+bw = gr.function_material("bw_squares", {0, 0, 0}, 25)
 
 --require('mymesh')
 --scene:add_child(mymesh)
@@ -10,55 +11,10 @@ blue = gr.material({0.25, 0.33, 0.88}, {0.5, 0.4, 0.8}, 25)
 --mymesh:set_material(blue)
 s = gr.sphere('sphere')
 scene:add_child(s)
-s:set_material(blue)
-s:translate(2, 2, 0)
-s:scale(0.4, 0.4, 0.4)
+s:set_material(bw)
+s:scale(2, 2, 2)
 
-s2 = gr.sphere('sphere2')
-scene:add_child(s2)
-s2:set_material(blue)
-s2:translate(-2, 2, 0)
-s2:scale(0.4, 0.4, 0.4)
-
-s3 = gr.sphere('sphere3')
-scene:add_child(s3)
-s3:set_material(blue)
-s3:translate(2, -2, 0)
-s3:scale(0.4, 0.4, 0.4)
-
-s4 = gr.sphere('sphere4')
-scene:add_child(s4)
-s4:set_material(blue)
-s4:translate(-2, -2, 0)
-s4:scale(0.4, 0.4, 0.4)
-
-s5 = gr.sphere('sphere5')
-scene:add_child(s5)
-s5:set_material(blue)
-s5:translate(2, 2, -2)
-s5:scale(0.4, 0.4, 0.4)
-
-s6 = gr.sphere('sphere6')
-scene:add_child(s6)
-s6:set_material(blue)
-s6:translate(-2, 2, -2)
-s6:scale(0.4, 0.4, 0.4)
-
-s7 = gr.sphere('sphere7')
-scene:add_child(s7)
-s7:set_material(blue)
-s7:translate(2, -2, -2)
-s7:scale(0.4, 0.4, 0.4)
-
-s8 = gr.sphere('sphere8')
-scene:add_child(s8)
-s8:set_material(blue)
-s8:translate(-2, -2, -2)
-s8:scale(0.4, 0.4, 0.4)
-
-
-
-l1 = gr.light({0, 0, 2}, {0.8, 0.8, 0.8}, {1, 0, 0})
+l1 = gr.light({0, 0, 6}, {0.8, 0.8, 0.8}, {1, 0, 0})
 
 SIZE = 128
 gr.render(scene, 'myscene.png', SIZE, SIZE,
