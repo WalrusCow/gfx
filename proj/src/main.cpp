@@ -91,8 +91,10 @@ int main(int argc, char** argv) {
     switch (c) {
     case 'p':
       rayTracerOptions.phongInterpolation = true;
+      break;
     case 'g':
       rayTracerOptions.uniformGrid = true;
+      break;
     }
   }
 

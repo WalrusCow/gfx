@@ -1,6 +1,7 @@
 #include "Sphere.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 #include "algebra.hpp"
 #include "HitRecord.hpp"
@@ -25,6 +26,15 @@ bool Sphere::intersects(const Ray& ray,
   auto localPoint = p1 + t * dir;
   Vector3D localNorm(localPoint[0], localPoint[1], localPoint[2]);
 
+  // Get polar coordinates
+  double phi = std::acos(localPoint[2]);
+  double theta = std::acos(localPoint[0] / std::sin(phi));
+  double phiP = (phi / M_PI);
+  if (localPoint[1] < 0) {
+    theta = (2 * M_PI) - theta;
+  }
+  double thetaP = theta / (2 * M_PI);
+
   // t is unchanged by this
   // Remember to use the *original* intersection point
   auto point = ray.at(t);
@@ -36,7 +46,7 @@ bool Sphere::intersects(const Ray& ray,
 
   // We will return whether or not this intersection was
   // better than whatever was already stored there
-  return hitRecord->update(norm, point, t);
+  return hitRecord->update(norm, point, t, phiP, thetaP);
 }
 
 double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) const {
