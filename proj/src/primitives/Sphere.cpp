@@ -46,7 +46,7 @@ bool Sphere::intersects(const Ray& ray,
 
   // We will return whether or not this intersection was
   // better than whatever was already stored there
-  return hitRecord->update(norm, point, t, phiP, thetaP);
+  return hitRecord->update(norm, point, t, thetaP, phiP);
 }
 
 double Sphere::solveIntersection(const Point3D& p1, const Vector3D& dir) const {
