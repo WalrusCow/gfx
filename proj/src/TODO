@@ -5,7 +5,6 @@
 - Torus primitive
 - Reflection
 - Refraction
-- Adaptive supersampling *
 - Soft shadows + area lights
 - Glossy reflection
 - Unique scene
@@ -13,6 +12,12 @@
 ================================================================================
 ============================= Completed Objectives =============================
 ================================================================================
+
+Adaptive supersampling
+======================
+
+Could possibly build a "heatmap" style thing out of the depth to which pixels
+are being antialiased.
 
 Texture mapping
 ===============
