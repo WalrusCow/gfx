@@ -47,6 +47,7 @@
 #include "light.hpp"
 #include "materials/ColourMaterial.hpp"
 #include "materials/FunctionMaterial.hpp"
+#include "materials/TextureMaterial.hpp"
 #include "primitives/Cube.hpp"
 #include "primitives/Cylinder.hpp"
 #include "primitives/Mesh.hpp"
@@ -393,6 +394,32 @@ int gr_material_cmd(lua_State* L) {
 
 // Create a material
 extern "C"
+int gr_texture_material_cmd(lua_State* L) {
+  GRLUA_DEBUG_CALL;
+
+  gr_material_ud* data = (gr_material_ud*)lua_newuserdata(L, sizeof(gr_material_ud));
+  data->material = 0;
+
+  std::string filename = luaL_checkstring(L, 1);
+
+  double ks[3];
+  get_tuple(L, 2, ks, 3);
+
+  double shininess = luaL_checknumber(L, 3);
+
+  data->material = new TextureMaterial(
+        filename,
+        Colour(ks[0], ks[1], ks[2]),
+        shininess);
+
+  luaL_newmetatable(L, "gr.material");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Create a material
+extern "C"
 int gr_function_material_cmd(lua_State* L) {
   GRLUA_DEBUG_CALL;
 
@@ -555,6 +582,7 @@ static const luaL_reg grlib_functions[] = {
 
   {"material", gr_material_cmd},
   {"function_material", gr_function_material_cmd},
+  {"texture_material", gr_texture_material_cmd},
 
   {"cube", gr_cube_cmd},
   {"cylinder", gr_cylinder_cmd},

@@ -24,4 +24,3 @@ class FunctionMaterial : public Material {
   // Function to use
   ColourMap mapFunction;
 };
-
