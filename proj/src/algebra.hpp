@@ -153,6 +153,10 @@ public:
   {
     return v_[0]*other.v_[0] + v_[1]*other.v_[1] + v_[2]*other.v_[2];
   }
+  double dot(const Point3D& other) const
+  {
+    return v_[0]*other[0] + v_[1]*other[1] + v_[2]*other[2];
+  }
 
   double length2() const
   {

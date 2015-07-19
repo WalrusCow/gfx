@@ -1,10 +1,8 @@
 #include "Cylinder.hpp"
 
-#include "algebra.hpp"
 #include "HitRecord.hpp"
 #include "polyroots.hpp"
 #include "Ray.hpp"
-#include "xform.hpp"
 
 using namespace primitives;
 
@@ -111,20 +109,14 @@ double Cylinder::getWallT(const Point3D& p1, const Vector3D& dir) const {
 }
 
 Point3D Cylinder::getMinPoint(const Matrix4x4& inverseTransform) const {
-  auto cubeInv = translationMatrix(-1, -1, -1) * scaleMatrix(2, 2, 2);
-  cubeInv = cubeInv.invert();
   return boundingCube.getMinPoint(cubeInv * inverseTransform);
 }
 
 Point3D Cylinder::getMaxPoint(const Matrix4x4& inverseTransform) const {
-  auto cubeInv = translationMatrix(-1, -1, -1) * scaleMatrix(2, 2, 2);
-  cubeInv = cubeInv.invert();
   return boundingCube.getMaxPoint(cubeInv * inverseTransform);
 }
 
 std::vector<Point3D>
 Cylinder::getBoundingBox(const Matrix4x4& inverseTransform) const {
-  auto cubeInv = translationMatrix(-1, -1, -1) * scaleMatrix(2, 2, 2);
-  cubeInv = cubeInv.invert();
   return boundingCube.getBoundingBox(cubeInv * inverseTransform);
 }

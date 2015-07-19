@@ -9,8 +9,9 @@ class Cube : public Primitive {
                   const Matrix4x4& inverseTransform) const override;
   Point3D getMinPoint(const Matrix4x4& inverseTransform) const override;
   Point3D getMaxPoint(const Matrix4x4& inverseTransform) const override;
-  std::vector<Point3D> getBoundingBox(const Matrix4x4& inverseTransform)
-      const override;
+  std::vector<Point3D>
+  getBoundingBox(const Matrix4x4& inverseTransform) const override;
+
  private:
   // "back" face
   const Point3D p0 = Point3D(0, 0, 0);
@@ -32,4 +33,3 @@ class Cube : public Primitive {
 
   double solveIntersection(const Point3D& p1, const Vector3D& dir) const;
 };
-
