@@ -35,6 +35,7 @@ class RayTracer {
             std::list<Light*> lights_,
             const Options& options_);
 
+  Colour pixelColour(double x, double y) const;
   void render(const std::string& filename);
 
  private:
@@ -63,21 +64,21 @@ class RayTracer {
   void extractModels(SceneNode* root);
   void extractModels(SceneNode* root, const Matrix4x4& inverse);
 
-  Colour rayColour(const Ray& ray, double x, double y);
-  Colour backgroundColour(double x, double y);
+  Colour rayColour(const Ray& ray, double x, double y) const;
+  Colour backgroundColour(double x, double y) const;
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   // Get the intersection of ray with models. Uses a particular implementation.
-  bool getIntersection(const Ray& ray, HitRecord* hitRecord);
+  bool getIntersection(const Ray& ray, HitRecord* hitRecord) const;
 
   // Particular implementations of the intersection component
-  bool uniformGridIntersection(const Ray& ray, HitRecord* hitRecord);
-  bool basicIntersection(const Ray& ray, HitRecord* hitRecord);
+  bool uniformGridIntersection(const Ray& ray, HitRecord* hitRecord) const;
+  bool basicIntersection(const Ray& ray, HitRecord* hitRecord) const;
 
   // Make dest extreme regarding data. Extremize the coords individually,
   // according to the given function
   void extremize(Point3D* dest, const Point3D& data,
-                 std::function<double(double, double)> extreme);
+                 std::function<double(double, double)> extreme) const;
 
   Colour phongColour(const Light& light,
                      const Point3D& pt,

@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <thread>
 
+#include "Antialiaser.hpp"
 #include "image.hpp"
 #include "light.hpp"
 #include "scene.hpp"
@@ -57,7 +58,7 @@ RayTracer::RayTracer(SceneNode* root,
   }
 }
 
-Colour RayTracer::rayColour(const Ray& ray, double x, double y) {
+Colour RayTracer::rayColour(const Ray& ray, double x, double y) const {
   HitRecord hitRecord;
   if (!getIntersection(ray, &hitRecord)) {
     // No intersection - use background colour
@@ -86,7 +87,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y) {
   return colour + materialColour * ambientColour;
 }
 
-Colour RayTracer::backgroundColour(double x, double y) {
+Colour RayTracer::backgroundColour(double x, double y) const {
   (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
@@ -122,7 +123,7 @@ void RayTracer::extractModels(SceneNode* root, const Matrix4x4& inverse) {
 
 void RayTracer::writePixel(uint32_t x, uint32_t y, const Colour& colour) {
   auto xPx = x / options.sampleRateX;
-  auto yPx = imageHeight - 1 - (y / options.sampleRateY);
+  auto yPx = y / options.sampleRateY;
 
   auto pixelColour = colour / (options.sampleRateX * options.sampleRateY);
   tempImage(xPx, yPx, 0) += pixelColour.R();
@@ -144,16 +145,28 @@ void RayTracer::render(const std::string& filename) {
 
   // Now we have the temporary image, we need to get the real deal.
   // Adaptive anti-aliasing techniques up in this.
+  Antialiaser antialiaser(this, &tempImage);
 
   for (unsigned y = 0; y < imageHeight; ++y) {
     for (unsigned x = 0; x < imageHeight; ++x) {
-      for (int i = 0; i < 3; ++i) {
-        finalImage(x, y, i) = tempImage(x, y, i);
-      }
+      Colour finalColour = antialiaser.antialias(x, y);
+
+      finalImage(x, y, 0) = finalColour.R();
+      finalImage(x, y, 1) = finalColour.G();
+      finalImage(x, y, 2) = finalColour.B();
     }
   }
 
   finalImage.savePng(filename);
+}
+
+Colour RayTracer::pixelColour(double x, double y) const {
+  // Invert y
+  y = rayHeight() - 1 - y;
+  auto worldCoords = pixelTransformer.transform(x, y);
+
+  Ray ray(viewConfig.eye, worldCoords);
+  return rayColour(ray, x, y);
 }
 
 void RayTracer::threadWork(uint32_t id) {
@@ -162,23 +175,20 @@ void RayTracer::threadWork(uint32_t id) {
   const auto h = rayHeight();
   for (uint32_t y = 0; y < h; ++y) {
     for (uint32_t x = (y + id) % options.threadCount; x < w; x += threadCount) {
-      // Get world coordinates of pixel (x, y)
-      auto worldCoords = pixelTransformer.transform(x, y);
-
-      Ray ray(viewConfig.eye, worldCoords);
-      writePixel(x, y, rayColour(ray, x, y));
+      writePixel(x, y, pixelColour(x, y));
     }
   }
 }
 
-bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) {
+bool RayTracer::getIntersection(const Ray& ray, HitRecord* hitRecord) const {
   if (options.uniformGrid) {
     return uniformGridIntersection(ray, hitRecord);
   }
   return basicIntersection(ray, hitRecord);
 }
 
-bool RayTracer::uniformGridIntersection(const Ray& ray, HitRecord* hitRecord) {
+bool
+RayTracer::uniformGridIntersection(const Ray& ray, HitRecord* hitRecord) const {
   bool hitModel = false;
   for (const auto* model : uniformGrid->getModels(ray)) {
     if (model->intersects(ray, hitRecord)) {
@@ -188,7 +198,7 @@ bool RayTracer::uniformGridIntersection(const Ray& ray, HitRecord* hitRecord) {
   return hitModel;
 }
 
-bool RayTracer::basicIntersection(const Ray& ray, HitRecord* hitRecord) {
+bool RayTracer::basicIntersection(const Ray& ray, HitRecord* hitRecord) const {
   bool hitModel = false;
   for (const auto& model : models) {
     if (model.intersects(ray, hitRecord)) {
@@ -199,7 +209,7 @@ bool RayTracer::basicIntersection(const Ray& ray, HitRecord* hitRecord) {
 }
 
 void RayTracer::extremize(Point3D* dest, const Point3D& data,
-                          std::function<double(double, double)> extreme) {
+                          std::function<double(double, double)> extreme) const {
   (*dest)[0] = extreme((*dest)[0], data[0]);
   (*dest)[1] = extreme((*dest)[1], data[1]);
   (*dest)[2] = extreme((*dest)[2], data[2]);

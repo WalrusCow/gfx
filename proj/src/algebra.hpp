@@ -503,6 +503,11 @@ inline Colour operator +(const Colour& a, const Colour& b)
   return Colour(a.R()+b.R(), a.G()+b.G(), a.B()+b.B());
 }
 
+inline Colour operator -(const Colour& a, const Colour& b)
+{
+  return Colour(a.R()-b.R(), a.G()-b.G(), a.B()-b.B());
+}
+
 inline std::ostream& operator <<(std::ostream& os, const Colour& c)
 {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
