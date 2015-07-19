@@ -33,7 +33,7 @@ Colour average(const std::vector<Colour>& colours) {
 } // Anonymous
 
 Colour Antialiaser::Pixel::colour() const {
-  return average(colours);
+  return colours[0];
 }
 
 bool Antialiaser::shouldAntialias(const Antialiaser::Pixel& pixel) const {
@@ -65,6 +65,8 @@ Colour
 Antialiaser::getColour(const Antialiaser::Pixel& pixel, int depth) const {
   // Get colour for a pixel
   if (depth >= maxDepth || !shouldAntialias(pixel)) return pixel.colour();
+  // Uncomment to view which pixels are getting antialiased
+  //return Colour(1, 0, 0);
 
   // Split into sub-pixels
   std::vector<Antialiaser::Pixel> subPixels;
