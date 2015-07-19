@@ -145,7 +145,8 @@ void RayTracer::render(const std::string& filename) {
 
   // Now we have the temporary image, we need to get the real deal.
   // Adaptive anti-aliasing techniques up in this.
-  Antialiaser antialiaser(this, &tempImage);
+  Antialiaser antialiaser(this, &tempImage,
+                          options.aaTolerance, options.aaDepth);
 
   for (unsigned y = 0; y < imageHeight; ++y) {
     for (unsigned x = 0; x < imageHeight; ++x) {

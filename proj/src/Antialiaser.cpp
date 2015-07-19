@@ -40,7 +40,7 @@ bool Antialiaser::shouldAntialias(const Antialiaser::Pixel& pixel) const {
   for (size_t i = 0; i < pixel.colours.size(); ++i) {
     for (size_t j = i + 1; j < pixel.colours.size(); ++j) {
       // If any pair of colours too far apart then we should antialias
-      if (distance(pixel.colours[i], pixel.colours[j]) > maxDistance) {
+      if (distance(pixel.colours[i], pixel.colours[j]) > tolerance) {
         return true;
       }
     }

@@ -10,15 +10,16 @@ class RayTracer;
 
 class Antialiaser {
  public:
-  Antialiaser(const RayTracer* rt_, const Image* image_, double dist=.02)
-      : rt(rt_), image(image_), maxDistance(dist) {}
+  Antialiaser(const RayTracer* rt_, const Image* image_,
+              double tol=.02, int depth=1)
+              : rt(rt_), image(image_), tolerance(tol), maxDepth(depth) {}
   Colour antialias(unsigned x, unsigned y) const;
 
  private:
   const RayTracer* const rt;
   const Image* const image;
-  const double maxDistance;
-  const int maxDepth = 0;
+  const double tolerance;
+  const int maxDepth;
 
   struct Pixel {
     // A pixel consists of a top-left point, a distance and four colours, which

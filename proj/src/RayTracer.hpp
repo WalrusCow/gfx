@@ -26,6 +26,8 @@ class RayTracer {
     bool phongInterpolation = false;
     bool uniformGrid = false;
     uint32_t uniformGridSizeFactor = 8;
+    double aaTolerance = 0.2;
+    int aaDepth = 0;
   };
 
   RayTracer(SceneNode* root_,

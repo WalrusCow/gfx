@@ -16,10 +16,12 @@ int main(int argc, char** argv) {
   auto printUsage = [&] () {
     std::cerr
       << "Usage: " << argv[0] << " file [-t threads] [-p] [-g]"
-      << std::endl
-      << "\t-p:  Use phong interpolation" << std::endl
-      << "\t-g:  Use a uniform grid structure" << std::endl
-      << "\t-u:  SeSet uniform grid size factor. Default 8." << std::endl;
+      << "\t-t:  Number of threads to use. Default is 4." << std::endl
+      << "\t-p:  Use phong interpolation." << std::endl
+      << "\t-g:  Use a uniform grid structure." << std::endl
+      << "\t-u:  Uniform grid size factor. Default 8." << std::endl
+      << "\t-a:  Antialiasing tolerance (as a percent)." << std::endl
+      << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl;
   };
 
   if (argc < 2) {
@@ -33,6 +35,8 @@ int main(int argc, char** argv) {
     {'p', {false}},
     {'g', {false}},
     {'u', {true}},
+    {'a', {true}},
+    {'d', {true}},
   };
 
   std::set<char> flags;
@@ -122,6 +126,19 @@ int main(int argc, char** argv) {
       rayTracerOptions.uniformGridSizeFactor = constant;
       break;
       }
+    case 'a':
+      {
+      double tolerance = std::stod(arg.second);
+      if (tolerance <= 0) {
+        std::cerr << "Invalid tolerance: " << tolerance << std::endl;
+        printUsage();
+      }
+      rayTracerOptions.aaTolerance = tolerance;
+      break;
+      }
+    case 'd':
+      rayTracerOptions.aaDepth = std::stoi(arg.second);
+      break;
     }
   }
 
