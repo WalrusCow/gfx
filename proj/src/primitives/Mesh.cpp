@@ -1,5 +1,6 @@
 #include "Mesh.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <set>
@@ -82,8 +83,19 @@ bool Mesh::faceIntersection(
     norm = interpolatedNormal(face, planePt);
   }
 
+  double xp = -1;
+  double yp = -1;
+  getXYPercent(face, planePt, &xp, &yp);
   // Update if this is a better t value
-  return hitRecord->update(norm, planePt, t);
+  return hitRecord->update(norm, planePt, t, xp, yp);
+}
+
+void Mesh::getXYPercent(
+    const Mesh::Face& face, const Point3D& pt, double* xp, double* yp) const {
+  Point3D rectPoint = face.toZAxis * pt;
+  const auto k = rectPoint - face.rectStart;
+  *xp = k[0] / face.rectSize[0];
+  *yp = k[1] / face.rectSize[1];
 }
 
 bool Mesh::intersects(const Ray& ray,
@@ -183,10 +195,54 @@ std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
     // Norm for whole face (used sometimes)
     const auto norm = (p1 - p0).cross(p2 - p0);
 
-    faces.emplace_back(std::move(vertices), norm);
+    auto toZ = rotateToZAxis(norm);
+    auto p0Z = toZ * p0;
+    Point3D minPoint(p0Z[0], p0Z[1], p0Z[2]);
+    Point3D maxPoint(minPoint);
+    for (const auto& fv : vertices) {
+      auto v = toZ * fv.vertex();
+      for (int i = 0; i < 2; ++i) {
+        minPoint[i] = std::min(v[i], minPoint[i]);
+        maxPoint[i] = std::max(v[i], maxPoint[i]);
+      }
+    }
+
+    // Get the rotation matrix and etc
+    faces.emplace_back(
+        std::move(vertices), norm,
+        std::move(toZ), std::move(minPoint), maxPoint - minPoint);
   }
 
   return faces;
+}
+
+// Return a matrix to rotate the given vector to the *positive* z axis.
+Matrix4x4 Mesh::rotateToZAxis(const Vector3D& n) const {
+  Matrix4x4 mat;
+  if (isZero(n[0]) && isZero(n[1])) {
+    // Both x and y are zero. Nothing to do
+    mat = Matrix4x4();
+  }
+  else if (isZero(n[0])) {
+    // X is zero (and Y is not): We are on the yz plane
+    // All we need to do is rotate around X to get z = 0
+    mat = xRotationMatrix(std::atan(-n[2] / n[1]));
+  }
+  else {
+    // We know that x is not zero, so we can rotate to the xz plane around z
+    mat = zRotationMatrix(std::atan(-n[1] / n[0]));
+    auto m = mat * n;
+    // Now m is on the xz plane, so we need to rotate about y to get z = 0
+    mat = yRotationMatrix(std::atan(-m[2] / m[0])) * mat;
+  }
+
+  Vector3D newN = mat * n;
+  if (newN[2] < 0) {
+    // Currently pointing backwards, so flip around y
+    mat = yRotationMatrix(M_PI) * mat;
+  }
+  std::cerr << "Got the matrix:\n"<<mat<<"\nand product:\n"<<mat*n<<std::endl;
+  return mat;
 }
 
 std::vector<Vector3D> Mesh::getNormals(std::vector<Vector3D>&& normals_) const {
@@ -226,35 +282,6 @@ const Vector3D& Mesh::FaceVertex::normal() const {
 
 int Mesh::FaceVertex::vertexId() const {
   return m_vertex;
-}
-
-std::ostream& operator<<(std::ostream& out, const Mesh& mesh) {
-  out << "mesh({";
-  auto i = 0;
-  for (const auto& vert : mesh.m_verts) {
-    if (i++)
-      out << ",\n      ";
-    out << vert;
-  }
-  out << "},\n\n     {";
-
-  i = 0;
-  for (const auto& face : mesh.m_faces) {
-    if (i++)
-      out << ",\n      ";
-    out << "[";
-
-    auto j = 0;
-    for (const auto& val : face.vertices) {
-      if (j++)
-        out << ", ";
-      out << val.vertex();
-    }
-    out << "]";
-  }
-
-  out << "});" << std::endl;
-  return out;
 }
 
 Point3D Mesh::getMinPoint(const Matrix4x4& inverseTransform) const {

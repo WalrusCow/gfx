@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <iosfwd>
 
 #include "algebra.hpp"
 #include "Cube.hpp"
@@ -49,10 +48,20 @@ class Mesh : public Primitive {
   };
 
   struct Face {
-    Face(std::vector<FaceVertex>&& vertices_, const Vector3D& normal_)
-        : vertices(std::move(vertices_)), normal(normal_) {}
+    Face(std::vector<FaceVertex>&& vertices_, const Vector3D& normal_,
+         Matrix4x4&& toZAxis_, Point3D&& rectStart_, Vector3D&& rectSize_)
+        : vertices(std::move(vertices_)), normal(normal_),
+          toZAxis(std::move(toZAxis_)), rectStart(std::move(rectStart_)),
+          rectSize(std::move(rectSize_)) {}
     const std::vector<FaceVertex> vertices;
     const Vector3D normal;
+
+    // Info for texture mapping. How to get a percentage of (x, y) in the
+    // containing rectangle of this polygon.
+    const Matrix4x4 toZAxis;
+    // These are kept as 3D b/c of better support, but are really 2D
+    const Point3D rectStart;
+    const Vector3D rectSize;
   };
 
   const std::vector<Point3D> m_verts;
@@ -62,7 +71,6 @@ class Mesh : public Primitive {
   Cube boundingCube;
   Matrix4x4 boundingCubeInverse;
 
-  friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
   bool faceIntersection(
       const Ray& ray, HitRecord* hitRecord, const Face& face) const;
 
@@ -70,4 +78,7 @@ class Mesh : public Primitive {
   std::vector<Vector3D> getNormals(std::vector<Vector3D>&& normals) const;
 
   Vector3D interpolatedNormal(const Face& face, const Point3D& pt) const;
+  void getXYPercent(
+      const Face& face, const Point3D& pt, double* xp, double* yp) const;
+  Matrix4x4 rotateToZAxis(const Vector3D& n) const;
 };
