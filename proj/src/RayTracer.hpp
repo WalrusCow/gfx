@@ -42,7 +42,8 @@ class RayTracer {
   ViewConfig viewConfig;
   Colour ambientColour;
   std::list<Light*> lights;
-  Image image;
+  Image tempImage;
+  Image finalImage;
   Options options;
   PixelTransformer pixelTransformer;
 
@@ -62,8 +63,8 @@ class RayTracer {
   void extractModels(SceneNode* root);
   void extractModels(SceneNode* root, const Matrix4x4& inverse);
 
-  Colour rayColour(const Ray& ray, uint32_t x, uint32_t y);
-  Colour backgroundColour(uint32_t x, uint32_t y);
+  Colour rayColour(const Ray& ray, double x, double y);
+  Colour backgroundColour(double x, double y);
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   // Get the intersection of ray with models. Uses a particular implementation.

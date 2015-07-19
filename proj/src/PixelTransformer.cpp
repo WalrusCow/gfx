@@ -47,6 +47,6 @@ PixelTransformer::PixelTransformer(int width, int height,
   transformMatrix = T2 * R * S * T1;
 }
 
-Point3D PixelTransformer::transform(int x, int y) const {
+Point3D PixelTransformer::transform(double x, double y) const {
   return transformMatrix * Point3D(x, y, 0);
 }

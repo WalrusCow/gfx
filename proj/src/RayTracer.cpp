@@ -24,7 +24,8 @@ RayTracer::RayTracer(SceneNode* root,
     viewConfig(std::move(viewConfig_)),
     ambientColour(std::move(ambient_)),
     lights(std::move(lights_)),
-    image(width_, height_, 3),
+    tempImage(width_ + 1, height_ + 1, 3),
+    finalImage(width_, height_, 3),
     options(options_),
     pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
 
@@ -32,15 +33,13 @@ RayTracer::RayTracer(SceneNode* root,
   Mesh::interpolateNormals = options_.phongInterpolation;
 
   // Initialize image data to black
-  for (uint32_t y = 0; y < imageHeight; ++y) {
-    for (uint32_t x = 0; x < imageWidth; ++x) {
+  for (uint32_t y = 0; y < imageHeight + 1; ++y) {
+    for (uint32_t x = 0; x < imageWidth + 1; ++x) {
       for (auto i = 0; i < 3; ++i)
-        image(x, y, i) = 0;
+        tempImage(x, y, i) = 0;
     }
   }
 
-  // TODO: It would actually be great if we could have this not include
-  // the eye, and instead handle that case in the UniformGrid.
   minPoint = Point3D(1e20, 1e20, 1e20);
   maxPoint = Point3D(-1e20, -1e20, -1e20);
   extractModels(root);
@@ -58,7 +57,7 @@ RayTracer::RayTracer(SceneNode* root,
   }
 }
 
-Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
+Colour RayTracer::rayColour(const Ray& ray, double x, double y) {
   HitRecord hitRecord;
   if (!getIntersection(ray, &hitRecord)) {
     // No intersection - use background colour
@@ -87,7 +86,7 @@ Colour RayTracer::rayColour(const Ray& ray, uint32_t x, uint32_t y) {
   return colour + materialColour * ambientColour;
 }
 
-Colour RayTracer::backgroundColour(uint32_t x, uint32_t y) {
+Colour RayTracer::backgroundColour(double x, double y) {
   (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
@@ -126,9 +125,9 @@ void RayTracer::writePixel(uint32_t x, uint32_t y, const Colour& colour) {
   auto yPx = imageHeight - 1 - (y / options.sampleRateY);
 
   auto pixelColour = colour / (options.sampleRateX * options.sampleRateY);
-  image(xPx, yPx, 0) += pixelColour.R();
-  image(xPx, yPx, 1) += pixelColour.G();
-  image(xPx, yPx, 2) += pixelColour.B();
+  tempImage(xPx, yPx, 0) += pixelColour.R();
+  tempImage(xPx, yPx, 1) += pixelColour.G();
+  tempImage(xPx, yPx, 2) += pixelColour.B();
 }
 
 void RayTracer::render(const std::string& filename) {
@@ -143,7 +142,18 @@ void RayTracer::render(const std::string& filename) {
     thread.join();
   }
 
-  image.savePng(filename);
+  // Now we have the temporary image, we need to get the real deal.
+  // Adaptive anti-aliasing techniques up in this.
+
+  for (unsigned y = 0; y < imageHeight; ++y) {
+    for (unsigned x = 0; x < imageHeight; ++x) {
+      for (int i = 0; i < 3; ++i) {
+        finalImage(x, y, i) = tempImage(x, y, i);
+      }
+    }
+  }
+
+  finalImage.savePng(filename);
 }
 
 void RayTracer::threadWork(uint32_t id) {
