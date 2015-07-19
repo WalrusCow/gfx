@@ -1,6 +1,6 @@
 #include "Antialiaser.hpp"
 
-#include <vector>
+#include <cmath>
 
 #include "image.hpp"
 #include "RayTracer.hpp"
@@ -32,12 +32,15 @@ Colour average(const std::vector<Colour>& colours) {
 
 } // Anonymous
 
-bool Antialiaser::shouldAntialias(const std::vector<Colour>& colours) {
-  return false;
-  for (size_t i = 0; i < colours.size(); ++i) {
-    for (size_t j = i + 1; j < colours.size(); ++j) {
+Colour Antialiaser::Pixel::colour() const {
+  return average(colours);
+}
+
+bool Antialiaser::shouldAntialias(const Antialiaser::Pixel& pixel) const {
+  for (size_t i = 0; i < pixel.colours.size(); ++i) {
+    for (size_t j = i + 1; j < pixel.colours.size(); ++j) {
       // If any pair of colours too far apart then we should antialias
-      if (distance(colours[i], colours[j]) > maxDistance) {
+      if (distance(pixel.colours[i], pixel.colours[j]) > maxDistance) {
         return true;
       }
     }
@@ -46,7 +49,7 @@ bool Antialiaser::shouldAntialias(const std::vector<Colour>& colours) {
   return false;
 }
 
-Colour Antialiaser::antialias(unsigned x, unsigned y) {
+Colour Antialiaser::antialias(unsigned x, unsigned y) const {
   // Antialias it all.
   // First, determine if there is too large a difference
   std::vector<Colour> colours = {
@@ -55,8 +58,41 @@ Colour Antialiaser::antialias(unsigned x, unsigned y) {
     getPixelColour(*image, x, y + 1),
     getPixelColour(*image, x + 1, y + 1),
   };
-  if (!shouldAntialias(colours)) {
-    return average(colours);
+  return getColour(Antialiaser::Pixel(x, y, std::move(colours)));
+}
+
+Colour
+Antialiaser::getColour(const Antialiaser::Pixel& pixel, int depth) const {
+  // Get colour for a pixel
+  if (depth >= maxDepth || !shouldAntialias(pixel)) return pixel.colour();
+
+  // Split into sub-pixels
+  std::vector<Antialiaser::Pixel> subPixels;
+
+  double dist = std::pow(0.5, depth);
+  Colour top = rt->pixelColour(pixel.x + dist, pixel.y);
+  Colour mid = rt->pixelColour(pixel.x + dist, pixel.y + dist);
+  Colour left = rt->pixelColour(pixel.x, pixel.y + dist);
+  Colour right = rt->pixelColour(pixel.x + 2*dist, pixel.y + dist);
+  Colour bottom = rt->pixelColour(pixel.x + dist, pixel.y + 2*dist);
+
+  // Top left
+  subPixels.emplace_back(pixel.x, pixel.y, std::vector<Colour>(
+                         {pixel.colours[0], top, left, mid}));
+  // Top right
+  subPixels.emplace_back(pixel.x + dist, pixel.y, std::vector<Colour>(
+                         {top, pixel.colours[1], top, mid, right}));
+  // Bottom left
+  subPixels.emplace_back(pixel.x, pixel.y + dist, std::vector<Colour>(
+                         {left, mid, pixel.colours[2], bottom}));
+  // Bottom right
+  subPixels.emplace_back(pixel.x + dist, pixel.y + dist, std::vector<Colour>(
+                         {mid, right, bottom, pixel.colours[3]}));
+  // Now we just need to average them all
+  std::vector<Colour> colours;
+  for (const auto& px : subPixels) {
+    colours.emplace_back(getColour(px, depth + 1));
   }
-  return Colour(0, 0, 0);
+
+  return average(colours);
 }

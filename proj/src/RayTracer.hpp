@@ -57,8 +57,8 @@ class RayTracer {
   std::unique_ptr<UniformGrid> uniformGrid = nullptr;
 
   // Account for supersampling
-  uint32_t rayHeight() const { return imageHeight * options.sampleRateY; }
-  uint32_t rayWidth() const { return imageWidth * options.sampleRateX; }
+  uint32_t rayHeight() const { return (imageHeight + 1) * options.sampleRateY; }
+  uint32_t rayWidth() const { return (imageWidth + 1) * options.sampleRateX; }
 
   void threadWork(uint32_t id);
   void extractModels(SceneNode* root);
