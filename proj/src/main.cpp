@@ -15,12 +15,13 @@ struct Argument {
 int main(int argc, char** argv) {
   auto printUsage = [&] () {
     std::cerr
-      << "Usage: " << argv[0] << " file [-t threads] [-p] [-g]"
+      << "Usage: " << argv[0] << " file [-t threads] [-p] [-g] [-u gridfactor] "
+      "[-a tolerance] [-d depth]" << std::endl
       << "\t-t:  Number of threads to use. Default is 4." << std::endl
       << "\t-p:  Use phong interpolation." << std::endl
       << "\t-g:  Use a uniform grid structure." << std::endl
-      << "\t-u:  Uniform grid size factor. Default 8." << std::endl
-      << "\t-a:  Antialiasing tolerance (as a percent)." << std::endl
+      << "\t-u:  Uniform grid size factor. Requires -g. Default 8." << std::endl
+      << "\t-a:  Antialiasing tolerance. Default is 0.2." << std::endl
       << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl;
   };
 
