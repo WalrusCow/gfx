@@ -60,9 +60,24 @@ front:rotate('Y', 180)
 front:scale(roomSize, roomSize, 1)
 
 -- Camera at middle of box opening
-camera = {0, -roomSize/4, 0}
+camera = {0, -roomSize / 4, -1}
 cameraDirection = {0, 0, -1}
 -- Light from the top centre
-topLight = gr.light({0, roomSize / 4 - 0.01, -2 * roomSize}, {1, 1, 1}, {1, 0, 0})
+topLight = gr.light({0, roomSize / 4, -2}, {1, 1, 1}, {1, 0, 0})
 -- And light from the camera
-cameraLight = gr.light(camera, {0.3, 0.3, 0.3}, {1, 0, 0})
+--cameraLight = gr.light(camera, {0.3, 0.3, 0.3}, {1, 0, 0})
+cameraLight = gr.light(camera, {1, 1, 1}, {1, 0, 0})
+
+EP = 1
+LEFT = -roomSize / 2 + EP
+RIGHT = roomSize / 2 - EP
+TOP = roomSize / 2 - EP
+BACK = -4 * roomSize + EP
+FRONT = -EP
+
+backTopLeft = gr.light({LEFT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
+backTopRight = gr.light({RIGHT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
+frontTopLeft = gr.light({LEFT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
+frontTopRight = gr.light({RIGHT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
+
+roomLights = {backTopLeft, backTopRight, frontTopLeft, frontTopRight}
