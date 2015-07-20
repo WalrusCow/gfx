@@ -66,7 +66,11 @@ RayTracer::RayTracer(SceneNode* root,
   threadPercents.reserve(options.threadCount + 1);
 }
 
-Colour RayTracer::rayColour(const Ray& ray, double x, double y) const {
+Colour RayTracer::rayColour(
+    const Ray& ray, double x, double y, size_t reflDepth) const {
+  // TODO: Make this not a hack
+  if (reflDepth >= 2) return Colour(0, 0, 0);
+
   HitRecord hitRecord;
   if (!getIntersection(ray, &hitRecord)) {
     // No intersection - use background colour
@@ -96,10 +100,19 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y) const {
     }
   }
 
+  if (material->isSpecular() && reflDepth < 1) {
+    // There will be some amount of specular reflection going on
+    auto reflDir = reflect(direction, hitRecord.norm);
+    Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
+    auto reflectedColour = rayColour(reflectedRay, x, y, reflDepth + 1);
+    colour = colour + material->specularColour() * reflectedColour;
+  }
+
   return colour + materialColour * ambientColour;
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {
+  return Colour(0.2, 0.2, 0.2);
   (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
@@ -234,9 +247,12 @@ void RayTracer::showThreadProgress(uint32_t id, double percent) {
   threadPercents[id] = percent;
   std::string progressBar = "[" + getProgressBar(percent, 20) + "]";
   progressMutex.lock();
-  for (size_t i = 1; i <= options.threadCount; ++i) {
-    std::cerr << ERASE_LINE << UP_ONE;
+  if (!firstPrint) {
+    for (size_t i = 1; i <= options.threadCount; ++i) {
+      std::cerr << ERASE_LINE << UP_ONE;
+    }
   }
+  firstPrint = false;
   for (size_t i = 1; i <= options.threadCount; ++i) {
     size_t displayPercent = (size_t) (100 * threadPercents[i]);
     std::cerr << "Thread " << std::setfill(' ') << std::setw(2) << i << ": "
@@ -256,4 +272,8 @@ std::string RayTracer::getProgressBar(double percent, size_t len) const {
     s += " ";
   }
   return s;
+}
+
+Vector3D RayTracer::reflect(const Vector3D& dir, const Vector3D& norm) const {
+  return dir - (2 * norm.dot(dir)) * norm;
 }

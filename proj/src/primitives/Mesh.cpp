@@ -241,7 +241,7 @@ Matrix4x4 Mesh::rotateToZAxis(const Vector3D& n) const {
     // Currently pointing backwards, so flip around y
     mat = yRotationMatrix(M_PI) * mat;
   }
-  std::cerr << "Got the matrix:\n"<<mat<<"\nand product:\n"<<mat*n<<std::endl;
+  //std::cerr << "Got the matrix:\n"<<mat<<"\nand product:\n"<<mat*n<<std::endl;
   return mat;
 }
 

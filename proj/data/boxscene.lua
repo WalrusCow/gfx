@@ -7,6 +7,7 @@ green = gr.material({0, 1, 0}, {0, 0, 0}, 1)
 blue = gr.material({0, 0, 1}, {0, 0, 0}, 1)
 white = gr.material({1, 1, 1}, {0, 0, 0}, 1)
 black = gr.material({0, 0, 0}, {0, 0, 0}, 1)
+purple = gr.material({0.6, 0, 0.6}, {0, 0, 0}, 15)
 
 roomSize = 10
 
@@ -46,8 +47,16 @@ roof:translate(0, roomSize, -roomSize)
 roof:rotate('X', 90)
 roof:scale(roomSize, roomSize, 1)
 
+--front = gr.mesh('front', readobj('mymesh.obj'))
+--boxParent:add_child(front)
+--front:set_material(purple)
+--front:translate(roomSize, 0, 0)
+--front:rotate('Y', 180)
+--front:scale(roomSize, roomSize, 1)
+
 -- Camera at middle of box opening
 camera = {0, 0, roomSize}
+cameraDirection = {0, 0, -1}
 -- Light from the top centre
 topLight = gr.light({0, roomSize / 4 - 0.01, 0}, {1, 1, 1}, {1, 0, 0})
 -- And light from the camera

@@ -18,6 +18,8 @@ class Material {
                      const Point3D& lightPosition, // Position on light
                      const Light& light, // Light to light with
                      const HitRecord& hitRecord) const;
+  bool isSpecular() const;
+  Colour specularColour() const;
 
  protected:
   virtual Colour getKd(const HitRecord& hitRecord) const = 0;

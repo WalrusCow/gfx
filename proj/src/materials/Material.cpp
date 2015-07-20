@@ -38,3 +38,11 @@ Colour Material::lightColour(const Colour& colour,
 
   return phi * lightColour * atten;
 }
+
+bool Material::isSpecular() const {
+  return ks.R() > 0 || ks.G() > 0 || ks.B() > 0;
+}
+
+Colour Material::specularColour() const {
+  return ks;
+};

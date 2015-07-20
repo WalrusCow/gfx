@@ -19,7 +19,8 @@ Class to display multithreading progress.
 Soft shadows + area lights
 ==========================
 
-Could possibly have better sampling.
+Could possibly have better sampling (uniform & deterministic?)
+Use a model for area lights so that they show up in the scene
 
 Primitives (Torus & Cylinder)
 =============================
