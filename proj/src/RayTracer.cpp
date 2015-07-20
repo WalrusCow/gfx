@@ -44,12 +44,13 @@ RayTracer::RayTracer(SceneNode* root,
   maxPoint = Point3D(-1e20, -1e20, -1e20);
   extractModels(root);
 
-  for (Light* light : lights) {
-    extremize(&minPoint, light->position,
-              [] (double a, double b) { return std::min(a,b); });
-    extremize(&maxPoint, light->position,
-              [] (double a, double b) { return std::max(a,b); });
-  }
+  // Maybe one day, if we decide to use a model for area lights
+  //for (Light* light : lights) {
+  //  extremize(&minPoint, light->position,
+  //            [] (double a, double b) { return std::min(a,b); });
+  //  extremize(&maxPoint, light->position,
+  //            [] (double a, double b) { return std::max(a,b); });
+  //}
 
   if (options.uniformGrid) {
     uniformGrid = std::make_unique<UniformGrid>(
@@ -74,12 +75,14 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y) const {
   Colour materialColour(material->getColour(hitRecord));
 
   for (const auto light : lights) {
-    Ray shadowRay(hitRecord.point, light->position);
-    HitRecord r;
-    if (!getIntersection(shadowRay, &r)) {
-      // Only add from light source if nothing is hit first
-      colour = colour + material->lightColour(
-          materialColour, direction, *light, hitRecord);
+    for (const auto& lightPoint : light->getPoints(1)) {
+      Ray shadowRay(hitRecord.point, lightPoint);
+      HitRecord r;
+      if (!getIntersection(shadowRay, &r)) {
+        // Only add from light source if nothing is hit first
+        colour = colour + material->lightColour(
+            materialColour, direction, lightPoint, *light, hitRecord);
+      }
     }
   }
 

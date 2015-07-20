@@ -15,6 +15,7 @@ class Material {
 
   Colour lightColour(const Colour& colour, // Colour at point
                      const Vector3D& dir, // View direction
+                     const Point3D& lightPosition, // Position on light
                      const Light& light, // Light to light with
                      const HitRecord& hitRecord) const;
 

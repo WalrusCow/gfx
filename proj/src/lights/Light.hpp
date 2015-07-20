@@ -1,12 +1,23 @@
 #pragma once
 
+#include <array>
+
 #include "algebra.hpp"
 
 // Represents a simple point light.
-struct Light {
-  Light();
+class Light {
+ public:
+  Light(Colour&& colour_, Point3D&& position_, std::array<double, 3> falloff_);
 
-  Colour colour;
-  Point3D position;
-  double falloff[3];
+  // Return at most n points to use for this light
+  virtual std::vector<Point3D> getPoints(size_t n) const;
+  Colour getColour() const;
+  double getFalloff(double dist) const;
+
+ protected:
+  const Point3D position;
+
+ private:
+  const Colour colour;
+  const std::array<double, 3> falloff;
 };

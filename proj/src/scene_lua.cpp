@@ -322,16 +322,17 @@ int gr_light_cmd(lua_State* L) {
   data->light = 0;
 
 
-  Light l;
-
+  Point3D position;
+  std::array<double, 3> falloff;
   double col[3];
-  get_tuple(L, 1, &l.position[0], 3);
+  get_tuple(L, 1, &position[0], 3);
   get_tuple(L, 2, col, 3);
-  get_tuple(L, 3, l.falloff, 3);
+  get_tuple(L, 3, falloff.data(), 3);
 
-  l.colour = Colour(col[0], col[1], col[2]);
+  Colour colour(col[0], col[1], col[2]);
 
-  data->light = new Light(l);
+  data->light = new Light(
+      std::move(colour), std::move(position), std::move(falloff));
 
   luaL_newmetatable(L, "gr.light");
   lua_setmetatable(L, -2);

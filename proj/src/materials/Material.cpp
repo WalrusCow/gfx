@@ -14,11 +14,12 @@ Colour Material::getColour(const HitRecord& hitRecord) const {
 
 Colour Material::lightColour(const Colour& colour,
                              const Vector3D& dir,
+                             const Point3D& lightPoint,
                              const Light& light,
                              const HitRecord& hitRecord) const {
   // Direction to the light (away from surface)
-  auto lightDir = light.position - hitRecord.point;
-  Colour lightColour = light.colour;
+  auto lightDir = lightPoint - hitRecord.point;
+  Colour lightColour = light.getColour();
 
   auto r = lightDir.length();
   lightDir.normalize();
@@ -32,7 +33,7 @@ Colour Material::lightColour(const Colour& colour,
   specular /= ldotn;
 
   auto phi = colour + ks * specular;
-  auto atten = light.falloff[0] + light.falloff[1]*r + light.falloff[2]*r*r;
+  auto atten = light.getFalloff(r);
   atten = ldotn / atten;
 
   return phi * lightColour * atten;
