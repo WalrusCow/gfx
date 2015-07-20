@@ -100,7 +100,7 @@ Colour RayTracer::rayColour(
     }
   }
 
-  if (material->isSpecular() && reflDepth < 1) {
+  if (material->isSpecular()) {
     // There will be some amount of specular reflection going on
     auto reflDir = reflect(direction, hitRecord.norm);
     Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
@@ -112,7 +112,6 @@ Colour RayTracer::rayColour(
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {
-  return Colour(0.2, 0.2, 0.2);
   (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
