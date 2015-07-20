@@ -91,7 +91,7 @@ Colour RayTracer::rayColour(
     for (const auto& lightPoint : lightPoints) {
       Ray shadowRay(hitRecord.point, lightPoint);
       HitRecord r;
-      if (!getIntersection(shadowRay, &r)) {
+      if (!(getIntersection(shadowRay, &r) && r.t < 1)) {
         // Only add from light source if nothing is hit first
         auto litColour = material->lightColour(
             materialColour, direction, lightPoint, *light, hitRecord);
