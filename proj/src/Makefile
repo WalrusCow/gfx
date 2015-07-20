@@ -22,3 +22,12 @@ $(MAIN): $(OBJECTS)
 %.o: %.cpp
 	@echo Compiling $<...
 	@$(CXX) -o $@ -c $(CXXFLAGS) $<
+
+depend: .depend
+
+.depend: $(SRCS)
+	touch ./.depend
+	rm -f ./.depend
+	$(CC) $(CFLAGS) -MM $^>>./.depend
+
+include .depend
