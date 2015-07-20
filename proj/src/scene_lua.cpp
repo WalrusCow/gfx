@@ -44,6 +44,7 @@
 #include <vector>
 
 #include "lua488.hpp"
+#include "lights/AreaLight.hpp"
 #include "lights/Light.hpp"
 #include "materials/ColourMaterial.hpp"
 #include "materials/FunctionMaterial.hpp"
@@ -308,6 +309,35 @@ int gr_mesh_cmd(lua_State* L) {
   data->node = new GeometryNode(name, mesh);
 
   luaL_getmetatable(L, "gr.node");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Make a point light
+extern "C"
+int gr_area_light_cmd(lua_State* L) {
+  GRLUA_DEBUG_CALL;
+
+  gr_light_ud* data = (gr_light_ud*)lua_newuserdata(L, sizeof(gr_light_ud));
+  data->light = 0;
+
+  double radius = luaL_checknumber(L, 1);
+
+  Point3D position;
+  std::array<double, 3> falloff;
+  double col[3];
+  get_tuple(L, 2, &position[0], 3);
+  get_tuple(L, 3, col, 3);
+  get_tuple(L, 4, falloff.data(), 3);
+
+  Colour colour(col[0], col[1], col[2]);
+
+  data->light = new AreaLight(
+      radius,
+      std::move(colour), std::move(position), std::move(falloff));
+
+  luaL_newmetatable(L, "gr.light");
   lua_setmetatable(L, -2);
 
   return 1;
@@ -611,6 +641,7 @@ static const luaL_reg grlib_functions[] = {
   {"torus", gr_torus_cmd},
 
   {"light", gr_light_cmd},
+  {"area_light", gr_area_light_cmd},
   {"render", gr_render_cmd},
   {0, 0}
 };
