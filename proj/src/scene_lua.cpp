@@ -44,7 +44,7 @@
 #include <vector>
 
 #include "lua488.hpp"
-#include "light.hpp"
+#include "lights/Light.hpp"
 #include "materials/ColourMaterial.hpp"
 #include "materials/FunctionMaterial.hpp"
 #include "materials/TextureMaterial.hpp"

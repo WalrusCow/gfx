@@ -7,7 +7,6 @@
 
 #include "Antialiaser.hpp"
 #include "image.hpp"
-#include "light.hpp"
 #include "scene.hpp"
 #include "HitRecord.hpp"
 #include "PixelTransformer.hpp"

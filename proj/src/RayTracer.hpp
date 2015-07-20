@@ -7,7 +7,7 @@
 
 #include "algebra.hpp"
 #include "image.hpp"
-#include "light.hpp"
+#include "lights/Light.hpp"
 #include "Model.hpp"
 #include "PixelTransformer.hpp"
 #include "Ray.hpp"

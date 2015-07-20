@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include "light.hpp"
+#include "lights/Light.hpp"
 #include "HitRecord.hpp"
 
 Material::Material(const Colour& ks_, double shininess_)

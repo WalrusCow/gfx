@@ -1,4 +1,4 @@
-SOURCES = $(wildcard *.cpp primitives/*.cpp materials/*.cpp)
+SOURCES = $(wildcard *.cpp primitives/*.cpp materials/*.cpp lights/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 LDFLAGS = $(shell pkg-config --libs lua5.1) -llua5.1 -lpng -lpthread

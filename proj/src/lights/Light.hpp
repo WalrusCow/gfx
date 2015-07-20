@@ -1,7 +1,6 @@
 #pragma once
 
 #include "algebra.hpp"
-#include <iosfwd>
 
 // Represents a simple point light.
 struct Light {
@@ -11,5 +10,3 @@ struct Light {
   Point3D position;
   double falloff[3];
 };
-
-std::ostream& operator<<(std::ostream& out, const Light& l);
