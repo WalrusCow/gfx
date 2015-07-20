@@ -22,7 +22,8 @@ int main(int argc, char** argv) {
       << "\t-g:  Use a uniform grid structure." << std::endl
       << "\t-u:  Uniform grid size factor. Requires -g. Default 8." << std::endl
       << "\t-a:  Antialiasing tolerance. Default is 0.2." << std::endl
-      << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl;
+      << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl
+      << "\t-s:  Soft shadow sample count. Use 1 to disable." << std::endl;
   };
 
   if (argc < 2) {
@@ -38,6 +39,7 @@ int main(int argc, char** argv) {
     {'u', {true}},
     {'a', {true}},
     {'d', {true}},
+    {'s', {true}},
   };
 
   std::set<char> flags;
@@ -139,6 +141,9 @@ int main(int argc, char** argv) {
       }
     case 'd':
       rayTracerOptions.aaDepth = std::stoi(arg.second);
+      break;
+    case 's':
+      rayTracerOptions.shadowSamples = std::stoul(arg.second);
       break;
     }
   }

@@ -28,6 +28,7 @@ class RayTracer {
     uint32_t uniformGridSizeFactor = 8;
     double aaTolerance = 0.2;
     int aaDepth = 0;
+    size_t shadowSamples = 1;
   };
 
   RayTracer(SceneNode* root_,
