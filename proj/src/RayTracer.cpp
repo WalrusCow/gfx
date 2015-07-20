@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <thread>
 
 #include "Antialiaser.hpp"
@@ -13,6 +14,12 @@
 #include "primitives/Mesh.hpp"
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
+
+namespace {
+const std::string ESC = "\x1b";
+const std::string UP_ONE = ESC + "[1A";
+const std::string ERASE_LINE = ESC + "[2K";
+} // Anonymous
 
 RayTracer::RayTracer(SceneNode* root,
                      uint32_t width_, uint32_t height_,
@@ -56,6 +63,7 @@ RayTracer::RayTracer(SceneNode* root,
     uniformGrid = std::make_unique<UniformGrid>(
         models, minPoint, maxPoint, options.uniformGridSizeFactor);
   }
+  threadPercents.reserve(options.threadCount + 1);
 }
 
 Colour RayTracer::rayColour(const Ray& ray, double x, double y) const {
@@ -138,7 +146,7 @@ void RayTracer::writePixel(uint32_t x, uint32_t y, const Colour& colour) {
 void RayTracer::render(const std::string& filename) {
   // Threading
   std::list<std::thread> threads;
-  for (uint32_t id = 0; id < options.threadCount; ++id) {
+  for (uint32_t id = 1; id <= options.threadCount; ++id) {
     threads.emplace_back(&RayTracer::threadWork, this, id);
   }
 
@@ -182,6 +190,7 @@ void RayTracer::threadWork(uint32_t id) {
     for (uint32_t x = (y + id) % options.threadCount; x < w; x += threadCount) {
       writePixel(x, y, pixelColour(x, y));
     }
+    showThreadProgress(id, (y + 1) / (double) h);
   }
 }
 
@@ -218,4 +227,33 @@ void RayTracer::extremize(Point3D* dest, const Point3D& data,
   (*dest)[0] = extreme((*dest)[0], data[0]);
   (*dest)[1] = extreme((*dest)[1], data[1]);
   (*dest)[2] = extreme((*dest)[2], data[2]);
+}
+
+void RayTracer::showThreadProgress(uint32_t id, double percent) {
+  // Lock
+  threadPercents[id] = percent;
+  std::string progressBar = "[" + getProgressBar(percent, 20) + "]";
+  progressMutex.lock();
+  for (size_t i = 1; i <= options.threadCount; ++i) {
+    std::cerr << ERASE_LINE << UP_ONE;
+  }
+  for (size_t i = 1; i <= options.threadCount; ++i) {
+    size_t displayPercent = (size_t) (100 * threadPercents[i]);
+    std::cerr << "Thread " << std::setfill(' ') << std::setw(2) << i << ": "
+              << progressBar << " (" << displayPercent << "%)"
+              << std::endl;
+  }
+  progressMutex.unlock();
+}
+
+std::string RayTracer::getProgressBar(double percent, size_t len) const {
+  std::string s("");
+  size_t fillCount = len * percent;
+  for (size_t i = 0; i < fillCount; ++i) {
+    s += "=";
+  }
+  for (size_t i = fillCount; i < len; ++i) {
+    s += " ";
+  }
+  return s;
 }

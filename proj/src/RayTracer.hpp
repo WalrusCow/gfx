@@ -3,7 +3,9 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include "algebra.hpp"
 #include "image.hpp"
@@ -87,4 +89,9 @@ class RayTracer {
                      const Point3D& pt,
                      const Vector3D& norm,
                      const Vector3D& dir);
+
+  std::vector<double> threadPercents;
+  std::mutex progressMutex;
+  void showThreadProgress(uint32_t id, double percent);
+  std::string getProgressBar(double percent, size_t len) const;
 };
