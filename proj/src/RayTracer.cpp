@@ -121,11 +121,16 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
   }
 
   if (material->isSpecular()) {
+    Colour reflectedColour(0);
     // There will be some amount of specular reflection going on
-    auto reflDir = reflect(direction, hitRecord.norm);
-    Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
-    auto reflectedColour = rayColour(reflectedRay, x, y, depth + 1,
-                                     rc, refractionIndex);
+    auto reflectedRays = getReflectedRays(direction, hitRecord.norm);
+    double weight = 1 / (double) reflectedRays.size();
+    for (const auto& reflDir : reflectedRays) {
+      Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
+      auto col = rayColour(reflectedRay, x, y, depth + 1,
+                           rc, refractionIndex);
+      reflectedColour = reflectedColour + (weight * col);
+    }
     colour = colour + material->specularColour() * reflectedColour;
   }
 
@@ -340,4 +345,13 @@ Vector3D RayTracer::refract(const Vector3D& in, const Vector3D& norm,
   auto k = 1 - (ratio * ratio) * (1 - (dot * dot));
   if (k < 0) return Vector3D(0, 0, 0);
   return (-ratio * dot - std::sqrt(k)) * norm + (ratio * in);
+}
+
+std::vector<Vector3D> RayTracer::getReflectedRays(
+    const Vector3D& dir, const Vector3D& norm) const {
+  if (options.glossyReflection <= 1) {
+    // No glossy reflection
+    return {reflect(dir, norm)};
+  }
+  return {};
 }

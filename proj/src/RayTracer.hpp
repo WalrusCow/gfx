@@ -32,6 +32,7 @@ class RayTracer {
     int aaDepth = 0;
     size_t shadowSamples = 1;
     size_t recursiveDepthLimit = 4;
+    size_t glossyReflection = 1;
   };
 
   RayTracer(SceneNode* root_,
@@ -79,6 +80,9 @@ class RayTracer {
   Vector3D refract(const Vector3D& in, const Vector3D& norm,
                    double ni, double nt) const;
 
+  std::vector<Vector3D> getReflectedRays(
+      const Vector3D& dir, const Vector3D& norm) const;
+
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   // Get the intersection of ray with models. Uses a particular implementation.
   bool getIntersection(const Ray& ray, HitRecord* hitRecord) const;
@@ -91,11 +95,6 @@ class RayTracer {
   // according to the given function
   void extremize(Point3D* dest, const Point3D& data,
                  std::function<double(double, double)> extreme) const;
-
-  Colour phongColour(const Light& light,
-                     const Point3D& pt,
-                     const Vector3D& norm,
-                     const Vector3D& dir);
 
   std::vector<double> threadPercents;
   std::mutex progressMutex;
