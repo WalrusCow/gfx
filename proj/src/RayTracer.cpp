@@ -76,7 +76,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
                             size_t depth, const Colour& rc,
                             double refractionIndex) const {
   // TODO: Make this not a hack
-  if (depth >= 4) return Colour(0, 0, 0);
+  if (depth >= options.recursiveDepthLimit) return Colour(0, 0, 0);
   // TODO: Same with this...
   if (colourSize(rc) < 0.2) {
     return Colour(0, 0, 0);
