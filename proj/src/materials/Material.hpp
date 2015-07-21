@@ -8,7 +8,7 @@ class Light;
 // It's a phong material kind of world
 class Material {
  public:
-  Material(const Colour& ks, double shininess);
+  Material(const Colour& ks_, double shininess_, double alpha_);
   virtual ~Material() = default;
 
   Colour getColour(const HitRecord& hitRecord) const;
@@ -20,11 +20,13 @@ class Material {
                      const HitRecord& hitRecord) const;
   bool isSpecular() const;
   Colour specularColour() const;
+  double getAlpha() const;
 
  protected:
   virtual Colour getKd(const HitRecord& hitRecord) const = 0;
 
  private:
-  Colour ks;
-  double shininess;
+  const Colour ks;
+  const double shininess;
+  const double alpha;
 };

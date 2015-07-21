@@ -12,7 +12,8 @@ class FunctionMaterial : public Material {
 
   FunctionMaterial(const ColourMap& mapFunction_,
                    const Colour& ks_,
-                   double shininess_);
+                   double shininess_,
+                   double alpha_);
 
   static Colour bwSquares(double xPercent, double yPercent);
   static std::map<std::string, ColourMap> functions;

@@ -1,8 +1,8 @@
-mat1 = gr.material({0.7, 0.45, 0.9}, {0.6, 0.6, 0.6}, 10)
-mat2 = gr.material({0.2, 0.49, 0.2}, {0.9, 0.2, 0.1}, 15)
-mat3 = gr.material({0.9, 0.78, 0.35}, {0.6, 0.6, 0.6}, 12)
-mat4 = gr.material({0.7, 0.25, 0.2}, {0.9, 0.9, 0.9}, 22)
-mat5 = gr.material({0.6, 0.1, 0.0}, {0.4, 0.4, 0.4}, 1)
+mat1 = gr.material({0.7, 0.45, 0.9}, {0.6, 0.6, 0.6}, 10, 1)
+mat2 = gr.material({0.2, 0.49, 0.2}, {0.9, 0.2, 0.1}, 15, 1)
+mat3 = gr.material({0.9, 0.78, 0.35}, {0.6, 0.6, 0.6}, 12, 1)
+mat4 = gr.material({0.7, 0.25, 0.2}, {0.9, 0.9, 0.9}, 22, 1)
+mat5 = gr.material({0.6, 0.1, 0.0}, {0.4, 0.4, 0.4}, 1, 1)
 mats = {mat1, mat2, mat3, mat4, mat5}
 
 root = gr.node('root')
@@ -92,7 +92,7 @@ plane = gr.mesh('plane', {
 }, {}, {
   {{3}, {2}, {1}, {0}}
 })
-planeMat = gr.material({1, 0.45, 0.0}, {0,0,0}, 1)
+planeMat = gr.material({1, 0.45, 0.0}, {0,0,0}, 1, 1)
 plane:rotate('x', 15)
 plane:set_material(planeMat)
 plane:translate(0, -25, 0)

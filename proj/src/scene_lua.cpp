@@ -431,10 +431,11 @@ int gr_material_cmd(lua_State* L) {
   get_tuple(L, 2, ks, 3);
 
   double shininess = luaL_checknumber(L, 3);
+  double alpha = luaL_checknumber(L, 4);
 
   data->material = new ColourMaterial(Colour(kd[0], kd[1], kd[2]),
                                       Colour(ks[0], ks[1], ks[2]),
-                                      shininess);
+                                      shininess, alpha);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);
@@ -456,11 +457,12 @@ int gr_texture_material_cmd(lua_State* L) {
   get_tuple(L, 2, ks, 3);
 
   double shininess = luaL_checknumber(L, 3);
+  double alpha = luaL_checknumber(L, 4);
 
-  data->material = new TextureMaterial(
-        filename,
-        Colour(ks[0], ks[1], ks[2]),
-        shininess);
+  data->material = new TextureMaterial(filename,
+                                       Colour(ks[0], ks[1], ks[2]),
+                                       shininess,
+                                       alpha);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);
@@ -482,11 +484,13 @@ int gr_function_material_cmd(lua_State* L) {
   get_tuple(L, 2, ks, 3);
 
   double shininess = luaL_checknumber(L, 3);
+  double alpha = luaL_checknumber(L, 4);
 
   data->material = new FunctionMaterial(
         FunctionMaterial::functions[functionName],
         Colour(ks[0], ks[1], ks[2]),
-        shininess);
+        shininess,
+        alpha);
 
   luaL_newmetatable(L, "gr.material");
   lua_setmetatable(L, -2);

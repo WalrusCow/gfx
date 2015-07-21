@@ -5,8 +5,8 @@
 #include "lights/Light.hpp"
 #include "HitRecord.hpp"
 
-Material::Material(const Colour& ks_, double shininess_)
-    : ks(ks_), shininess(shininess_) {}
+Material::Material(const Colour& ks_, double shininess_, double alpha_)
+    : ks(ks_), shininess(shininess_), alpha(alpha_) {}
 
 Colour Material::getColour(const HitRecord& hitRecord) const {
   return getKd(hitRecord);
@@ -46,3 +46,7 @@ bool Material::isSpecular() const {
 Colour Material::specularColour() const {
   return ks;
 };
+
+double Material::getAlpha() const {
+  return alpha;
+}

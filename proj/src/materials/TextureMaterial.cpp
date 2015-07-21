@@ -5,8 +5,9 @@
 #include "HitRecord.hpp"
 
 TextureMaterial::TextureMaterial(
-    const std::string& filename, const Colour& ks_, double shininess_)
-    : Material(ks_, shininess_), texture(readTexture(filename)) {}
+    const std::string& filename,
+    const Colour& ks_, double shininess_, double alpha_)
+    : Material(ks_, shininess_, alpha_), texture(readTexture(filename)) {}
 
 TextureMaterial::Texture TextureMaterial::readTexture(
     const std::string& filename) const {
