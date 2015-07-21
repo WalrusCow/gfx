@@ -4,6 +4,7 @@
 #include <cmath>
 #include "lights/Light.hpp"
 #include "HitRecord.hpp"
+#include "xform.hpp"
 
 Material::Material(const Colour& ks_, double shininess_,
                    double alpha_, double idx_)
@@ -59,4 +60,19 @@ double Material::getAlpha() const {
 
 double Material::getRefractionIndex() const {
   return refractionIndex;
+}
+
+std::vector<Vector3D> Material::getReflectedRays(
+    const Vector3D& dir, const Vector3D& norm, size_t numRays) const {
+  // Reflected ray
+  auto rr = reflect(dir, norm);
+  if (numRays <= 1) {
+    // No glossy reflection
+    return {rr};
+  }
+
+  // Give several perturbations of the reflected ray
+  for (size_t i = 0; i < numRays; ++i) {
+  }
+  return {};
 }

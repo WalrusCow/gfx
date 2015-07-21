@@ -72,13 +72,10 @@ class RayTracer {
   void extractModels(SceneNode* root, const Matrix4x4& inverse);
 
   Colour rayColour(const Ray& ray, double x, double y,
-                   size_t reflDepth = 0,
+                   size_t depth = 0,
                    const Colour& rc=Colour(1, 1, 1),
                    double refractionIndex = 1) const;
   Colour backgroundColour(double x, double y) const;
-
-  std::vector<Vector3D> getReflectedRays(
-      const Vector3D& dir, const Vector3D& norm) const;
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   // Get the intersection of ray with models. Uses a particular implementation.

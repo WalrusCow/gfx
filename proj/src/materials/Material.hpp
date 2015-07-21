@@ -24,6 +24,9 @@ class Material {
   double getAlpha() const;
   double getRefractionIndex() const;
 
+  std::vector<Vector3D> getReflectedRays(
+      const Vector3D& dir, const Vector3D& norm, size_t numRays) const;
+
  protected:
   virtual Colour getKd(const HitRecord& hitRecord) const = 0;
 

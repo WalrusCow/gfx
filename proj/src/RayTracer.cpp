@@ -68,10 +68,8 @@ RayTracer::RayTracer(SceneNode* root,
 Colour RayTracer::rayColour(const Ray& ray, double x, double y,
                             size_t depth, const Colour& rc,
                             double refractionIndex) const {
-  // TODO: Make this not a hack
-  if (depth >= options.recursiveDepthLimit) return Colour(0, 0, 0);
-  // TODO: Same with this...
-  if (colourSize(rc) < 0.2) {
+  // TODO: Option? Background colour?
+  if (depth >= options.recursiveDepthLimit || colourSize(rc) < 0.2) {
     return Colour(0, 0, 0);
   }
 
@@ -116,13 +114,13 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
   if (material->isSpecular()) {
     Colour reflectedColour(0);
     // There will be some amount of specular reflection going on
-    auto reflectedRays = getReflectedRays(direction, hitRecord.norm);
-    double weight = 1 / (double) reflectedRays.size();
+    auto reflectedRays = material->getReflectedRays(
+        direction, hitRecord.norm, options.glossyReflection);
     for (const auto& reflDir : reflectedRays) {
       Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
       auto col = rayColour(reflectedRay, x, y, depth + 1,
                            rc, refractionIndex);
-      reflectedColour = reflectedColour + (weight * col);
+      reflectedColour = reflectedColour + (col / reflectedRays.size());
     }
     colour = colour + material->specularColour() * reflectedColour;
   }
@@ -325,19 +323,4 @@ std::string RayTracer::getProgressBar(double percent, size_t len) const {
     s += " ";
   }
   return s;
-}
-
-std::vector<Vector3D> RayTracer::getReflectedRays(
-    const Vector3D& dir, const Vector3D& norm) const {
-  // Reflected ray
-  auto rr = reflect(dir, norm);
-  if (options.glossyReflection <= 1) {
-    // No glossy reflection
-    return {rr};
-  }
-
-  // Give several perturbations of the reflected ray
-  for (size_t i = 0; i < options.glossyReflection; ++i) {
-  }
-  return {};
 }
