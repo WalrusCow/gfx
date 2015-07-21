@@ -96,8 +96,10 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
 
   // Norm and incident vector must be in opposite directions. This will happen
   // if the incident vector is coming from "within" or "behind" a surface.
+  bool fromInside = false;
   if (hitRecord.norm.dot(ray.dir) > 0) {
     // TODO: This is also hacky
+    fromInside = true;
     hitRecord.norm = -1 * hitRecord.norm;
   }
 
@@ -134,8 +136,9 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
   if (material->isTransparent()) {
     // We have to cast the tramsmitted ray as well
     // TODO: Refraction
+    auto otherIndex = fromInside ? 1 : material->getRefractionIndex();
     auto refrDir = refract(direction, hitRecord.norm,
-                           refractionIndex, material->getRefractionIndex());
+                           refractionIndex, otherIndex);
 
     Ray transRay(hitRecord.point, hitRecord.point + refrDir);
     // Multiply by proportion that is transmitted
@@ -143,7 +146,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
     // TODO: Use proper index based on whether or not we are now inside
     // the material (i.e. check angle relative to normal)
     transColour = rayColour(transRay, x, y, depth + 1,
-                            transRayColour, refractionIndex);
+                            transRayColour, otherIndex);
   }
 
   return rc * (reflColour + transColour);
