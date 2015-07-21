@@ -16,14 +16,17 @@ int main(int argc, char** argv) {
   auto printUsage = [&] () {
     std::cerr
       << "Usage: " << argv[0] << " file [-t threads] [-p] [-g] [-u gridfactor] "
-      "[-a tolerance] [-d depth]" << std::endl
+      "[-a tolerance] [-d depth] [-s shadows] [-r reflections] [-h help]"
+      << std::endl
+      << "\t-h:  Show this help and exit" << std::endl
       << "\t-t:  Number of threads to use. Default is 4." << std::endl
       << "\t-p:  Use phong interpolation." << std::endl
       << "\t-g:  Use a uniform grid structure." << std::endl
       << "\t-u:  Uniform grid size factor. Requires -g. Default 8." << std::endl
       << "\t-a:  Antialiasing tolerance. Default is 0.2." << std::endl
       << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl
-      << "\t-s:  Soft shadow sample count. Use 1 to disable." << std::endl;
+      << "\t-s:  Soft shadow sample count. Use 1 to disable." << std::endl
+      << "\t-r:  Samples to use for glossy reflection. Use 1 to disable." << std::endl;
   };
 
   if (argc < 2) {
@@ -33,13 +36,15 @@ int main(int argc, char** argv) {
   }
 
   std::map<char, Argument> argMap = {
-    {'t', {true}},
     {'p', {false}},
     {'g', {false}},
+    {'h', {false}},
+    {'t', {true}},
     {'u', {true}},
     {'a', {true}},
     {'d', {true}},
     {'s', {true}},
+    {'r', {true}},
   };
 
   std::set<char> flags;
@@ -102,6 +107,9 @@ int main(int argc, char** argv) {
     case 'g':
       rayTracerOptions.uniformGrid = true;
       break;
+    case 'h':
+      printUsage();
+      return 1;
     }
   }
 
@@ -144,6 +152,9 @@ int main(int argc, char** argv) {
       break;
     case 's':
       rayTracerOptions.shadowSamples = std::stoul(arg.second);
+      break;
+    case 'r':
+      rayTracerOptions.glossyReflection = std::stoul(arg.second);
       break;
     }
   }
