@@ -5,7 +5,7 @@ scene = gr.node('scene')
 grey = gr.material({0.2, 0.2, 0.2}, {0, 0, 0}, 0, 1)
 bw = gr.function_material("bw_squares", {0, 0, 0}, 25, 1)
 bluegreen = gr.function_material("blue_green_squares", {0, 0, 0}, 25, 1)
-mirror = gr.material({.1, .1, .1}, {0.6, 0.6, 0.6}, 1000, 1)
+mirror = gr.material({.1, .1, .1}, {0.6, 0.6, 0.6}, 1e10, 1)
 
 back = gr.mesh('back', readobj('mymesh.obj'))
 back:translate(-10, -10, -20)
