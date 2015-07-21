@@ -80,5 +80,4 @@ class Mesh : public Primitive {
   Vector3D interpolatedNormal(const Face& face, const Point3D& pt) const;
   void getXYPercent(
       const Face& face, const Point3D& pt, double* xp, double* yp) const;
-  Matrix4x4 rotateToZAxis(const Vector3D& n) const;
 };

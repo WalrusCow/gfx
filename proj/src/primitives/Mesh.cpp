@@ -194,8 +194,11 @@ std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
     const auto& p2 = vertices.back().vertex();
     // Norm for whole face (used sometimes)
     const auto norm = (p1 - p0).cross(p2 - p0);
+    Vector3D nn = norm;
+    nn.normalize();
 
-    auto toZ = rotateToZAxis(norm);
+    auto toZ = toZAxis(nn);
+    std::cerr << "Rotating norm " << nn << " to z axis: " << toZ*nn<<std::endl;
     auto p0Z = toZ * p0;
     Point3D minPoint(p0Z[0], p0Z[1], p0Z[2]);
     Point3D maxPoint(minPoint);
@@ -214,35 +217,6 @@ std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
   }
 
   return faces;
-}
-
-// Return a matrix to rotate the given vector to the *positive* z axis.
-Matrix4x4 Mesh::rotateToZAxis(const Vector3D& n) const {
-  Matrix4x4 mat;
-  if (isZero(n[0]) && isZero(n[1])) {
-    // Both x and y are zero. Nothing to do
-    mat = Matrix4x4();
-  }
-  else if (isZero(n[0])) {
-    // X is zero (and Y is not): We are on the yz plane
-    // All we need to do is rotate around X to get z = 0
-    mat = xRotationMatrix(std::atan(-n[2] / n[1]));
-  }
-  else {
-    // We know that x is not zero, so we can rotate to the xz plane around z
-    mat = zRotationMatrix(std::atan(-n[1] / n[0]));
-    auto m = mat * n;
-    // Now m is on the xz plane, so we need to rotate about y to get z = 0
-    mat = yRotationMatrix(std::atan(-m[2] / m[0])) * mat;
-  }
-
-  Vector3D newN = mat * n;
-  if (newN[2] < 0) {
-    // Currently pointing backwards, so flip around y
-    mat = yRotationMatrix(M_PI) * mat;
-  }
-  //std::cerr << "Got the matrix:\n"<<mat<<"\nand product:\n"<<mat*n<<std::endl;
-  return mat;
 }
 
 std::vector<Vector3D> Mesh::getNormals(std::vector<Vector3D>&& normals_) const {

@@ -55,3 +55,12 @@ Matrix4x4 translationMatrix(double x, double y, double z) {
       Vector4D(0, 0, 0, 1)
   );
 }
+
+Matrix4x4 toZAxis(const Vector3D& unitV) {
+  // We know that x is not zero, so we can rotate to the xz plane around z
+  Matrix4x4 mat = zRotationMatrix(std::atan2(-unitV[1],  unitV[0]));
+  auto m = mat * unitV;
+  // Now m is on the xz plane, so we need to rotate about y to get z = 0
+  mat = yRotationMatrix(std::atan2(-m[0], m[2])) * mat;
+  return mat;
+}
