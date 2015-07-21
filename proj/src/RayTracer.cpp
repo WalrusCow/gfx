@@ -69,7 +69,7 @@ RayTracer::RayTracer(SceneNode* root,
     uniformGrid = std::make_unique<UniformGrid>(
         models, minPoint, maxPoint, options.uniformGridSizeFactor);
   }
-  threadPercents.reserve(options.threadCount + 1);
+  threadPercents.resize(options.threadCount + 1);
 }
 
 Colour RayTracer::rayColour(const Ray& ray, double x, double y,
@@ -213,6 +213,7 @@ void RayTracer::render(const std::string& filename) {
   Antialiaser antialiaser(this, &tempImage,
                           options.aaTolerance, options.aaDepth);
 
+  // Also need to show progress here.
   for (unsigned y = 0; y < imageHeight; ++y) {
     for (unsigned x = 0; x < imageHeight; ++x) {
       Colour finalColour = antialiaser.antialias(x, y);
@@ -221,6 +222,7 @@ void RayTracer::render(const std::string& filename) {
       finalImage(x, y, 1) = finalColour.G();
       finalImage(x, y, 2) = finalColour.B();
     }
+    showProgress("Antialiasing:", (y + 1) / (double) imageHeight);
   }
 
   finalImage.savePng(filename);
@@ -282,11 +284,23 @@ void RayTracer::extremize(Point3D* dest, const Point3D& data,
   (*dest)[2] = extreme((*dest)[2], data[2]);
 }
 
+void RayTracer::showProgress(const std::string& msg, double percent) const {
+  static bool first = true;
+  auto bar = "[" + getProgressBar(percent, 20) + "]";
+  if (!first) {
+    std::cerr << ERASE_LINE << UP_ONE;
+  }
+  first = false;
+
+  size_t displayPercent = (size_t) (100 * percent);
+  std::cerr << msg << " " << bar << " (" << displayPercent << "%)" << std::endl;
+}
+
 void RayTracer::showThreadProgress(uint32_t id, double percent) {
   // Lock
-  threadPercents[id] = percent;
-  std::string progressBar = "[" + getProgressBar(percent, 20) + "]";
   progressMutex.lock();
+  static bool firstPrint = true;
+  threadPercents[id] = percent;
   if (!firstPrint) {
     for (size_t i = 1; i <= options.threadCount; ++i) {
       std::cerr << ERASE_LINE << UP_ONE;
@@ -294,6 +308,7 @@ void RayTracer::showThreadProgress(uint32_t id, double percent) {
   }
   firstPrint = false;
   for (size_t i = 1; i <= options.threadCount; ++i) {
+    std::string progressBar = "[" + getProgressBar(threadPercents[i], 20) + "]";
     size_t displayPercent = (size_t) (100 * threadPercents[i]);
     std::cerr << "Thread " << std::setfill(' ') << std::setw(2) << i << ": "
               << progressBar << " (" << displayPercent << "%)"

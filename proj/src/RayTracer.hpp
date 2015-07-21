@@ -98,7 +98,7 @@ class RayTracer {
 
   std::vector<double> threadPercents;
   std::mutex progressMutex;
+  void showProgress(const std::string& msg, double percent) const;
   void showThreadProgress(uint32_t id, double percent);
   std::string getProgressBar(double percent, size_t len) const;
-  bool firstPrint = true;
 };
