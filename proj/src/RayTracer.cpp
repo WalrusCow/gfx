@@ -19,6 +19,11 @@ namespace {
 const std::string ESC = "\x1b";
 const std::string UP_ONE = ESC + "[1A";
 const std::string ERASE_LINE = ESC + "[2K";
+
+double colourSize(const Colour& c) {
+  return std::sqrt(c.R()*c.R() + c.B()*c.B() + c.G()*c.G());
+}
+
 } // Anonymous
 
 RayTracer::RayTracer(SceneNode* root,
@@ -66,10 +71,14 @@ RayTracer::RayTracer(SceneNode* root,
   threadPercents.reserve(options.threadCount + 1);
 }
 
-Colour RayTracer::rayColour(
-    const Ray& ray, double x, double y, size_t reflDepth) const {
+Colour RayTracer::rayColour(const Ray& ray, double x, double y,
+                            size_t reflDepth, const Colour& rc) const {
   // TODO: Make this not a hack
   if (reflDepth >= 2) return Colour(0, 0, 0);
+  // TODO: Same with this...
+  if (colourSize(rc) < 0.2) {
+    return Colour(0, 0, 0);
+  }
 
   HitRecord hitRecord;
   if (!getIntersection(ray, &hitRecord)) {
@@ -104,20 +113,22 @@ Colour RayTracer::rayColour(
     // There will be some amount of specular reflection going on
     auto reflDir = reflect(direction, hitRecord.norm);
     Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
-    auto reflectedColour = rayColour(reflectedRay, x, y, reflDepth + 1);
+    auto reflectedColour = rayColour(reflectedRay, x, y, reflDepth + 1, rc);
     colour = colour + material->specularColour() * reflectedColour;
   }
 
   auto alpha = material->getAlpha();
-  auto alphaColour = alpha * (colour + materialColour * ambientColour);
+  Colour solidColour = (colour + materialColour * ambientColour);
+  Colour transmittedColour(0);
   if (material->isTransparent()) {
     // We have to cast the tramsmitted ray as well
-    // TODO
-    Colour transmittedColour(0);
-    alphaColour = (1 - alpha) * transmittedColour;
+    // TODO: Refraction.
+    Ray transmittedRay(hitRecord.point, hitRecord.point + ray.dir);
+    transmittedColour = rayColour(
+        transmittedRay, x, y, reflDepth, (1 - alpha) * materialColour);
   }
 
-  return alphaColour;
+  return rc * (alpha * solidColour + transmittedColour);
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {

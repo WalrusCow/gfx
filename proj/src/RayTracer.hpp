@@ -69,8 +69,9 @@ class RayTracer {
   void extractModels(SceneNode* root);
   void extractModels(SceneNode* root, const Matrix4x4& inverse);
 
-  Colour rayColour(
-      const Ray& ray, double x, double y, size_t reflDepth = 0) const;
+  Colour rayColour(const Ray& ray, double x, double y,
+                   size_t reflDepth = 0,
+                   const Colour& rc=Colour(1, 1, 1)) const;
   Colour backgroundColour(double x, double y) const;
   Vector3D reflect(const Vector3D& dir, const Vector3D& norm) const;
 
