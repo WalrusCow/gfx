@@ -108,7 +108,16 @@ Colour RayTracer::rayColour(
     colour = colour + material->specularColour() * reflectedColour;
   }
 
-  return colour + materialColour * ambientColour;
+  auto alpha = material->getAlpha();
+  auto alphaColour = alpha * (colour + materialColour * ambientColour);
+  if (material->isTransparent()) {
+    // We have to cast the tramsmitted ray as well
+    // TODO
+    Colour transmittedColour(0);
+    alphaColour = (1 - alpha) * transmittedColour;
+  }
+
+  return alphaColour;
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {

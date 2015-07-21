@@ -40,4 +40,3 @@ Colour TextureMaterial::getKd(const HitRecord& hitRecord) const {
   yPx = texture.height - yPx;
   return texture.data[(yPx * texture.width) + xPx];
 }
-

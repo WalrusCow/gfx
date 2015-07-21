@@ -43,6 +43,10 @@ bool Material::isSpecular() const {
   return ks.R() > 0 || ks.G() > 0 || ks.B() > 0;
 }
 
+bool Material::isTransparent() const {
+  return alpha < 1;
+}
+
 Colour Material::specularColour() const {
   return ks;
 };

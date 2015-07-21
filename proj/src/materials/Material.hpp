@@ -19,6 +19,7 @@ class Material {
                      const Light& light, // Light to light with
                      const HitRecord& hitRecord) const;
   bool isSpecular() const;
+  bool isTransparent() const;
   Colour specularColour() const;
   double getAlpha() const;
 
