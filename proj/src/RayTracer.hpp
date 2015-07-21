@@ -71,9 +71,12 @@ class RayTracer {
 
   Colour rayColour(const Ray& ray, double x, double y,
                    size_t reflDepth = 0,
-                   const Colour& rc=Colour(1, 1, 1)) const;
+                   const Colour& rc=Colour(1, 1, 1),
+                   double refractionIndex = 1) const;
   Colour backgroundColour(double x, double y) const;
   Vector3D reflect(const Vector3D& dir, const Vector3D& norm) const;
+  Vector3D refract(const Vector3D& in, const Vector3D& norm,
+                   double ni, double nt) const;
 
   void writePixel(uint32_t x, uint32_t y, const Colour& colour);
   // Get the intersection of ray with models. Uses a particular implementation.

@@ -39,7 +39,8 @@ RayTracer::RayTracer(SceneNode* root,
     tempImage(width_ + 1, height_ + 1, 3),
     finalImage(width_, height_, 3),
     options(options_),
-    pixelTransformer(rayWidth(), rayHeight(), viewConfig_) {
+    pixelTransformer(rayWidth(), rayHeight(), viewConfig_)
+{ // Stop indenting, damnit
 
   // This is such a horrible hack
   Mesh::interpolateNormals = options_.phongInterpolation;
@@ -72,9 +73,10 @@ RayTracer::RayTracer(SceneNode* root,
 }
 
 Colour RayTracer::rayColour(const Ray& ray, double x, double y,
-                            size_t reflDepth, const Colour& rc) const {
+                            size_t depth, const Colour& rc,
+                            double refractionIndex) const {
   // TODO: Make this not a hack
-  if (reflDepth >= 2) return Colour(0, 0, 0);
+  if (depth >= 4) return Colour(0, 0, 0);
   // TODO: Same with this...
   if (colourSize(rc) < 0.2) {
     return Colour(0, 0, 0);
@@ -91,6 +93,13 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
   // Unit direction
   Vector3D direction = ray.dir;
   direction.normalize();
+
+  // Norm and incident vector must be in opposite directions. This will happen
+  // if the incident vector is coming from "within" or "behind" a surface.
+  if (hitRecord.norm.dot(ray.dir) > 0) {
+    // TODO: This is also hacky
+    hitRecord.norm = -1 * hitRecord.norm;
+  }
 
   const Material* material = hitRecord.material;
   Colour materialColour(material->getColour(hitRecord));
@@ -113,22 +122,31 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
     // There will be some amount of specular reflection going on
     auto reflDir = reflect(direction, hitRecord.norm);
     Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
-    auto reflectedColour = rayColour(reflectedRay, x, y, reflDepth + 1, rc);
+    auto reflectedColour = rayColour(reflectedRay, x, y, depth + 1,
+                                     rc, refractionIndex);
     colour = colour + material->specularColour() * reflectedColour;
   }
 
   auto alpha = material->getAlpha();
-  Colour solidColour = (colour + materialColour * ambientColour);
-  Colour transmittedColour(0);
+  // Total colour reflected
+  Colour reflColour = alpha * (colour + materialColour * ambientColour);
+  Colour transColour(0);
   if (material->isTransparent()) {
     // We have to cast the tramsmitted ray as well
-    // TODO: Refraction.
-    Ray transmittedRay(hitRecord.point, hitRecord.point + ray.dir);
-    transmittedColour = rayColour(
-        transmittedRay, x, y, reflDepth, (1 - alpha) * materialColour);
+    // TODO: Refraction
+    auto refrDir = refract(direction, hitRecord.norm,
+                           refractionIndex, material->getRefractionIndex());
+
+    Ray transRay(hitRecord.point, hitRecord.point + refrDir);
+    // Multiply by proportion that is transmitted
+    auto transRayColour = (1 - alpha) * rc;
+    // TODO: Use proper index based on whether or not we are now inside
+    // the material (i.e. check angle relative to normal)
+    transColour = rayColour(transRay, x, y, depth + 1,
+                            transRayColour, refractionIndex);
   }
 
-  return rc * (alpha * solidColour + transmittedColour);
+  return rc * (reflColour + transColour);
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {
@@ -295,4 +313,13 @@ std::string RayTracer::getProgressBar(double percent, size_t len) const {
 
 Vector3D RayTracer::reflect(const Vector3D& dir, const Vector3D& norm) const {
   return dir - (2 * norm.dot(dir)) * norm;
+}
+
+Vector3D RayTracer::refract(const Vector3D& in, const Vector3D& norm,
+                            double ni, double nt) const {
+  auto ratio = ni / nt;
+  auto dot = in.dot(norm);
+  auto k = 1 - (ratio * ratio) * (1 - (dot * dot));
+  if (k < 0) return Vector3D(0, 0, 0);
+  return (-ratio * dot - std::sqrt(k)) * norm + (ratio * in);
 }
