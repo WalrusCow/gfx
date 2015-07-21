@@ -8,7 +8,7 @@ class Light;
 // It's a phong material kind of world
 class Material {
  public:
-  Material(const Colour& ks_, double shininess_, double alpha_);
+  Material(const Colour& ks_, double shininess_, double alpha_, double idx_);
   virtual ~Material() = default;
 
   Colour getColour(const HitRecord& hitRecord) const;
@@ -22,6 +22,7 @@ class Material {
   bool isTransparent() const;
   Colour specularColour() const;
   double getAlpha() const;
+  double getRefractionIndex() const;
 
  protected:
   virtual Colour getKd(const HitRecord& hitRecord) const = 0;
@@ -30,4 +31,5 @@ class Material {
   const Colour ks;
   const double shininess;
   const double alpha;
+  const double refractionIndex;
 };

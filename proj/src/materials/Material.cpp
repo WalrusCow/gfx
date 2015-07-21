@@ -5,8 +5,10 @@
 #include "lights/Light.hpp"
 #include "HitRecord.hpp"
 
-Material::Material(const Colour& ks_, double shininess_, double alpha_)
-    : ks(ks_), shininess(shininess_), alpha(alpha_) {}
+Material::Material(const Colour& ks_, double shininess_,
+                   double alpha_, double idx_)
+                   : ks(ks_), shininess(shininess_),
+                   alpha(alpha_), refractionIndex(idx_) {}
 
 Colour Material::getColour(const HitRecord& hitRecord) const {
   return getKd(hitRecord);
@@ -53,4 +55,8 @@ Colour Material::specularColour() const {
 
 double Material::getAlpha() const {
   return alpha;
+}
+
+double Material::getRefractionIndex() const {
+  return refractionIndex;
 }

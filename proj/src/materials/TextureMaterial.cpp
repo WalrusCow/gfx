@@ -6,8 +6,8 @@
 
 TextureMaterial::TextureMaterial(
     const std::string& filename,
-    const Colour& ks_, double shininess_, double alpha_)
-    : Material(ks_, shininess_, alpha_), texture(readTexture(filename)) {}
+    const Colour& ks_, double shininess_, double alpha_, double idx_)
+    : Material(ks_, shininess_, alpha_, idx_), texture(readTexture(filename)) {}
 
 TextureMaterial::Texture TextureMaterial::readTexture(
     const std::string& filename) const {

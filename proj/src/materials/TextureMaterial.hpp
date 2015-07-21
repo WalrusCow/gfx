@@ -10,7 +10,8 @@ class TextureMaterial : public Material {
   TextureMaterial(const std::string& filename,
                   const Colour& ks,
                   double shininess_,
-                  double alpha_);
+                  double alpha_,
+                  double idx_);
  protected:
   Colour getKd(const HitRecord& hitRecord) const override;
 

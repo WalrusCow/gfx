@@ -2,7 +2,7 @@ require('readobj')
 
 scene = gr.node('scene')
 
-red = gr.material({1, 0, 0}, {0, 0, 0}, 1, 1, 1)
+red = gr.material({1, 0, 0}, {0, 0, 0}, 1, 1)
 green = gr.material({0, 1, 0}, {0, 0, 0}, 1, 1)
 blue = gr.material({0, 0, 1}, {0, 0, 0}, 1, 1)
 white = gr.material({1, 1, 1}, {0, 0, 0}, 1, 1)

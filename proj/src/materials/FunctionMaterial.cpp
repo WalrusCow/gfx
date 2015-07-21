@@ -10,8 +10,8 @@ FunctionMaterial::functions = {
 FunctionMaterial::FunctionMaterial(
     const FunctionMaterial::ColourMap& mapFunction_,
     const Colour& ks_,
-    double shininess_, double alpha_)
-    : Material(ks_, shininess_, alpha_), mapFunction(mapFunction_) {}
+    double shininess_, double alpha_, double idx_)
+    : Material(ks_, shininess_, alpha_, idx_), mapFunction(mapFunction_) {}
 
 Colour FunctionMaterial::getKd(const HitRecord& hitRecord) const {
   return mapFunction(hitRecord.xPercent, hitRecord.yPercent);
