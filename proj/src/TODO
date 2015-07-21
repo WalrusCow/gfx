@@ -7,13 +7,18 @@ Class to display multithreading progress.
 =============================== Main Objectives ================================
 ================================================================================
 
-- Refraction
 - Glossy reflection
 - Unique scene
 
 ================================================================================
 ============================= Completed Objectives =============================
 ================================================================================
+
+Refraction
+==========
+
+Could work with shadows: If intersects a transparent object, use alpha and
+recast ray.
 
 Reflection
 ==========
@@ -23,7 +28,7 @@ Done. Depth could use a command line parameter
 Soft shadows + area lights
 ==========================
 
-Could possibly have better sampling (uniform & deterministic?)
+Sampling is currently deterministic.  Is that the best way?
 Use a model for area lights so that they show up in the scene
 
 Primitives (Torus & Cylinder)
