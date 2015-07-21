@@ -149,6 +149,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
 }
 
 Colour RayTracer::backgroundColour(double x, double y) const {
+  return Colour(0.1, 0.1, 0.1);
   (void) x;
   // Let's try a simple gradient between two colours
   const Colour top(0.6, 1, 0.9);
