@@ -70,8 +70,10 @@ double Material::getRefractionIndex() const {
 
 std::vector<Vector3D> Material::getReflectedRays(
     const Vector3D& dir, const Vector3D& norm, size_t numRays) const {
+  auto d = dir;
+  d.normalize();
   // Reflected ray
-  auto rr = reflect(dir, norm);
+  auto rr = reflect(d, norm);
   if (numRays <= 1) {
     // No glossy reflection
     return {rr};
@@ -90,13 +92,13 @@ std::vector<Vector3D> Material::getReflectedRays(
 
   // Give several perturbations of the reflected ray
   for (size_t i = 0; i < numRays; ++i) {
-    auto alpha = std::pow(std::acos(getRandom()), exp);
+    auto alpha = std::acos(std::pow(getRandom(), exp));
     auto beta = 2 * M_PI * getRandom();
     // We want to perturb up by alpha and around by beta
     // We will be on the z axis, so that is around X to go up
     // and around Z to go around
     // P is perturbation matrix
-    auto P = fromZ * xRotationMatrix(alpha) * zRotationMatrix(beta);
+    auto P = fromZ * zRotationMatrix(beta) * xRotationMatrix(alpha);
     reflectedRays.emplace_back(P * rrZ);
   }
   return reflectedRays;
