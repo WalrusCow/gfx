@@ -1,4 +1,3 @@
-// William McDonald 20418145 wmcdonal
 #include "xform.hpp"
 
 #include <cmath>
@@ -63,4 +62,17 @@ Matrix4x4 toZAxis(const Vector3D& unitV) {
   // Now m is on the xz plane, so we need to rotate about y to get z = 0
   mat = yRotationMatrix(std::atan2(-m[0], m[2])) * mat;
   return mat;
+}
+
+Vector3D reflect(const Vector3D& dir, const Vector3D& norm) {
+  return dir - (2 * norm.dot(dir)) * norm;
+}
+
+Vector3D refract(const Vector3D& in, const Vector3D& norm,
+                 double ni, double nt) {
+  auto ratio = ni / nt;
+  auto dot = in.dot(norm);
+  auto k = 1 - (ratio * ratio) * (1 - (dot * dot));
+  if (k < 0) return Vector3D(0, 0, 0);
+  return (-ratio * dot - std::sqrt(k)) * norm + (ratio * in);
 }

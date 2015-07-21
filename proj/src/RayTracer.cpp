@@ -14,6 +14,7 @@
 #include "primitives/Mesh.hpp"
 #include "Ray.hpp"
 #include "ViewConfig.hpp"
+#include "xform.hpp"
 
 namespace {
 const std::string ESC = "\x1b";
@@ -56,14 +57,6 @@ RayTracer::RayTracer(SceneNode* root,
   minPoint = Point3D(1e20, 1e20, 1e20);
   maxPoint = Point3D(-1e20, -1e20, -1e20);
   extractModels(root);
-
-  // Maybe one day, if we decide to use a model for area lights
-  //for (Light* light : lights) {
-  //  extremize(&minPoint, light->position,
-  //            [] (double a, double b) { return std::min(a,b); });
-  //  extremize(&maxPoint, light->position,
-  //            [] (double a, double b) { return std::max(a,b); });
-  //}
 
   if (options.uniformGrid) {
     uniformGrid = std::make_unique<UniformGrid>(
@@ -334,24 +327,17 @@ std::string RayTracer::getProgressBar(double percent, size_t len) const {
   return s;
 }
 
-Vector3D RayTracer::reflect(const Vector3D& dir, const Vector3D& norm) const {
-  return dir - (2 * norm.dot(dir)) * norm;
-}
-
-Vector3D RayTracer::refract(const Vector3D& in, const Vector3D& norm,
-                            double ni, double nt) const {
-  auto ratio = ni / nt;
-  auto dot = in.dot(norm);
-  auto k = 1 - (ratio * ratio) * (1 - (dot * dot));
-  if (k < 0) return Vector3D(0, 0, 0);
-  return (-ratio * dot - std::sqrt(k)) * norm + (ratio * in);
-}
-
 std::vector<Vector3D> RayTracer::getReflectedRays(
     const Vector3D& dir, const Vector3D& norm) const {
+  // Reflected ray
+  auto rr = reflect(dir, norm);
   if (options.glossyReflection <= 1) {
     // No glossy reflection
-    return {reflect(dir, norm)};
+    return {rr};
+  }
+
+  // Give several perturbations of the reflected ray
+  for (size_t i = 0; i < options.glossyReflection; ++i) {
   }
   return {};
 }

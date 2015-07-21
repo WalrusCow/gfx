@@ -76,9 +76,6 @@ class RayTracer {
                    const Colour& rc=Colour(1, 1, 1),
                    double refractionIndex = 1) const;
   Colour backgroundColour(double x, double y) const;
-  Vector3D reflect(const Vector3D& dir, const Vector3D& norm) const;
-  Vector3D refract(const Vector3D& in, const Vector3D& norm,
-                   double ni, double nt) const;
 
   std::vector<Vector3D> getReflectedRays(
       const Vector3D& dir, const Vector3D& norm) const;
