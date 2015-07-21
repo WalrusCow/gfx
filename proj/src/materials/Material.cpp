@@ -6,6 +6,12 @@
 #include "HitRecord.hpp"
 #include "xform.hpp"
 
+// Random generator and distribution
+thread_local
+std::default_random_engine Material::generator;
+thread_local
+std::uniform_real_distribution<double> Material::distribution(0, 1);
+
 Material::Material(const Colour& ks_, double shininess_,
                    double alpha_, double idx_)
                    : ks(ks_), shininess(shininess_),
@@ -71,8 +77,31 @@ std::vector<Vector3D> Material::getReflectedRays(
     return {rr};
   }
 
+  auto exp = 1 / (shininess + 1);
+
+  std::vector<Vector3D> reflectedRays;
+  reflectedRays.resize(numRays);
+
+  // Matrix to move to Z axis
+  auto toZ = toZAxis(rr);
+  auto fromZ = toZ.invert();
+
+  auto rrZ = toZ * rr;
+
   // Give several perturbations of the reflected ray
   for (size_t i = 0; i < numRays; ++i) {
+    auto alpha = std::pow(std::acos(getRandom()), exp);
+    auto beta = 2 * M_PI * getRandom();
+    // We want to perturb up by alpha and around by beta
+    // We will be on the z axis, so that is around X to go up
+    // and around Z to go around
+    // P is perturbation matrix
+    auto P = fromZ * xRotationMatrix(alpha) * zRotationMatrix(beta);
+    reflectedRays.emplace_back(P * rrZ);
   }
-  return {};
+  return reflectedRays;
+}
+
+double Material::getRandom() const {
+  return distribution(generator);
 }

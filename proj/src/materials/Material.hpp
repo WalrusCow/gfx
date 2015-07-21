@@ -1,5 +1,7 @@
 #pragma once
 
+#include <random>
+
 #include "algebra.hpp"
 
 class HitRecord;
@@ -35,4 +37,10 @@ class Material {
   const double shininess;
   const double alpha;
   const double refractionIndex;
+
+  // For random
+  static thread_local std::default_random_engine generator;
+  static thread_local std::uniform_real_distribution<double> distribution;
+
+  double getRandom() const;
 };
