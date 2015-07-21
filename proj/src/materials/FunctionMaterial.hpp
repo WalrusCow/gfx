@@ -16,6 +16,7 @@ class FunctionMaterial : public Material {
                    double alpha_, double idx_);
 
   static Colour bwSquares(double xPercent, double yPercent);
+  static Colour blueGreenSquares(double xPercent, double yPercent);
   static std::map<std::string, ColourMap> functions;
 
  protected:

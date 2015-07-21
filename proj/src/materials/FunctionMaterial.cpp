@@ -5,6 +5,7 @@
 std::map<std::string, FunctionMaterial::ColourMap>
 FunctionMaterial::functions = {
   {"bw_squares", FunctionMaterial::bwSquares},
+  {"blue_green_squares", FunctionMaterial::blueGreenSquares},
 };
 
 FunctionMaterial::FunctionMaterial(
@@ -32,4 +33,21 @@ Colour FunctionMaterial::bwSquares(double xPercent, double yPercent) {
     return Colour(1, 1, 1);
   }
   return Colour(0, 0, 0);
+}
+
+Colour FunctionMaterial::blueGreenSquares(double xPercent, double yPercent) {
+  // We want squares of 10% with/height
+  //  ---------
+  //  | B | W |
+  //  ---------
+  //  | W | B |
+  //  ---------
+  int xp = (int) (xPercent * 100);
+  int yp = (int) (yPercent * 100);
+  bool left = (xp % 20 < 10);
+  bool bottom = (yp % 20 < 10);
+  if (left ^ bottom) {
+    return Colour(0, 1, 0);
+  }
+  return Colour(0, 0, 1);
 }
