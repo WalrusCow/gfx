@@ -42,13 +42,12 @@ s3:rotate('X', 90)
 scene:add_child(s3)
 
 
-SIZE = 128
 camera = {0, 1, -10}
 cameraDirection = {0, 0, -1}
 
 cameraLight = gr.light({0, 5, -15}, {0.7, 0.7, 0.7}, {1, 0, 0})
 
-SIZE = 128
+SIZE = 512
 gr.render(scene, 'glossy.png', SIZE, SIZE,
           camera, cameraDirection, {0, 1, 0}, 50,
           {0.4, 0.4, 0.4}, {cameraLight})
