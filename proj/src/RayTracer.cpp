@@ -25,6 +25,10 @@ double colourSize(const Colour& c) {
   return std::sqrt(c.R()*c.R() + c.B()*c.B() + c.G()*c.G());
 }
 
+bool vectorZero(const Vector3D& v) {
+  return isZero(v[0]) && isZero(v[1]) && isZero(v[2]);
+}
+
 } // Anonymous
 
 RayTracer::RayTracer(SceneNode* root,
@@ -117,6 +121,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
     auto reflectedRays = material->getReflectedRays(
         direction, hitRecord.norm, options.glossyReflection);
     for (const auto& reflDir : reflectedRays) {
+      if (vectorZero(reflDir)) continue;
       Ray reflectedRay(hitRecord.point, hitRecord.point + reflDir);
       auto col = rayColour(reflectedRay, x, y, depth + 1,
                            rc, refractionIndex);
@@ -135,14 +140,14 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
     auto otherIndex = fromInside ? 1 : material->getRefractionIndex();
     auto refrDir = refract(direction, hitRecord.norm,
                            refractionIndex, otherIndex);
-    if (!isZero(refrDir[0]) || !isZero(refrDir[1]) || !isZero(refrDir[2])) {
+    if (!vectorZero(refrDir)) {
 
       Ray transRay(hitRecord.point, hitRecord.point + refrDir);
       // Multiply by proportion that is transmitted
       auto transRayColour = (1 - alpha) * rc;
       // TODO: Use proper index based on whether or not we are now inside
       // the material (i.e. check angle relative to normal)
-      transColour = rayColour(transRay, x, y, depth,
+      transColour = rayColour(transRay, x, y, depth + 1,
                               transRayColour, otherIndex);
     }
   }
@@ -291,8 +296,9 @@ void RayTracer::showProgress(const std::string& msg, double percent) const {
   }
   first = false;
 
-  size_t displayPercent = (size_t) (100 * percent);
-  std::cerr << msg << " " << bar << " (" << displayPercent << "%)" << std::endl;
+  auto displayPercent = 100 * percent;
+  std::cerr << msg << " " << bar << " (" << std::fixed << std::setprecision(3)
+            << displayPercent << "%)" << std::endl;
 }
 
 void RayTracer::showThreadProgress(uint32_t id, double percent) {
