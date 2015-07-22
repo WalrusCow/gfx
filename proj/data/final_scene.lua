@@ -17,9 +17,13 @@ wood = gr.texture_material("wood.png", {0, 0, 0}, 1, 1)
 bw = gr.function_material("bw_squares", {0, 0, 0}, 25, 1)
 bluegreen = gr.function_material("blue_green_squares", {0, 0, 0}, 25, 1)
 
-floor:set_material(brown)
-back:set_material(bw)
-left:set_material(bluegreen)
+concrete = gr.texture_material("concrete.png", {0,0,0},1,1)
+brick = gr.texture_material("brick.png", {0,0,0},1,1)
+wood = gr.texture_material("wood3.png",{0,0,0},1,1)
+
+floor:set_material(wood)
+back:set_material(brick)
+left:set_material(brick)
 
 camera = {2, -3, -1}
 
@@ -27,11 +31,6 @@ camera = {2, -3, -1}
 -- Magnifying glass
 --
 mag = gr.node('mag')
---scene:add_child(mag)
---mag:translate(unpack(camera))
---mag:translate(-1.6, -.5, -2)
---mag:rotate('Y', 45)
---mag:rotate('X', -5)
 
 lens = gr.sphere('lens')
 mag:add_child(lens)
@@ -75,7 +74,7 @@ box:set_material(suzyM)
 box:scale(0.5, 0.5, 0.5)
 
 antFood = gr.torus('antFood', 1.5)
---antScene:add_child(antFood)
+antScene:add_child(antFood)
 antFood:set_material(antFoodM)
 antFood:translate(0.25, 0.63, 0.25)
 antFood:rotate('X', -32)
@@ -83,7 +82,7 @@ antFood:rotate('Y', 45)
 antFood:scale(0.053, 0.053, 0.063)
 
 ant = gr.mesh('ant', readobj('ant.obj'))
---antScene:add_child(ant)
+antScene:add_child(ant)
 ant:set_material(antM)
 ant:translate(0.55, 0.4, .3)
 ant:rotate('X', 180)
@@ -93,7 +92,7 @@ ant:scale(0.03, 0.03, 0.03)
 
 mag:translate(0.62, 0.67, 0.9)
 mag:scale(0.45, 0.45, 0.45)
---antScene:add_child(mag)
+antScene:add_child(mag)
 
 --scene:add_child(antScene)
 
@@ -101,8 +100,6 @@ mag:scale(0.45, 0.45, 0.45)
 -- A chair
 --
 chairScene = gr.node('chairScene')
-chairScene:translate(-1, -roomSize / 2, -4)
-chairScene:scale(0.5, 0.5, 0.5)
 
 armWidth = 0.3
 
@@ -175,13 +172,13 @@ seat:set_material(chairM)
 seat:translate(-0.6, 1, 0)
 seat:scale(1.2, 0.8, 1.8)
 
-chairScene:rotate('Y', 35)
-scene:add_child(chairScene)
-
+chairScene:translate(0, -roomSize / 2, -6)
+chairScene:scale(0.45, 0.45, 0.45)
+--scene:add_child(chairScene)
 
 cameraDirection = {-2, -0.8, -2}
 
-SIZE = 128
+SIZE = 1024
 gr.render(scene, 'final_scene.png', SIZE, SIZE,
           camera, cameraDirection, {0, 1, 0}, 50,
           {0.4, 0.4, 0.4}, {frontTopLeft, backTopRight})
