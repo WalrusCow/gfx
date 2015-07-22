@@ -142,7 +142,7 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
       auto transRayColour = (1 - alpha) * rc;
       // TODO: Use proper index based on whether or not we are now inside
       // the material (i.e. check angle relative to normal)
-      transColour = rayColour(transRay, x, y, depth + 1,
+      transColour = rayColour(transRay, x, y, depth,
                               transRayColour, otherIndex);
     }
   }

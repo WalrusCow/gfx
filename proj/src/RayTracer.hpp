@@ -31,7 +31,7 @@ class RayTracer {
     double aaTolerance = 0.2;
     int aaDepth = 0;
     size_t shadowSamples = 1;
-    size_t recursiveDepthLimit = 4;
+    size_t recursiveDepthLimit = 2;
     size_t glossyReflection = 1;
   };
 

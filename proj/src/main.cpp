@@ -26,7 +26,8 @@ int main(int argc, char** argv) {
       << "\t-a:  Antialiasing tolerance. Default is 0.2." << std::endl
       << "\t-d:  Maxmimum antialiasing depth. Default is 0 (off)." << std::endl
       << "\t-s:  Soft shadow sample count. Use 1 to disable." << std::endl
-      << "\t-r:  Samples to use for glossy reflection. Use 1 to disable." << std::endl;
+      << "\t-r:  Samples to use for glossy reflection. Use 1 to disable." << std::endl
+      << "\t-m:  Maximum recursive depth. Default is 2." << std::endl;
   };
 
   if (argc < 2) {
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
     {'d', {true}},
     {'s', {true}},
     {'r', {true}},
+    {'m', {true}},
   };
 
   std::set<char> flags;
@@ -155,6 +157,9 @@ int main(int argc, char** argv) {
       break;
     case 'r':
       rayTracerOptions.glossyReflection = std::stoul(arg.second);
+      break;
+    case 'm':
+      rayTracerOptions.recursiveDepthLimit = std::stoul(arg.second);
       break;
     }
   }
