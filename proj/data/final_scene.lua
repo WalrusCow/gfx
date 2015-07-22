@@ -9,7 +9,7 @@ suzyM = gr.material({1, 0, 0}, {0, 0, 0}, 1, 1)
 chairM = gr.material({0.507, 0.507, 0.507}, {0.508, 0.508, 0.508}, 9, 1)
 
 antFoodM = gr.material({0, 0.75, 0.75}, {0, 0, 0}, 1, 1)
-antM = gr.material({0.02, 0.02, 0.02}, {0, 0, 0}, 1, 1)
+antM = gr.material({0.02, 0.02, 0.02}, {0.08, 0.08, 0.08}, 6, 1)
 
 brick = gr.texture_material("brick.png", {0, 0, 0}, 1, 1)
 wood = gr.texture_material("wood3.png", {0.2, 0.2, 0.2}, 15, 1)
@@ -171,7 +171,7 @@ scene:add_child(chairScene)
 
 cameraDirection = {-2, -0.8, -2}
 
-SIZE = 128
+SIZE = 256
 gr.render(scene, 'final_scene.png', SIZE, SIZE,
           camera, cameraDirection, {0, 1, 0}, 50,
           {0.4, 0.4, 0.4}, {frontTopLeft, backTopRight})
