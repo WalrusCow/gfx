@@ -3,17 +3,33 @@ Student Number: 20418145
 User-id: wmcdonal
 Assignment: Project
 
-The final executable was compiled on this machine:
+The final executable was compiled on this machine: gl11
 
 How to invoke my program:
+  ./rt
+  Use `./rt -h` to get the list of options. Most features are switched
+  off by default and can be toggled on.
 
-How to use my extra features:
+In the data directory is a folder titled `images` containing a set of images
+for each objective.  All other files in the data directory are scenes that
+were or are used to generate the images.
 
-I have created the following data files, which are in the data directory:
+My program assumes the following:
+  Compiled with g++ >= 4.9
 
-There are two executables provided:
+  Note that the graphics lab machines have g++ 4.8.  To compile on the graphics
+computers, add this code snippet to the top of RayTracer.cpp
 
-My program assumes the following: Compiled with g++ >= 4.8
+  #include <memory>
+  #include <utility>
+
+  namespace std {
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args) {
+      // Pining for C++14...
+      return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+  }
 
 Objectives:
    1. Primitives: Cylinder + Torus
