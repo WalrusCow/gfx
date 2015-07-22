@@ -17,7 +17,6 @@ wood = gr.texture_material("wood.png", {0, 0, 0}, 1, 1)
 bw = gr.function_material("bw_squares", {0, 0, 0}, 25, 1)
 bluegreen = gr.function_material("blue_green_squares", {0, 0, 0}, 25, 1)
 
-concrete = gr.texture_material("concrete.png", {0,0,0},1,1)
 brick = gr.texture_material("brick.png", {0,0,0},1,1)
 wood = gr.texture_material("wood3.png",{0,0,0},1,1)
 
