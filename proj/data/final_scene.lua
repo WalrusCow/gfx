@@ -4,21 +4,15 @@ require('final_box')
 brown = gr.material({0.094, 0.05, 0.003}, {0.00, 0.00, 0.00}, 1000, 1, 1)
 lensM = gr.material({0.2, 0.2, 0.2}, {0.02, 0.02, 0.02}, 1e10, .11, 1.85)
 magM = gr.material({0, 0, 1}, {0, 0, 0}, 1, 1)
---gold = gr.material({0.75164, 0.60648, 0.22648}, {0.628281, 0.555802, 0.366065}, 51.2, 1)
-gold = gr.material({0.75164, 0.60648, 0.22648}, {0,0,0}, 51.2, 1)
+gold = gr.material({0.75164, 0.60648, 0.22648}, {0.628281, 0.555802, 0.366065}, 1e10, 1)
 suzyM = gr.material({1, 0, 0}, {0, 0, 0}, 1, 1)
---chairM = gr.material({0.507, 0.507, 0.507}, {0.508, 0.508, 0.508}, 2, 1)
-chairM = gr.material({0.507, 0.507, 0.507}, {0,0,0}, 2, 1)
+chairM = gr.material({0.507, 0.507, 0.507}, {0.508, 0.508, 0.508}, 9, 1)
 
-antFoodM = gr.material({0, 0.75, 0.75}, {0,0,0},1,1)
-antM = gr.material({0.02, 0.02, 0.02}, {0,0,0},1,1)
+antFoodM = gr.material({0, 0.75, 0.75}, {0, 0, 0}, 1, 1)
+antM = gr.material({0.02, 0.02, 0.02}, {0, 0, 0}, 1, 1)
 
-wood = gr.texture_material("wood.png", {0, 0, 0}, 1, 1)
-bw = gr.function_material("bw_squares", {0, 0, 0}, 25, 1)
-bluegreen = gr.function_material("blue_green_squares", {0, 0, 0}, 25, 1)
-
-brick = gr.texture_material("brick.png", {0,0,0},1,1)
-wood = gr.texture_material("wood3.png",{0,0,0},1,1)
+brick = gr.texture_material("brick.png", {0, 0, 0}, 1, 1)
+wood = gr.texture_material("wood3.png", {0.2, 0.2, 0.2}, 15, 1)
 
 floor:set_material(wood)
 back:set_material(brick)
@@ -52,7 +46,7 @@ handle:scale(0.05, 0.05, 1.5)
 -- Monkey head on wall
 --
 suzy = gr.mesh('suzy', readobj('suzy.obj'))
---scene:add_child(suzy)
+scene:add_child(suzy)
 suzy:set_material(gold)
 suzy:translate(LEFT, BOTTOM/2, BACK)
 suzy:translate(-0.7, -0.4, 3.5)
@@ -93,7 +87,7 @@ mag:translate(0.62, 0.67, 0.9)
 mag:scale(0.45, 0.45, 0.45)
 antScene:add_child(mag)
 
---scene:add_child(antScene)
+scene:add_child(antScene)
 
 --
 -- A chair
@@ -173,11 +167,11 @@ seat:scale(1.2, 0.8, 1.8)
 
 chairScene:translate(0, -roomSize / 2, -6)
 chairScene:scale(0.45, 0.45, 0.45)
---scene:add_child(chairScene)
+scene:add_child(chairScene)
 
 cameraDirection = {-2, -0.8, -2}
 
-SIZE = 1024
+SIZE = 128
 gr.render(scene, 'final_scene.png', SIZE, SIZE,
           camera, cameraDirection, {0, 1, 0}, 50,
           {0.4, 0.4, 0.4}, {frontTopLeft, backTopRight})

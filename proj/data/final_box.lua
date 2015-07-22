@@ -53,14 +53,14 @@ front:translate(roomSize, 0, 0)
 front:rotate('Y', 180)
 front:scale(roomSize, roomSize, 1)
 
---boxParent:add_child(left)
---boxParent:add_child(right)
+boxParent:add_child(left)
+boxParent:add_child(right)
 
 boxParent:add_child(floor)
---boxParent:add_child(roof)
---
---boxParent:add_child(front)
---boxParent:add_child(back)
+boxParent:add_child(roof)
+
+boxParent:add_child(front)
+boxParent:add_child(back)
 
 -- Camera at middle of box opening
 camera = {0, -roomSize / 4, -1}
