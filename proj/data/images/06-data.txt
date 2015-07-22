@@ -1,0 +1,4 @@
+No Grid
+=======
+real  2m34.132s
+user  9m36.502s
