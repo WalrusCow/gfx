@@ -198,7 +198,6 @@ std::vector<Mesh::Face> Mesh::getFaces(const Mesh::FaceInput& faceInput) const {
     nn.normalize();
 
     auto toZ = toZAxis(nn);
-    std::cerr << "Rotating norm " << nn << " to z axis: " << toZ*nn<<std::endl;
     auto p0Z = toZ * p0;
     Point3D minPoint(p0Z[0], p0Z[1], p0Z[2]);
     Point3D maxPoint(minPoint);
