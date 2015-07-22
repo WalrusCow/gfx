@@ -27,8 +27,9 @@ Colour FunctionMaterial::bwSquares(double xPercent, double yPercent) {
   //  ---------
   int xp = (int) (xPercent * 100);
   int yp = (int) (yPercent * 100);
-  bool left = (xp % 20 < 10);
-  bool bottom = (yp % 20 < 10);
+  int period = 6;
+  bool left = (xp % period < period/2);
+  bool bottom = (yp % period < period/2);
   if (left ^ bottom) {
     return Colour(1, 1, 1);
   }
@@ -44,8 +45,9 @@ Colour FunctionMaterial::blueGreenSquares(double xPercent, double yPercent) {
   //  ---------
   int xp = (int) (xPercent * 100);
   int yp = (int) (yPercent * 100);
-  bool left = (xp % 20 < 10);
-  bool bottom = (yp % 20 < 10);
+  int period = 6;
+  bool left = (xp % period < period/2);
+  bool bottom = (yp % period < period/2);
   if (left ^ bottom) {
     return Colour(0, 1, 0);
   }
