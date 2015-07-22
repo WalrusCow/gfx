@@ -2,7 +2,7 @@ require('final_box')
 
 -- Name, KS, Phong, Alpha, refr
 brown = gr.material({0.094, 0.05, 0.003}, {0.02, 0.02, 0.02}, 1000, 1, 1)
-lensM = gr.material({0.2, 0.2, 0.2}, {0.02, 0.02, 0.02}, 1e10, .11, 1.55)
+lensM = gr.material({0.2, 0.2, 0.2}, {0.02, 0.02, 0.02}, 1e10, .11, 1.45)
 magM = gr.material({0, 0, 1}, {0, 0, 0}, 1, 1)
 --gold = gr.material({0.75164, 0.60648, 0.22648}, {0.628281, 0.555802, 0.366065}, 51.2, 1)
 gold = gr.material({0.75164, 0.60648, 0.22648}, {0,0,0}, 51.2, 1)
@@ -33,7 +33,7 @@ mag:add_child(lens)
 lens:set_material(lensM)
 lens:scale(0.62, 0.62, 0.04)
 
-edge = gr.torus('edge', 0.04)
+edge = gr.torus('edge', 0.06)
 mag:add_child(edge)
 edge:set_material(magM)
 edge:scale(0.6, 0.6, 0.3)
@@ -57,9 +57,32 @@ suzy:rotate('Y', 90)
 suzy:rotate('X', 35)
 suzy:scale(0.6, 0.6, 0.6)
 
+--
+-- Ant
+--
+ant = gr.mesh('ant', readobj('ant.obj'))
+ant:set_material(suzyM)
+ant:rotate('Z', 180)
+ant:scale(0.06, 0.06, 0.06)
+
+a1 = gr.node('a1')
+a1:add_child(ant)
+a1:translate(LEFT - 0.8, BOTTOM - 1, BACK - 0.8)
+--a1:translate(unpack(camera))
+--a1:translate(-1.9, -.5, -2.3)
+
+--a2 = gr.node('a1')
+--a2:add_child(ant)
+--a2:translate(unpack(camera))
+--a2:translate(-1.9, BOTTOM, -2.3)
+
+
+scene:add_child(a1)
+--scene:add_child(a2)
+
 cameraDirection = {-2, -0.8, -2}
 
-SIZE = 128
+SIZE = 150
 gr.render(scene, 'final_scene.png', SIZE, SIZE,
           camera, cameraDirection, {0, 1, 0}, 50,
           {0.4, 0.4, 0.4}, {frontTopLeft, backTopRight})

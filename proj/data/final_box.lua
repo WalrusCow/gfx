@@ -75,9 +75,9 @@ BOTTOM = -roomSize / 2 + EP
 BACK = -roomSize + EP
 FRONT = -EP
 
-backTopLeft = gr.light({LEFT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
-backTopRight = gr.light({RIGHT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
-frontTopLeft = gr.light({LEFT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
-frontTopRight = gr.light({RIGHT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
+backTopLeft = gr.area_light(0.45, {LEFT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
+backTopRight = gr.area_light(0.45, {RIGHT, TOP, BACK}, {1, 1, 1}, {1, 0, 0})
+frontTopLeft = gr.area_light(0.45, {LEFT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
+frontTopRight = gr.area_light(0.45, {RIGHT, TOP, FRONT}, {1, 1, 1}, {1, 0, 0})
 
 roomLights = {backTopLeft, backTopRight, frontTopLeft, frontTopRight}
