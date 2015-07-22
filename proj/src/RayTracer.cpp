@@ -135,14 +135,16 @@ Colour RayTracer::rayColour(const Ray& ray, double x, double y,
     auto otherIndex = fromInside ? 1 : material->getRefractionIndex();
     auto refrDir = refract(direction, hitRecord.norm,
                            refractionIndex, otherIndex);
+    if (!isZero(refrDir[0]) || !isZero(refrDir[1]) || !isZero(refrDir[2])) {
 
-    Ray transRay(hitRecord.point, hitRecord.point + refrDir);
-    // Multiply by proportion that is transmitted
-    auto transRayColour = (1 - alpha) * rc;
-    // TODO: Use proper index based on whether or not we are now inside
-    // the material (i.e. check angle relative to normal)
-    transColour = rayColour(transRay, x, y, depth + 1,
-                            transRayColour, otherIndex);
+      Ray transRay(hitRecord.point, hitRecord.point + refrDir);
+      // Multiply by proportion that is transmitted
+      auto transRayColour = (1 - alpha) * rc;
+      // TODO: Use proper index based on whether or not we are now inside
+      // the material (i.e. check angle relative to normal)
+      transColour = rayColour(transRay, x, y, depth + 1,
+                              transRayColour, otherIndex);
+    }
   }
 
   return rc * (reflColour + transColour);

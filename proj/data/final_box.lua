@@ -71,6 +71,7 @@ EP = 1
 LEFT = -roomSize / 2 + EP
 RIGHT = roomSize / 2 - EP
 TOP = roomSize / 2 - EP
+BOTTOM = -roomSize / 2 + EP
 BACK = -roomSize + EP
 FRONT = -EP
 
