@@ -63,4 +63,7 @@ class UniformGrid {
 
   bool intersectsCell(const Model& model, const CellCoord& coord);
   void populateCells(const std::list<Model>& models);
+
+  void getMinAndMax(const std::vector<Point3D>& pts,
+                    Point3D* min, Point3D* max) const;
 };
