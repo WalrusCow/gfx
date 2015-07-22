@@ -2,3 +2,8 @@ No Grid
 =======
 real  2m34.132s
 user  9m36.502s
+
+Grid
+====
+real  0m2.520s
+user  0m4.586s
