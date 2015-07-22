@@ -76,12 +76,21 @@ UniformGrid::CellCoord UniformGrid::coordAt(int index) const {
 void UniformGrid::populateCells(const std::list<Model>& models) {
   // Populate the cells with the models
   std::cerr << "Populating the cells: " << cells.size() << std::endl;
-  std::cerr << "Cell size: " << cellSize
-            << " and start point " << startPoint << std::endl;
-  for (size_t i = 0; i < cells.size(); ++i) {
-    for (const auto& model : models) {
-      if (intersectsCell(model, coordAt(i))) {
-        cells[i].models.push_back(&model);
+  for (const auto& model : models) {
+    auto bbox = model.getBoundingBox();
+    Point3D min = bbox.front();
+    Point3D max = bbox.front();
+    getMinAndMax(bbox, &min, &max);
+    auto minCoord = coordAt(min);
+    auto maxCoord = coordAt(max);
+    for (size_t x = minCoord[0]; x <= maxCoord[0]; ++x) {
+      for (size_t y = minCoord[1]; y <= maxCoord[1]; ++y) {
+        for (size_t z = minCoord[2]; z <= maxCoord[2]; ++z) {
+          UniformGrid::CellCoord coord(x, y, z);
+          if (intersectsCell(model, coord)) {
+            cells[indexFor(coord)].models.push_back(&model);
+          }
+        }
       }
     }
   }
@@ -315,4 +324,14 @@ bool UniformGrid::inGrid(const Point3D& pt) const {
   return startPoint[0] <= pt[0] && pt[0] <= startPoint[0] + d &&
          startPoint[1] <= pt[1] && pt[1] <= startPoint[1] + d &&
          startPoint[2] <= pt[2] && pt[2] <= startPoint[2] + d;
+}
+
+void UniformGrid::getMinAndMax(const std::vector<Point3D>& pts,
+                               Point3D* min, Point3D* max) const {
+  for (const auto& pt : pts) {
+    for (int i = 0; i < 3; ++i) {
+      (*min)[i] = std::min((*min)[i], pt[i]);
+      (*max)[i] = std::max((*max)[i], pt[i]);
+    }
+  }
 }
