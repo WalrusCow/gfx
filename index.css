@@ -1,0 +1,59 @@
+html, body {
+  margin: 0;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  color: rgba(0, 0, 0, .87);
+  background-color: #eee;
+}
+
+h1 {
+  font-size: 80px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 40px;
+  font-weight: normal;
+  margin: 0;
+}
+
+section {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.page-header-wrapper {
+  background-color: #ff9800;
+  position: relative;
+}
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  height: 450px;
+  padding-bottom: 10px;
+}
+.page-header header {
+  flex-grow: 1;
+}
+
+.content {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 912px;
+}
+
+.objective {
+  display: flex;
+}
+.images {
+  flex-grow: 1;
+  background-color:black;
+}
+.description {
+  padding-left: 10px;
+  background-color:red;
+  width: 40%;
+}
