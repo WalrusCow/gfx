@@ -48,7 +48,7 @@ section {
 .objective {
   display: flex;
 }
-.images {
+.images, .single-image {
   flex-grow: 1;
   max-width: 512px;
   margin-right: 30px;

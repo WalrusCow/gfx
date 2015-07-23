@@ -4,8 +4,8 @@
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
   <title>Cry Errata</title>
-  <!--<link href='https://fonts.googleapis.com/css?family=Open+Sans'
-  rel='stylesheet' type='text/css'>-->
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans'
+  rel='stylesheet' type='text/css'>
   <link rel="stylesheet" type="text/css" href="slick/slick.css"/>
   <link rel="stylesheet" type="text/css" href="slick/slick-theme.css"/>
   <link href="index.css" rel="stylesheet"/>
@@ -100,14 +100,11 @@
   </div>
 
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Texture mapping was implemented for individual polygons as well as for
+    spheres. Textures can either be functions (operating on a percentage of
+    the width and height) or a png image.</p>
+  <p>The last image has the right wall set recursively to the ray traced image
+    itself.</p>
   </div>
 </div>
 </section>
@@ -116,20 +113,23 @@
 <header><h2>Objective 5: Adaptive Supersampling</h2></header>
 <div class="objective">
   <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+    <img class="objective-image" src="images/05-1-no-antialiasing.png"></img>
+    <img class="objective-image" src="images/05-1-pixels.png"></img>
+    <img class="objective-image" src="images/05-1-antialiasing-3.png"></img>
   </div>
 
-
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Adaptive antialiasing was implemented as sort of two-pass approach. First,
+    rays are cast to each corner of each pixel (just like a basic image with
+    one more row and one more column). Then for each pixel, we check to see if
+    any of the corners of the pixel are significantly different from the
+    others.</p>
+  <p>If there is too much variation in the corners then the pixel is divided into
+    four new pixels, and antialiasing is performed recursively. The final pixel
+    colour is the average of all its sub-pixels.</p>
+  <p>The first image has no antialiasing. The second shows which pixels were
+    selected for antialiasing, and the third is the result of antialiasing with
+    maximum depth 3.</p>
   </div>
 </div>
 </section>
@@ -138,42 +138,41 @@
 <header><h2>Objective 6: Uniform Grid Acceleration </h2></header>
 <div class="objective">
   <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+    <img class="objective-image" src="images/06-small-test.png"></img>
+    <img class="objective-image" src="images/06-big-test.png"></img>
   </div>
 
-
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Uniform grid acceleration was implemented by finding the outermost points
+    of any model, and then dividing a cube covering those points into equal
+    portions. It performs best on images with many uniformly spaced models.</p>
+  <p>The first image took 1 minute and 52 seconds to render without the grid,
+    and 1 minute and 11 seconds to render with the grid.</p>
+  <p>The second image (spheres arranged in a 20x20x20 grid) took 2 minutes and
+    34 seconds to render without the grid at a resolution of 256x256.
+    Using the uniform grid, this image rendered in 512x512 resolution in
+    only 2.5 seconds.</p>
   </div>
 </div>
 </section>
 
 <section class="content">
-<header><h2>Objective 7: Soft shadows and Area Lights</h2></header>
+<header><h2>Objective 7: Soft shadows</h2></header>
 <div class="objective">
   <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+    <img class="objective-image" src="images/07-hard-shadows.png"></img>
+    <img class="objective-image" src="images/07-soft-shadows.png"></img>
+    <img class="objective-image" src="images/07-soft-shadows-100.png"></img>
   </div>
 
-
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Area lights are represented as spheres by giving them a radius. The area
+    lights were not given a model because the primary goal was soft shadows.</p>
+  <p>To generate soft shadows, N shadow rays are sent to uniformly sampled
+    points on the surface of the area light. Each shadow ray then contributes
+    equally to the shadow of the point.</p>
+  <p>The second image uses 20 shadow rays per pixel, and the last image uses
+    100 shadow rays per pixel.</p>
   </div>
 </div>
 </section>
@@ -182,20 +181,20 @@
 <header><h2>Objective 8: Phong Shading and Normal Interpolation</h2></header>
 <div class="objective">
   <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+    <img class="objective-image" src="images/08-gourd.png"></img>
+    <img class="objective-image" src="images/08-gourd-smooth.png"></img>
+    <img class="objective-image" src="images/08-suzanne.png"></img>
+    <img class="objective-image" src="images/08-suzanne-smooth.png"></img>
   </div>
 
-
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Phong shading for triangular meshes was implemented by interpolating
+    normals across vertices.  Normals can either be specified in .obj format
+    or can be inferred.  A vertex normal is inferred by averaging the normals
+    of all of the faces it is adjacent to.</p>
+  <p>The first two images show a mesh of a gourd with inferred normals.</p>
+  <p>The second image shows a mesh of Suzanne with normals specified for each
+    vertex on each face.</p>
   </div>
 </div>
 </section>
@@ -204,20 +203,19 @@
 <header><h2>Objective 9: Glossy Reflection</h2></header>
 <div class="objective">
   <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+    <img class="objective-image" src="images/09-glossy-floor-mirror.png"></img>
+    <img class="objective-image" src="images/09-glossy-floor.png"></img>
+    <img class="objective-image" src="images/09-three-glossy.png"></img>
   </div>
 
-
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Glossy reflection was implemented by casting many perturbed reflective
+    rays. The amount of perturbation is relative to the phong exponent of a
+    material.  A very high phong exponent results in a mirror surface,
+    while a lower phong exponent results in a blurry reflection.</p>
+  <p>The first image shows the floor as a mirror, and the second as a blurry
+    reflective surface. The final image shows three spheres side by side with
+    varying phong exponents.</p>
   </div>
 </div>
 </section>
@@ -225,28 +223,46 @@
 <section class="content">
 <header><h2>Objective 10: Unique Scene</h2></header>
 <div class="objective">
-  <div class="images">
-    <img class="objective-image" src="images/01-torus.png"></img>
-    <img class="objective-image" src="images/01-cylinders.gif"></img>
+  <div class="single-image">
+    <img class="objective-image" src="images/10-final-512.png"></img>
   </div>
 
+  <div class="description">
+  <p>My final image shows a room with a magnifying glass looking at an ant.
+    There is also a shiny throne to the right, and a monkey's head on the wall.
+  </p>
+  <p>The rendering time without antialiasing was about 3 hours using 6 threads
+    on gl11. There are quite a few glossy surfaces reflecting off one another,
+    so the rendering time was greatly increased. Because of this and the amount
+    of texture mapping used, antialiasing this image would take an estimated 30
+    hours, so that is omitted from the final image.</p>
+  <p>The magnifying glass was created using a torus, cylinder and a sphere. The
+    sphere was flattened and used for the lens. The throne was created using
+    a series of cylinders and cubes. The ant model was found for free online
+    at turbosquid.com.</p>
+  </div>
+</div>
+</section>
+
+<section class="content">
+<header><h2>Extra: Concurrency</h2></header>
+<div class="objective">
+  <div class="single-image">
+    <img class="objective-image" src="images/BB-multithreading.png"></img>
+  </div>
 
   <div class="description">
-  <p>Torus and cylinder were implemented as extra primitives. A torus is
-    created by specifying the radius of its "tube". Both are set to standard
-    sizes and can then be transformed, as with all other primitives. </p>
-  <p>Torus intersections are computed as the result of a quartic equation.
-    Cylinder intersections are done by intersecting with an infinite cylinder
-    then checking against the cylinder height.</p>
-  <p>The second image shows the cylinder primitive on the left, and a basic
-    mesh of a cylinder on the right.</p>
+  <p>Concurrent processing was implemented as well. The image shows rendering
+    time for a sample image as the number of threads increases (on a 6 core
+    machine). In general, this was able to reduce rendering time by more than
+    66%.</p>
   </div>
 </div>
 </section>
 
 </main>
 
-<script type="text/javascript" src="jquery1.js"></script>
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="slick/slick.js"></script>
 <script>
   // Enable slick
